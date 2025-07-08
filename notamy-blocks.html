@@ -635,6 +635,10 @@
     </div>
 
     <script>
+        // Check if we should autostart the game
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldAutostart = urlParams.get('autostart') === 'true';
+        
         // Prevent scrolling and add iOS bounce prevention
         document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
         document.addEventListener('gesturestart', (e) => e.preventDefault());
@@ -1329,6 +1333,13 @@
         
         // Start the game loop
         requestAnimationFrame(gameLoop);
+        
+        // Autostart if coming from index
+        window.addEventListener('load', () => {
+            if (shouldAutostart) {
+                setTimeout(startGame, 100); // Small delay to ensure everything is loaded
+            }
+        });
     </script>
 </body>
 </html>

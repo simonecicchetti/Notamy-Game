@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Notamy Crush</title>
+    <title>Notamy Mini Games</title>
     <style>
         * {
             margin: 0;
@@ -20,53 +20,141 @@
         body {
             background: #000000;
             font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-        }
-        
-        #gameContainer {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            position: relative;
         }
         
-        #gameHeader {
-            position: absolute;
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            z-index: 10;
-            padding: env(safe-area-inset-top) 16px 16px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
         }
         
-        #gameInfo {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #FFFFFF;
-            font-size: 16px;
-            font-weight: 500;
+        .bg-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00d9ff;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float-up 20s linear infinite;
         }
         
-        .status-item {
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .logo {
+            margin: 0 auto 40px;
+            text-align: center;
+            animation: logo-float 3s ease-in-out infinite;
+        }
+        
+        @keyframes logo-float {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+            }
+            50% { 
+                transform: translateY(-10px) scale(1.05); 
+            }
+        }
+        
+        .logo-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #b366ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 5px;
+            animation: gradientShift 3s ease-in-out infinite;
+            text-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+        
+        .logo-subtitle {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.8;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            font-weight: 300;
+            color: #E0E0E0;
+            opacity: 0.8;
+        }
+        
+        /* Games grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .game-card {
             background: rgba(26, 26, 26, 0.8);
-            padding: 8px 16px;
-            border-radius: 999px;
             border: 1px solid #2A2A2A;
-            backdrop-filter: blur(10px);
-            animation: statusGlow 3s ease-in-out infinite;
+            border-radius: 24px;
+            padding: 30px;
+            text-align: center;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            backdrop-filter: blur(10px);
         }
         
-        .status-item::before {
+        .game-card::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -75,6 +163,8 @@
             height: 200%;
             background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
             animation: rotate 20s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         @keyframes rotate {
@@ -82,1265 +172,247 @@
             100% { transform: rotate(360deg); }
         }
         
-        @keyframes statusGlow {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #00d9ff;
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.3);
         }
         
-        .status-item span {
-            color: #00d9ff;
-            font-weight: 600;
+        .game-card:hover::before {
+            opacity: 1;
+        }
+        
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             z-index: 1;
         }
         
-        #gameCanvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
+        /* Crush game icon */
+        .crush-icon {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            animation: icon-pulse 2s ease-in-out infinite;
         }
         
-        #menuScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #000000, #0A0A0A);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-            padding: 20px;
-        }
-        
-        .menu-logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 32px;
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            padding: 3px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: float 3s ease-in-out infinite;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-            50% { transform: translateY(-10px) scale(1.05) rotate(5deg); }
-        }
-        
-        .logo-inner {
-            width: 114px;
-            height: 114px;
-            border-radius: 30px;
-            background: #000000;
-            border: 1px solid #1A1A1A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .candy-grid {
+        .crush-icon-content {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 2px;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
         }
         
-        .logo-candy {
-            width: 100%;
-            height: 100%;
-            border-radius: 4px;
-            animation: logoCandy 2s ease-in-out infinite;
+        .mini-candy {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            animation: mini-candy-pulse 2s ease-in-out infinite;
         }
         
-        @keyframes logoCandy {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.8); }
+        .mini-candy:nth-child(odd) {
+            animation-delay: 0.5s;
         }
         
-        .menu-title {
-            font-size: 42px;
-            font-weight: 200;
-            color: #FFFFFF;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        @keyframes mini-candy-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(0.8); opacity: 0.6; }
         }
         
-        .menu-subtitle {
-            font-size: 18px;
-            font-weight: 300;
-            color: #E0E0E0;
-            margin-bottom: 32px;
-            opacity: 0.8;
-        }
-        
-        .menu-button {
+        /* Blocks game icon */
+        .blocks-icon {
             background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            border: none;
-            color: #000000;
-            padding: 20px 60px;
-            margin: 10px;
-            border-radius: 999px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(0, 180, 166, 0.3);
-            transform: scale(1);
+            animation: icon-pulse 2s ease-in-out infinite;
+            animation-delay: 1s;
         }
         
-        .menu-button:active {
-            transform: scale(0.95);
+        .blocks-icon-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 1px;
+            width: 40px;
+            height: 40px;
+            position: relative;
         }
         
-        /* Score popup */
-        .score-popup {
-            position: absolute;
-            font-size: 28px;
-            font-weight: 600;
-            color: #00d9ff;
-            pointer-events: none;
-            animation: scoreFloat 1.2s ease-out forwards;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
-            z-index: 50;
+        .tetris-block {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 1px;
         }
         
-        @keyframes scoreFloat {
-            0% { 
-                transform: translateY(0) scale(1); 
-                opacity: 1; 
-            }
-            50% {
-                transform: translateY(-40px) scale(1.3);
-            }
-            100% { 
-                transform: translateY(-80px) scale(1.5); 
-                opacity: 0; 
-            }
+        .tetris-shape-1 {
+            grid-column: 1 / 3;
+            grid-row: 1 / 3;
+            background: rgba(255, 255, 255, 0.4);
+            animation: tetris-fall 3s ease-in-out infinite;
         }
         
-        /* Combo indicator */
-        #comboIndicator {
-            position: absolute;
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff6b6b, #ff8787);
-            padding: 12px 32px;
-            border-radius: 999px;
-            color: #000000;
-            font-weight: 700;
-            font-size: 20px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
-            z-index: 15;
+        .tetris-shape-2 {
+            grid-column: 3 / 5;
+            grid-row: 2 / 4;
+            background: rgba(255, 255, 255, 0.3);
+            animation: tetris-fall 3s ease-in-out infinite;
+            animation-delay: 1.5s;
         }
         
-        #comboIndicator.show {
-            opacity: 1;
-            animation: comboShake 0.5s ease-in-out;
+        @keyframes tetris-fall {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(5px); }
         }
         
-        @keyframes comboShake {
-            0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
-            25% { transform: translateX(-50%) scale(1.2) rotate(3deg); }
-            75% { transform: translateX(-50%) scale(1.2) rotate(-3deg); }
-        }
-        
-        /* Shuffle indicator */
-        #shuffleIndicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px 40px;
-            border-radius: 20px;
-            color: #00d9ff;
-            font-weight: 600;
-            font-size: 24px;
-            opacity: 0;
-            z-index: 30;
-            pointer-events: none;
-            border: 2px solid #00d9ff;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-        }
-        
-        #shuffleIndicator.show {
-            animation: shufflePulse 1s ease-in-out;
-        }
-        
-        @keyframes shufflePulse {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-        }
-        
-        /* Game over screen */
-        #gameOverScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 25;
-            padding: 20px;
-        }
-        
-        .game-over-title {
-            font-size: 48px;
-            font-weight: 200;
-            color: #ff5252;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
-            text-shadow: 0 0 20px rgba(255, 82, 82, 0.5);
-        }
-        
-        .final-score {
-            font-size: 72px;
-            font-weight: 100;
-            color: #00d9ff;
-            margin-bottom: 8px;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
-        }
-        
-        .best-score {
-            font-size: 20px;
-            color: #999999;
-            margin-bottom: 48px;
-        }
-        
-        .play-again-button {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            border: none;
-            color: #000000;
-            padding: 16px 48px;
-            border-radius: 999px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-        }
-        
-        /* Hint animation */
-        @keyframes hintPulse {
+        @keyframes icon-pulse {
             0%, 100% { 
-                transform: scale(1); 
-                box-shadow: 0 0 0 rgba(0, 212, 255, 0);
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
             }
             50% { 
-                transform: scale(1.1); 
-                box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
             }
+        }
+        
+        .game-title {
+            font-size: 28px;
+            font-weight: 300;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-description {
+            font-size: 16px;
+            color: #999999;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .game-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            color: #000000;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: badge-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes badge-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.8); }
         }
         
         /* Responsive */
-        @media (max-width: 400px) {
-            #gameCanvas {
-                transform: translate(-50%, -50%) scale(0.9);
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 3rem;
+            }
+            
+            .logo-subtitle {
+                font-size: 1rem;
+            }
+            
+            .subtitle {
+                font-size: 18px;
+            }
+            
+            .games-grid {
+                gap: 20px;
+            }
+            
+            .game-card {
+                padding: 24px;
+            }
+            
+            .game-title {
+                font-size: 24px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <!-- Game Header -->
-        <div id="gameHeader">
-            <div id="gameInfo">
-                <div class="status-item">SCORE <span id="score">0</span></div>
-                <div class="status-item">MOVES <span id="moves">30</span></div>
-                <div class="status-item">LEVEL <span id="level">1</span></div>
-            </div>
-        </div>
-        
-        <!-- Canvas -->
-        <canvas id="gameCanvas"></canvas>
-        
-        <!-- Combo indicator -->
-        <div id="comboIndicator">COMBO x<span id="comboMultiplier">2</span></div>
-        
-        <!-- Shuffle indicator -->
-        <div id="shuffleIndicator">SHUFFLING!</div>
-        
-        <!-- Menu Screen -->
-        <div id="menuScreen">
-            <div class="menu-logo">
-                <div class="logo-inner">
-                    <div class="candy-grid">
-                        <div class="logo-candy" style="background: #00b4a6; animation-delay: 0s;"></div>
-                        <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.1s;"></div>
-                        <div class="logo-candy" style="background: #ff6b6b; animation-delay: 0.2s;"></div>
-                        <div class="logo-candy" style="background: #ffab00; animation-delay: 0.3s;"></div>
-                        <div class="logo-candy" style="background: #00e676; animation-delay: 0.4s;"></div>
-                        <div class="logo-candy" style="background: #9c27b0; animation-delay: 0.5s;"></div>
-                        <div class="logo-candy" style="background: #ff5252; animation-delay: 0.6s;"></div>
-                        <div class="logo-candy" style="background: #00b4a6; animation-delay: 0.7s;"></div>
-                        <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.8s;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="menu-title">Notamy Crush</div>
-            <div class="menu-subtitle">Match 3 or more candies!</div>
-            <button class="menu-button" onclick="startGame()">PLAY</button>
-        </div>
-        
-        <!-- Game Over Screen -->
-        <div id="gameOverScreen">
-            <div class="game-over-title">Game Over</div>
-            <div class="final-score" id="finalScore">0</div>
-            <div class="best-score">Best: <span id="bestScore">0</span></div>
-            <button class="play-again-button" onclick="restartGame()">PLAY AGAIN</button>
-        </div>
+    <!-- Animated background -->
+    <div class="bg-animation">
+        <script>
+            // Create floating particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'bg-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (20 + Math.random() * 10) + 's';
+                document.querySelector('.bg-animation').appendChild(particle);
+            }
+        </script>
     </div>
 
-    <script>
-        // Prevent scrolling and zooming
-        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-text">Notamy</div>
+                <div class="logo-subtitle">Mini Games</div>
+            </div>
+            <p class="subtitle">Scegli il tuo gioco preferito</p>
+        </div>
         
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Game constants
-        const GRID_SIZE = 8;
-        const CANDY_SIZE = 50;
-        const CANDY_SPACING = 2;
-        const BOARD_PADDING = 10;
-        const SWAP_DURATION = 300;
-        const DROP_SPEED = 8;
-        const MIN_SWIPE_DISTANCE = 20;
-        
-        // Calculate canvas size
-        const canvasSize = GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING * 2;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-        
-        // Candy types with enhanced visuals
-        const candyTypes = [
-            { color: '#00b4a6', shape: 'circle', gradient: ['#00d9ff', '#00b4a6', '#008a7f'] },
-            { color: '#00d9ff', shape: 'square', gradient: ['#66e7ff', '#00d9ff', '#0099cc'] },
-            { color: '#ff6b6b', shape: 'triangle', gradient: ['#ff9999', '#ff6b6b', '#cc5555'] },
-            { color: '#ffab00', shape: 'diamond', gradient: ['#ffd966', '#ffab00', '#cc8800'] },
-            { color: '#00e676', shape: 'star', gradient: ['#66ff99', '#00e676', '#00b85f'] },
-            { color: '#9c27b0', shape: 'hexagon', gradient: ['#c966d9', '#9c27b0', '#7a1f8d'] }
-        ];
-        
-        // Game state
-        let gameState = 'menu';
-        let score = 0;
-        let moves = 30;
-        let level = 1;
-        let combo = 0;
-        let bestScore = parseInt(localStorage.getItem('notamyCrushBest') || '0');
-        
-        // Board state
-        let board = [];
-        let selectedCandy = null;
-        let animating = false;
-        let particles = [];
-        let hintTimer = null;
-        
-        // Touch/Mouse handling
-        let touchStartPos = null;
-        let touchStartCoords = null;
-        let isDragging = false;
-        
-        // Animation states
-        let swapAnimations = [];
-        let dropAnimations = [];
-        let scaleAnimations = [];
-        
-        // Initialize board
-        function initBoard() {
-            board = [];
-            for (let row = 0; row < GRID_SIZE; row++) {
-                board[row] = [];
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    board[row][col] = createCandy(row, col);
-                }
-            }
+        <!-- Games Grid -->
+        <div class="games-grid">
+            <!-- Notamy Crush -->
+            <a href="notamy-crash.html" class="game-card">
+                <div class="game-badge">Match-3</div>
+                <div class="game-icon crush-icon">
+                    <div class="crush-icon-content">
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                        <div class="mini-candy"></div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Crush</h2>
+                <p class="game-description">
+                    60 secondi di pura adrenalina! Scambia e abbina le caramelle 
+                    prima che il tempo scada. Muoviti veloce o il tempo accelera!
+                </p>
+            </a>
             
-            // Ensure no initial matches and game is playable
-            removeInitialMatches();
-            ensureMovesAvailable();
-        }
-        
-        function createCandy(row, col) {
-            return {
-                type: Math.floor(Math.random() * candyTypes.length),
-                x: col * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING,
-                y: row * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING,
-                targetX: col * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING,
-                targetY: row * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING,
-                scale: 1,
-                targetScale: 1,
-                alpha: 1,
-                marked: false,
-                rotation: 0,
-                hint: false
-            };
-        }
-        
-        function removeInitialMatches() {
-            let hasMatch = true;
-            while (hasMatch) {
-                hasMatch = false;
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        if (checkMatch(row, col).length >= 3) {
-                            board[row][col].type = Math.floor(Math.random() * candyTypes.length);
-                            hasMatch = true;
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Check if there are possible moves
-        function checkPossibleMoves() {
-            // Check all possible swaps
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    // Check horizontal swap
-                    if (col < GRID_SIZE - 1) {
-                        // Swap
-                        const temp = board[row][col].type;
-                        board[row][col].type = board[row][col + 1].type;
-                        board[row][col + 1].type = temp;
-                        
-                        // Check for matches
-                        const matches1 = checkMatch(row, col);
-                        const matches2 = checkMatch(row, col + 1);
-                        
-                        // Swap back
-                        board[row][col + 1].type = board[row][col].type;
-                        board[row][col].type = temp;
-                        
-                        if (matches1.length >= 3 || matches2.length >= 3) {
-                            return [{row, col}, {row, col: col + 1}];
-                        }
-                    }
-                    
-                    // Check vertical swap
-                    if (row < GRID_SIZE - 1) {
-                        // Swap
-                        const temp = board[row][col].type;
-                        board[row][col].type = board[row + 1][col].type;
-                        board[row + 1][col].type = temp;
-                        
-                        // Check for matches
-                        const matches1 = checkMatch(row, col);
-                        const matches2 = checkMatch(row + 1, col);
-                        
-                        // Swap back
-                        board[row + 1][col].type = board[row][col].type;
-                        board[row][col].type = temp;
-                        
-                        if (matches1.length >= 3 || matches2.length >= 3) {
-                            return [{row, col}, {row: row + 1, col}];
-                        }
-                    }
-                }
-            }
-            
-            return null;
-        }
-        
-        // Ensure moves are available
-        function ensureMovesAvailable() {
-            if (!checkPossibleMoves()) {
-                shuffleBoard();
-            }
-        }
-        
-        // Shuffle board
-        function shuffleBoard() {
-            // Show shuffle indicator
-            document.getElementById('shuffleIndicator').classList.add('show');
-            
-            // Animate candies shrinking
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    board[row][col].targetScale = 0;
-                }
-            }
-            
-            setTimeout(() => {
-                // Shuffle candy types
-                const types = [];
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        types.push(board[row][col].type);
-                    }
-                }
-                
-                // Fisher-Yates shuffle
-                for (let i = types.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [types[i], types[j]] = [types[j], types[i]];
-                }
-                
-                // Assign shuffled types
-                let index = 0;
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        board[row][col].type = types[index++];
-                    }
-                }
-                
-                // Remove any matches and ensure playability
-                removeInitialMatches();
-                if (!checkPossibleMoves()) {
-                    shuffleBoard();
-                    return;
-                }
-                
-                // Animate candies growing back
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        board[row][col].targetScale = 1;
-                    }
-                }
-                
-                document.getElementById('shuffleIndicator').classList.remove('show');
-            }, 500);
-        }
-        
-        // Show hint after inactivity
-        function showHint() {
-            const possibleMove = checkPossibleMoves();
-            if (possibleMove) {
-                possibleMove.forEach(pos => {
-                    board[pos.row][pos.col].hint = true;
-                });
-            }
-        }
-        
-        function resetHintTimer() {
-            clearTimeout(hintTimer);
-            // Clear any existing hints
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    board[row][col].hint = false;
-                }
-            }
-            // Set new timer
-            hintTimer = setTimeout(showHint, 5000);
-        }
-        
-        // Check matches at position
-        function checkMatch(row, col) {
-            const type = board[row][col].type;
-            const horizontalMatches = [{row, col}];
-            const verticalMatches = [{row, col}];
-            
-            // Check horizontal
-            let left = col - 1;
-            while (left >= 0 && board[row][left].type === type) {
-                horizontalMatches.push({row, col: left});
-                left--;
-            }
-            
-            let right = col + 1;
-            while (right < GRID_SIZE && board[row][right].type === type) {
-                horizontalMatches.push({row, col: right});
-                right++;
-            }
-            
-            // Check vertical
-            let up = row - 1;
-            while (up >= 0 && board[up][col].type === type) {
-                verticalMatches.push({row: up, col});
-                up--;
-            }
-            
-            let down = row + 1;
-            while (down < GRID_SIZE && board[down][col].type === type) {
-                verticalMatches.push({row: down, col});
-                down++;
-            }
-            
-            // Return the longer match
-            if (horizontalMatches.length >= verticalMatches.length && horizontalMatches.length >= 3) {
-                return horizontalMatches;
-            } else if (verticalMatches.length >= 3) {
-                return verticalMatches;
-            }
-            
-            return [];
-        }
-        
-        // Find all matches on board
-        function findAllMatches() {
-            const allMatches = [];
-            const checked = [];
-            
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    if (!checked.some(m => m.row === row && m.col === col)) {
-                        const matches = checkMatch(row, col);
-                        if (matches.length >= 3) {
-                            matches.forEach(m => checked.push(m));
-                            allMatches.push(matches);
-                        }
-                    }
-                }
-            }
-            
-            return allMatches;
-        }
-        
-        // Enhanced input handlers
-        canvas.addEventListener('mousedown', handleStart);
-        canvas.addEventListener('mousemove', handleMove);
-        canvas.addEventListener('mouseup', handleEnd);
-        canvas.addEventListener('touchstart', handleStart, { passive: true });
-        canvas.addEventListener('touchmove', handleMove, { passive: true });
-        canvas.addEventListener('touchend', handleEnd, { passive: true });
-        
-        function handleStart(e) {
-            if (animating || gameState !== 'playing') return;
-            
-            const pos = getEventPos(e);
-            const gridPos = getGridPos(pos.x, pos.y);
-            
-            if (gridPos) {
-                touchStartPos = gridPos;
-                touchStartCoords = pos;
-                selectedCandy = gridPos;
-                isDragging = true;
-                board[gridPos.row][gridPos.col].targetScale = 1.15;
-                resetHintTimer();
-            }
-        }
-        
-        function handleMove(e) {
-            if (!isDragging || !touchStartPos || animating) return;
-            
-            const pos = getEventPos(e);
-            const dx = pos.x - touchStartCoords.x;
-            const dy = pos.y - touchStartCoords.y;
-            
-            // Check if we've moved enough to determine direction
-            if (Math.abs(dx) > MIN_SWIPE_DISTANCE || Math.abs(dy) > MIN_SWIPE_DISTANCE) {
-                let targetRow = touchStartPos.row;
-                let targetCol = touchStartPos.col;
-                
-                // Determine swipe direction
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    // Horizontal swipe
-                    targetCol += dx > 0 ? 1 : -1;
-                } else {
-                    // Vertical swipe
-                    targetRow += dy > 0 ? 1 : -1;
-                }
-                
-                // Check if target is valid
-                if (targetRow >= 0 && targetRow < GRID_SIZE && 
-                    targetCol >= 0 && targetCol < GRID_SIZE) {
-                    swapCandies(touchStartPos, { row: targetRow, col: targetCol });
-                    isDragging = false;
-                }
-            }
-        }
-        
-        function handleEnd(e) {
-            if (selectedCandy) {
-                board[selectedCandy.row][selectedCandy.col].targetScale = 1;
-                selectedCandy = null;
-            }
-            touchStartPos = null;
-            touchStartCoords = null;
-            isDragging = false;
-        }
-        
-        function getEventPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            if (e.touches) {
-                return {
-                    x: e.touches[0].clientX - rect.left,
-                    y: e.touches[0].clientY - rect.top
-                };
-            }
-            return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-        }
-        
-        function getGridPos(x, y) {
-            const col = Math.floor((x - BOARD_PADDING) / (CANDY_SIZE + CANDY_SPACING));
-            const row = Math.floor((y - BOARD_PADDING) / (CANDY_SIZE + CANDY_SPACING));
-            
-            if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
-                return { row, col };
-            }
-            return null;
-        }
-        
-        // Enhanced swap animation
-        function swapCandies(pos1, pos2) {
-            animating = true;
-            moves--;
-            updateUI();
-            
-            const candy1 = board[pos1.row][pos1.col];
-            const candy2 = board[pos2.row][pos2.col];
-            
-            // Set target positions for animation
-            candy1.targetX = candy2.x;
-            candy1.targetY = candy2.y;
-            candy2.targetX = candy1.x;
-            candy2.targetY = candy1.y;
-            
-            // Swap in array
-            board[pos1.row][pos1.col] = candy2;
-            board[pos2.row][pos2.col] = candy1;
-            
-            // Check for matches after animation
-            setTimeout(() => {
-                const matches = findAllMatches();
-                if (matches.length > 0) {
-                    processMatches(matches);
-                } else {
-                    // No matches, swap back with animation
-                    moves++;
-                    updateUI();
-                    
-                    candy1.targetX = candy1.x;
-                    candy1.targetY = candy1.y;
-                    candy2.targetX = candy2.x;
-                    candy2.targetY = candy2.y;
-                    
-                    board[pos1.row][pos1.col] = candy1;
-                    board[pos2.row][pos2.col] = candy2;
-                    
-                    setTimeout(() => {
-                        animating = false;
-                    }, SWAP_DURATION);
-                }
-            }, SWAP_DURATION);
-        }
-        
-        // Enhanced match processing
-        function processMatches(matches) {
-            let totalScore = 0;
-            combo++;
-            
-            // Create score popup at center of matches
-            matches.forEach((match, index) => {
-                let centerX = 0, centerY = 0;
-                
-                match.forEach(pos => {
-                    if (!board[pos.row][pos.col].marked) {
-                        board[pos.row][pos.col].marked = true;
-                        board[pos.row][pos.col].targetScale = 1.3;
-                        board[pos.row][pos.col].rotation = 360;
-                        
-                        const points = 10 * combo * (match.length - 2);
-                        totalScore += points;
-                        
-                        const candy = board[pos.row][pos.col];
-                        centerX += candy.x + CANDY_SIZE/2;
-                        centerY += candy.y + CANDY_SIZE/2;
-                        
-                        // Create burst particles
-                        createBurstParticles(
-                            candy.x + CANDY_SIZE/2,
-                            candy.y + CANDY_SIZE/2,
-                            candyTypes[candy.type].color
-                        );
-                    }
-                });
-                
-                // Show score popup
-                if (match.length > 0) {
-                    centerX /= match.length;
-                    centerY /= match.length;
-                    createScorePopup(centerX, centerY, totalScore);
-                }
-            });
-            
-            score += totalScore;
-            updateUI();
-            
-            // Show combo with enhanced animation
-            if (combo > 1) {
-                document.getElementById('comboMultiplier').textContent = combo;
-                document.getElementById('comboIndicator').classList.add('show');
-                setTimeout(() => {
-                    document.getElementById('comboIndicator').classList.remove('show');
-                }, 1500);
-            }
-            
-            // Remove matched candies with fade effect
-            setTimeout(() => {
-                for (let row = 0; row < GRID_SIZE; row++) {
-                    for (let col = 0; col < GRID_SIZE; col++) {
-                        if (board[row][col].marked) {
-                            board[row][col].alpha = 0;
-                        }
-                    }
-                }
-                
-                setTimeout(() => {
-                    removeMatches();
-                    dropCandies();
-                }, 200);
-            }, 300);
-        }
-        
-        // Create score popup
-        function createScorePopup(x, y, points) {
-            const popup = document.createElement('div');
-            popup.className = 'score-popup';
-            popup.textContent = `+${points}`;
-            popup.style.left = x + 'px';
-            popup.style.top = y + 'px';
-            canvas.parentElement.appendChild(popup);
-            
-            setTimeout(() => popup.remove(), 1200);
-        }
-        
-        // Remove matched candies
-        function removeMatches() {
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    if (board[row][col] && board[row][col].marked) {
-                        board[row][col] = null;
-                    }
-                }
-            }
-        }
-        
-        // Enhanced drop animation
-        function dropCandies() {
-            let hasDropped = false;
-            
-            // Move existing candies down
-            for (let col = 0; col < GRID_SIZE; col++) {
-                let emptyRow = GRID_SIZE - 1;
-                
-                for (let row = GRID_SIZE - 1; row >= 0; row--) {
-                    if (board[row][col] !== null) {
-                        if (row !== emptyRow) {
-                            board[emptyRow][col] = board[row][col];
-                            board[emptyRow][col].targetY = emptyRow * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
-                            board[row][col] = null;
-                            hasDropped = true;
-                        }
-                        emptyRow--;
-                    }
-                }
-                
-                // Fill empty spaces with new candies
-                for (let row = emptyRow; row >= 0; row--) {
-                    const candy = createCandy(row, col);
-                    candy.y = -CANDY_SIZE; // Start above board
-                    candy.targetY = row * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
-                    candy.scale = 0;
-                    candy.targetScale = 1;
-                    board[row][col] = candy;
-                    hasDropped = true;
-                }
-            }
-            
-            // Check for new matches after drop animation
-            if (hasDropped) {
-                setTimeout(() => {
-                    const newMatches = findAllMatches();
-                    if (newMatches.length > 0) {
-                        processMatches(newMatches);
-                    } else {
-                        combo = 0;
-                        animating = false;
-                        ensureMovesAvailable();
-                        checkGameState();
-                    }
-                }, 500);
-            } else {
-                combo = 0;
-                animating = false;
-                ensureMovesAvailable();
-                checkGameState();
-            }
-        }
-        
-        // Enhanced particle system
-        function createBurstParticles(x, y, color) {
-            const particleCount = 12;
-            for (let i = 0; i < particleCount; i++) {
-                const angle = (Math.PI * 2 / particleCount) * i;
-                const speed = 4 + Math.random() * 2;
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    color: color,
-                    size: 6,
-                    life: 40,
-                    maxLife: 40,
-                    type: 'burst'
-                });
-            }
-            
-            // Add sparkles
-            for (let i = 0; i < 6; i++) {
-                particles.push({
-                    x: x + (Math.random() - 0.5) * 20,
-                    y: y + (Math.random() - 0.5) * 20,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: -Math.random() * 3,
-                    color: '#FFFFFF',
-                    size: 3,
-                    life: 30,
-                    maxLife: 30,
-                    type: 'sparkle'
-                });
-            }
-        }
-        
-        // Update particles
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                
-                if (p.type === 'burst') {
-                    p.vy += 0.3;
-                    p.vx *= 0.98;
-                } else {
-                    p.vy += 0.1;
-                }
-                
-                p.life--;
-                
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-        }
-        
-        // Animate candy properties
-        function animateCandies() {
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const candy = board[row][col];
-                    if (candy) {
-                        // Position animation
-                        if (candy.x !== candy.targetX) {
-                            const dx = candy.targetX - candy.x;
-                            candy.x += dx * 0.2;
-                            if (Math.abs(dx) < 0.5) candy.x = candy.targetX;
-                        }
-                        
-                        if (candy.y !== candy.targetY) {
-                            const dy = candy.targetY - candy.y;
-                            candy.y += dy * 0.15;
-                            if (Math.abs(dy) < 0.5) candy.y = candy.targetY;
-                        }
-                        
-                        // Scale animation
-                        if (candy.scale !== candy.targetScale) {
-                            const ds = candy.targetScale - candy.scale;
-                            candy.scale += ds * 0.2;
-                            if (Math.abs(ds) < 0.01) candy.scale = candy.targetScale;
-                        }
-                        
-                        // Rotation animation
-                        if (candy.rotation > 0) {
-                            candy.rotation -= 15;
-                            if (candy.rotation < 0) candy.rotation = 0;
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Check game state
-        function checkGameState() {
-            if (moves <= 0) {
-                gameOver();
-            }
-        }
-        
-        // Update UI
-        function updateUI() {
-            document.getElementById('score').textContent = score;
-            document.getElementById('moves').textContent = moves;
-            document.getElementById('level').textContent = level;
-        }
-        
-        // Start game
-        function startGame() {
-            gameState = 'playing';
-            document.getElementById('menuScreen').style.display = 'none';
-            score = 0;
-            moves = 30;
-            level = 1;
-            combo = 0;
-            particles = [];
-            initBoard();
-            updateUI();
-            resetHintTimer();
-            gameLoop();
-        }
-        
-        // Game over
-        function gameOver() {
-            gameState = 'gameOver';
-            clearTimeout(hintTimer);
-            
-            if (score > bestScore) {
-                bestScore = score;
-                localStorage.setItem('notamyCrushBest', bestScore);
-            }
-            
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('bestScore').textContent = bestScore;
-            document.getElementById('gameOverScreen').style.display = 'flex';
-        }
-        
-        // Restart game
-        function restartGame() {
-            document.getElementById('gameOverScreen').style.display = 'none';
-            startGame();
-        }
-        
-        // Enhanced drawing functions
-        function draw() {
-            // Clear canvas
-            ctx.fillStyle = '#0A0A0A';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw board background with gradient
-            const boardGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            boardGradient.addColorStop(0, 'rgba(26, 26, 26, 0.7)');
-            boardGradient.addColorStop(1, 'rgba(10, 10, 10, 0.7)');
-            ctx.fillStyle = boardGradient;
-            ctx.fillRect(
-                BOARD_PADDING - 5,
-                BOARD_PADDING - 5,
-                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 10,
-                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 10
-            );
-            
-            // Draw grid lines
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i <= GRID_SIZE; i++) {
-                const pos = BOARD_PADDING + i * (CANDY_SIZE + CANDY_SPACING) - CANDY_SPACING / 2;
-                ctx.beginPath();
-                ctx.moveTo(pos, BOARD_PADDING);
-                ctx.lineTo(pos, canvas.height - BOARD_PADDING);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.moveTo(BOARD_PADDING, pos);
-                ctx.lineTo(canvas.width - BOARD_PADDING, pos);
-                ctx.stroke();
-            }
-            
-            // Draw candies
-            for (let row = 0; row < GRID_SIZE; row++) {
-                for (let col = 0; col < GRID_SIZE; col++) {
-                    const candy = board[row][col];
-                    if (candy && candy.alpha > 0) {
-                        drawCandy(candy);
-                    }
-                }
-            }
-            
-            // Draw particles
-            particles.forEach(p => {
-                ctx.save();
-                ctx.globalAlpha = p.life / p.maxLife;
-                
-                if (p.type === 'sparkle') {
-                    // Draw sparkle as star
-                    ctx.fillStyle = p.color;
-                    drawStar(p.x, p.y, 4, p.size, p.size/2);
-                } else {
-                    // Draw burst particle
-                    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-                    gradient.addColorStop(0, p.color);
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
-                }
-                
-                ctx.restore();
-            });
-        }
-        
-        function drawCandy(candy) {
-            const type = candyTypes[candy.type];
-            const centerX = candy.x + CANDY_SIZE / 2;
-            const centerY = candy.y + CANDY_SIZE / 2;
-            const size = (CANDY_SIZE * 0.8) * candy.scale;
-            
-            ctx.save();
-            ctx.globalAlpha = candy.alpha;
-            
-            // Apply rotation
-            if (candy.rotation > 0) {
-                ctx.translate(centerX, centerY);
-                ctx.rotate(candy.rotation * Math.PI / 180);
-                ctx.translate(-centerX, -centerY);
-            }
-            
-            // Apply hint animation
-            if (candy.hint) {
-                ctx.shadowColor = '#00d9ff';
-                ctx.shadowBlur = 20;
-                candy.scale = 1 + Math.sin(Date.now() * 0.005) * 0.1;
-            }
-            
-            // Shadow
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            drawShape(type.shape, centerX + 3, centerY + 3, size);
-            
-            // Main candy with gradient
-            const gradient = ctx.createRadialGradient(
-                centerX - size/3, centerY - size/3, 0,
-                centerX, centerY, size
-            );
-            type.gradient.forEach((color, index) => {
-                gradient.addColorStop(index / (type.gradient.length - 1), color);
-            });
-            
-            ctx.fillStyle = gradient;
-            drawShape(type.shape, centerX, centerY, size);
-            
-            // Highlight
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            drawShape(type.shape, centerX - size/4, centerY - size/4, size/3);
-            
-            ctx.restore();
-        }
-        
-        function drawShape(shape, x, y, size) {
-            ctx.beginPath();
-            
-            switch (shape) {
-                case 'circle':
-                    ctx.arc(x, y, size/2, 0, Math.PI * 2);
-                    break;
-                    
-                case 'square':
-                    const radius = size/8;
-                    ctx.roundRect(x - size/2, y - size/2, size, size, radius);
-                    break;
-                    
-                case 'triangle':
-                    ctx.moveTo(x, y - size/2);
-                    ctx.lineTo(x - size/2, y + size/2);
-                    ctx.lineTo(x + size/2, y + size/2);
-                    ctx.closePath();
-                    break;
-                    
-                case 'diamond':
-                    ctx.moveTo(x, y - size/2);
-                    ctx.lineTo(x + size/2, y);
-                    ctx.lineTo(x, y + size/2);
-                    ctx.lineTo(x - size/2, y);
-                    ctx.closePath();
-                    break;
-                    
-                case 'star':
-                    drawStar(x, y, 5, size/2, size/4);
-                    break;
-                    
-                case 'hexagon':
-                    for (let i = 0; i < 6; i++) {
-                        const angle = Math.PI / 3 * i;
-                        const px = x + Math.cos(angle) * size/2;
-                        const py = y + Math.sin(angle) * size/2;
-                        if (i === 0) ctx.moveTo(px, py);
-                        else ctx.lineTo(px, py);
-                    }
-                    ctx.closePath();
-                    break;
-            }
-            
-            ctx.fill();
-        }
-        
-        function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
-            let rot = Math.PI / 2 * 3;
-            let x = cx;
-            let y = cy;
-            const step = Math.PI / spikes;
-            
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - outerRadius);
-            
-            for (let i = 0; i < spikes; i++) {
-                x = cx + Math.cos(rot) * outerRadius;
-                y = cy + Math.sin(rot) * outerRadius;
-                ctx.lineTo(x, y);
-                rot += step;
-                
-                x = cx + Math.cos(rot) * innerRadius;
-                y = cy + Math.sin(rot) * innerRadius;
-                ctx.lineTo(x, y);
-                rot += step;
-            }
-            
-            ctx.lineTo(cx, cy - outerRadius);
-            ctx.closePath();
-        }
-        
-        // Game loop
-        function gameLoop() {
-            animateCandies();
-            updateParticles();
-            draw();
-            
-            if (gameState === 'playing') {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-        
-        // Polyfill for roundRect if needed
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-                if (w < 2 * r) r = w / 2;
-                if (h < 2 * r) r = h / 2;
-                this.moveTo(x + r, y);
-                this.arcTo(x + w, y, x + w, y + h, r);
-                this.arcTo(x + w, y + h, x, y + h, r);
-                this.arcTo(x, y + h, x, y, r);
-                this.arcTo(x, y, x + w, y, r);
-                this.closePath();
-                return this;
-            };
-        }
-    </script>
+            <!-- Notamy Blocks -->
+            <a href="notamy-blocks.html" class="game-card">
+                <div class="game-badge">Puzzle</div>
+                <div class="game-icon blocks-icon">
+                    <div class="blocks-icon-content">
+                        <div class="tetris-shape-1"></div>
+                        <div class="tetris-shape-2"></div>
+                        <div class="tetris-block" style="grid-column: 1; grid-row: 3;"></div>
+                        <div class="tetris-block" style="grid-column: 2; grid-row: 4;"></div>
+                        <div class="tetris-block" style="grid-column: 3; grid-row: 4;"></div>
+                        <div class="tetris-block" style="grid-column: 4; grid-row: 4;"></div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Blocks</h2>
+                <p class="game-description">
+                    Il classico gioco di blocchi con un tocco Notamy! 
+                    Impila, ruota e completa le linee in questo puzzle senza tempo.
+                </p>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

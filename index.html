@@ -71,18 +71,18 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 1000px;
-            padding: 20px;
+            max-width: 900px;
+            padding: 15px;
         }
         
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
         .logo {
-            margin: 0 auto 40px;
+            margin: 0 auto 30px;
             text-align: center;
             animation: logo-float 3s ease-in-out infinite;
         }
@@ -97,7 +97,7 @@
         }
         
         .logo-text {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 900;
             background: linear-gradient(45deg, #ff00ff, #00ffff, #b366ff);
             background-size: 300% 300%;
@@ -112,7 +112,7 @@
         }
         
         .logo-subtitle {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: #00d9ff;
             text-transform: uppercase;
@@ -126,7 +126,7 @@
         }
         
         .subtitle {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 300;
             color: #E0E0E0;
             opacity: 0.8;
@@ -135,15 +135,15 @@
         /* Games grid */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
         }
         
         .game-card {
             background: rgba(26, 26, 26, 0.8);
             border: 1px solid #2A2A2A;
-            border-radius: 24px;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 25px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -173,9 +173,9 @@
         }
         
         .game-card:hover {
-            transform: translateY(-10px) scale(1.02);
+            transform: translateY(-8px) scale(1.02);
             border-color: #00d9ff;
-            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 212, 255, 0.3);
         }
         
         .game-card:hover::before {
@@ -183,10 +183,10 @@
         }
         
         .game-icon {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 20px;
-            border-radius: 24px;
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 18px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -194,14 +194,14 @@
             z-index: 1;
             background: linear-gradient(135deg, #00b4a6, #00d9ff);
             padding: 3px;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
             animation: icon-pulse 2s ease-in-out infinite;
         }
         
         .icon-inner {
             width: 100%;
             height: 100%;
-            border-radius: 22px;
+            border-radius: 18px;
             background: #000000;
             border: 1px solid #1A1A1A;
             display: flex;
@@ -217,14 +217,14 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 2px;
-            width: 50px;
-            height: 50px;
+            width: 42px;
+            height: 42px;
         }
         
         .logo-candy {
             width: 100%;
             height: 100%;
-            border-radius: 3px;
+            border-radius: 2px;
             animation: logoCandy 2s ease-in-out infinite;
         }
         
@@ -236,21 +236,21 @@
         /* Blocks game icon - floating blocks */
         .logo-blocks {
             position: relative;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
         }
         
         .logo-block {
             position: absolute;
-            border-radius: 3px;
+            border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #FFFFFF;
-            font-size: 10px;
+            font-size: 8px;
             font-weight: 700;
             animation: logoBlockFloat 4s ease-in-out infinite;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         
         @keyframes logoBlockFloat {
@@ -263,40 +263,40 @@
         @keyframes icon-pulse {
             0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+                box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
             }
             50% { 
                 transform: scale(1.05);
-                box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+                box-shadow: 0 0 25px rgba(0, 212, 255, 0.6);
             }
         }
         
         .game-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 300;
             color: #FFFFFF;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             position: relative;
             z-index: 1;
         }
         
         .game-description {
-            font-size: 16px;
+            font-size: 14px;
             color: #999999;
-            line-height: 1.5;
+            line-height: 1.4;
             position: relative;
             z-index: 1;
         }
         
         .game-badge {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             background: linear-gradient(135deg, #00b4a6, #00d9ff);
             color: #000000;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 999px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -304,53 +304,93 @@
         }
         
         @keyframes badge-glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.8); }
+            0%, 100% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.5); }
+            50% { box-shadow: 0 0 16px rgba(0, 212, 255, 0.8); }
         }
         
-        /* Responsive */
+        /* Mobile optimizations */
         @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+                max-width: 100%;
+            }
+            
+            .header {
+                margin-bottom: 25px;
+            }
+            
+            .logo {
+                margin-bottom: 25px;
+            }
+            
             .logo-text {
-                font-size: 3rem;
+                font-size: 2.8rem;
+                letter-spacing: 3px;
             }
             
             .logo-subtitle {
-                font-size: 1rem;
+                font-size: 0.95rem;
+                letter-spacing: 2px;
             }
             
             .subtitle {
-                font-size: 18px;
+                font-size: 16px;
             }
             
             .games-grid {
-                gap: 20px;
+                gap: 15px;
+                grid-template-columns: 1fr;
+                max-width: 320px;
+                margin: 0 auto;
             }
             
             .game-card {
-                padding: 24px;
+                padding: 20px;
+                border-radius: 18px;
             }
             
             .game-title {
-                font-size: 24px;
+                font-size: 22px;
             }
             
             .game-icon {
-                width: 80px;
-                height: 80px;
+                width: 70px;
+                height: 70px;
+                margin-bottom: 15px;
             }
             
             .candy-grid {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .logo-blocks {
                 width: 45px;
                 height: 45px;
             }
             
-            .logo-blocks {
-                width: 50px;
-                height: 50px;
+            .logo-block {
+                font-size: 7px;
             }
             
-            .logo-block {
-                font-size: 9px;
+            .game-badge {
+                padding: 4px 12px;
+                font-size: 10px;
+            }
+        }
+        
+        /* Extra small screens like iPhone 12 mini */
+        @media (max-width: 375px) {
+            .logo-text {
+                font-size: 2.5rem;
+            }
+            
+            .games-grid {
+                max-width: 280px;
+            }
+            
+            .game-card {
+                padding: 18px;
             }
         }
     </style>
@@ -412,10 +452,10 @@
                 <div class="game-icon blocks-icon">
                     <div class="icon-inner">
                         <div class="logo-blocks">
-                            <div class="logo-block" style="width: 30px; height: 30px; background: #00d9ff; left: 15px; top: 15px; animation-delay: 0s;">30</div>
-                            <div class="logo-block" style="width: 22px; height: 22px; background: #00e676; left: 0px; top: 0px; animation-delay: 0.5s;">20</div>
-                            <div class="logo-block" style="width: 38px; height: 38px; background: #ff6b6b; left: 22px; top: 22px; animation-delay: 1s;">40</div>
-                            <div class="logo-block" style="width: 18px; height: 18px; background: #ffab00; left: 3px; top: 33px; animation-delay: 1.5s;">15</div>
+                            <div class="logo-block" style="width: 25px; height: 25px; background: #00d9ff; left: 12px; top: 12px; animation-delay: 0s;">25</div>
+                            <div class="logo-block" style="width: 18px; height: 18px; background: #00e676; left: 0px; top: 0px; animation-delay: 0.5s;">18</div>
+                            <div class="logo-block" style="width: 32px; height: 32px; background: #ff6b6b; left: 18px; top: 18px; animation-delay: 1s;">32</div>
+                            <div class="logo-block" style="width: 15px; height: 15px; background: #ffab00; left: 2px; top: 28px; animation-delay: 1.5s;">15</div>
                         </div>
                     </div>
                 </div>

@@ -420,6 +420,29 @@
             opacity: 1;
         }
         
+        /* Level indicator */
+        #levelIndicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 600;
+            color: #00d9ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 20;
+            animation: levelShow 2s ease-out forwards;
+        }
+        
+        @keyframes levelShow {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        
         /* Responsive adjustments */
         @media (max-height: 700px) {
             .menu-logo { width: 100px; height: 100px; }
@@ -472,6 +495,9 @@
         
         <!-- Streak indicator -->
         <div id="streakIndicator">🔥 STREAK <span id="streakCount">5</span></div>
+        
+        <!-- Level indicator -->
+        <div id="levelIndicator"></div>
         
         <!-- Menu Screen -->
         <div id="menuScreen">
@@ -546,6 +572,7 @@
         let streak = 0;
         let perfectShots = 0;
         let bestScore = parseInt(localStorage.getItem('notamyBubblePopBest') || '0');
+        let levelTransitioning = false;
         
         // Touch controls
         let touchX = null;
@@ -557,9 +584,9 @@
             y: 0,
             width: 60,
             height: 80,
-            speed: 18, // Even faster for better control
+            speed: 18,
             shootCooldown: 0,
-            autoShootInterval: 20, // Slightly faster shooting
+            autoShootInterval: 20,
             powerUps: [],
             shield: false,
             multiShot: false,
@@ -575,7 +602,7 @@
         let scorePopups = [];
         let visualEffects = [];
         
-        // Ball types - Simplified and slower
+        // Ball types
         const ballTypes = {
             normal: {
                 sizes: {
@@ -600,7 +627,7 @@
             }
         };
         
-        // Power-up types - More frequent and powerful
+        // Power-up types
         const powerUpTypes = {
             shield: { icon: '🛡️', color: '#00e676', duration: 400 },
             multishot: { icon: '🎯', color: '#00d9ff', duration: 500 },
@@ -619,7 +646,6 @@
             touchX = touch.clientX - rect.left;
             touchActive = true;
             
-            // Show touch indicator
             const indicator = document.getElementById('touchIndicator');
             indicator.style.display = 'block';
             indicator.style.left = touchX - 40 + 'px';
@@ -633,7 +659,6 @@
                 const rect = canvas.getBoundingClientRect();
                 touchX = touch.clientX - rect.left;
                 
-                // Update touch indicator
                 const indicator = document.getElementById('touchIndicator');
                 indicator.style.left = touchX - 40 + 'px';
             }
@@ -643,8 +668,6 @@
             e.preventDefault();
             touchActive = false;
             touchX = null;
-            
-            // Hide touch indicator
             document.getElementById('touchIndicator').style.display = 'none';
         });
         
@@ -686,6 +709,8 @@
             comboTimer = 0;
             streak = 0;
             perfectShots = 0;
+            levelTransitioning = false;
+            
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - player.height - 100;
             player.shootCooldown = 0;
@@ -695,51 +720,67 @@
             player.rapidFire = false;
             player.magnetPower = false;
             
+            clearGameArrays();
+            updatePowerUpDisplay();
+            updateScore();
+        }
+        
+        function clearGameArrays() {
             bullets = [];
             balls = [];
             particles = [];
             powerUps = [];
             scorePopups = [];
             visualEffects = [];
-            
-            updatePowerUpDisplay();
-            updateScore();
         }
         
         function initLevel() {
-            balls = [];
-            timer = 90 + (level * 15); // More time per level
+            // Clear everything before starting new level
+            clearGameArrays();
+            levelTransitioning = false;
             
-            // Always start with one ball from the top
-            const ballTypes = level > 2 ? ['normal', 'bouncy'] : ['normal'];
-            if (level > 5) ballTypes.push('special');
+            // Reset combo and hide indicators
+            combo = 0;
+            document.getElementById('comboIndicator').classList.remove('show');
+            document.getElementById('streakIndicator').classList.remove('show');
             
-            const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
-            const x = canvas.width / 2 + (Math.random() - 0.5) * 200; // Center with variation
-            const y = 100; // Start from top
+            // Set timer for new level
+            timer = 90 + (level * 10);
             
-            createBall(x, y, 'large', type);
-            // Ball will fall naturally with gravity
+            // Show level indicator
+            const levelDiv = document.getElementById('levelIndicator');
+            levelDiv.textContent = `Level ${level}`;
+            levelDiv.style.opacity = '1';
+            
+            // Create single ball from top after short delay
+            setTimeout(() => {
+                const ballType = level > 5 ? ['normal', 'bouncy', 'special'][Math.floor(Math.random() * 3)] :
+                               level > 2 ? ['normal', 'bouncy'][Math.floor(Math.random() * 2)] : 
+                               'normal';
+                
+                const x = canvas.width / 2;
+                const y = 100;
+                
+                createBall(x, y, 'large', ballType);
+            }, 500);
         }
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
-            
-            // Speed multiplier that increases slightly with level
-            const speedMultiplier = 1 + (level - 1) * 0.08; // 8% increase per level (less aggressive)
+            const speedMultiplier = 1 + (level - 1) * 0.05;
             
             const ball = {
                 x: x,
                 y: y,
-                velX: 0, // Start with no horizontal velocity
-                velY: 0, // Start falling
+                velX: 0,
+                velY: 2,
                 radius: ballData.radius,
                 size: size,
                 type: type,
                 color: ballData.color,
                 points: ballData.points,
-                gravity: 0.3, // Slightly higher gravity for better control
-                bounceVelocity: -10 * speedMultiplier, // Gentler bounce
+                gravity: 0.25,
+                bounceVelocity: -9 * speedMultiplier,
                 rotation: 0,
                 trail: [],
                 glowIntensity: 0
@@ -750,7 +791,7 @@
         }
         
         function shootBullet() {
-            if (player.shootCooldown > 0) return;
+            if (player.shootCooldown > 0 || levelTransitioning) return;
             
             const cooldown = player.rapidFire ? 4 : player.autoShootInterval;
             player.shootCooldown = cooldown;
@@ -783,12 +824,11 @@
                 });
             }
             
-            // Visual feedback for shooting
             createParticles(player.x + player.width/2, player.y, 5, theme.colors.primaryLight, true);
         }
         
         function createPowerUp(x, y) {
-            if (Math.random() < 0.5) { // 50% chance for power-ups
+            if (Math.random() < 0.3) { // 30% chance for power-ups
                 const types = Object.keys(powerUpTypes);
                 const type = types[Math.floor(Math.random() * types.length)];
                 
@@ -796,7 +836,7 @@
                     x: x,
                     y: y,
                     type: type,
-                    velY: 1.5, // Slow fall
+                    velY: 1.5,
                     size: 35,
                     bounce: 0,
                     collected: false,
@@ -811,7 +851,6 @@
             createParticles(powerUp.x, powerUp.y, 30, power.color);
             addScorePopup(powerUp.x, powerUp.y, power.icon);
             
-            // Visual effect
             visualEffects.push({
                 type: 'ring',
                 x: powerUp.x,
@@ -854,9 +893,6 @@
                         break;
                     case 'magnet':
                         player.magnetPower = true;
-                        break;
-                    case 'doublepoints':
-                        // Double points handled in scoring
                         break;
                 }
             }
@@ -936,17 +972,17 @@
         }
         
         function updatePlayer() {
-            if (touchX !== null && touchActive) {
+            if (touchX !== null && touchActive && !levelTransitioning) {
                 const targetX = touchX - player.width / 2;
                 const diff = targetX - player.x;
-                player.x += diff * 0.5; // Very smooth movement
+                player.x += diff * 0.5;
             }
             
             player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
             
             if (player.shootCooldown > 0) {
                 player.shootCooldown--;
-            } else {
+            } else if (!levelTransitioning) {
                 shootBullet();
             }
             
@@ -994,7 +1030,6 @@
                 for (let j = balls.length - 1; j >= 0; j--) {
                     const ball = balls[j];
                     if (checkCircleRectCollision(ball, bullet)) {
-                        // Score calculation
                         combo++;
                         comboTimer = 90;
                         streak++;
@@ -1004,20 +1039,17 @@
                         const points = ball.points * multiplier;
                         score += points;
                         
-                        // Visual effects
                         ball.glowIntensity = 1;
                         createParticles(ball.x, ball.y, 30, ball.color);
                         addScorePopup(ball.x, ball.y, '+' + points);
                         createPowerUp(ball.x, ball.y);
                         
-                        // Combo display
                         if (combo >= 3) {
                             const comboDiv = document.getElementById('comboIndicator');
                             document.getElementById('comboMultiplier').textContent = Math.floor(combo / 3) + 1;
                             comboDiv.classList.add('show');
                         }
                         
-                        // Streak display
                         if (streak >= 5 && streak % 5 === 0) {
                             const streakDiv = document.getElementById('streakIndicator');
                             document.getElementById('streakCount').textContent = streak;
@@ -1025,27 +1057,23 @@
                             setTimeout(() => streakDiv.classList.remove('show'), 2000);
                         }
                         
-                        // Perfect shot
                         if (Math.abs(ball.x - (bullet.x + bullet.width/2)) < 10) {
                             perfectShots++;
                             addPerfectShot(ball.x, ball.y);
                             score += 100;
                         }
                         
-                        // Split ball
                         const ballData = ballTypes[ball.type].sizes[ball.size];
                         if (ballData.nextSize) {
-                            // Speed multiplier for split balls
-                            const speedMultiplier = 1 + (level - 1) * 0.1;
+                            const speedMultiplier = 1 + (level - 1) * 0.05;
                             
                             for (let k = 0; k < 2; k++) {
-                                const angle = k === 0 ? -0.5 : 0.5; // Split left and right
+                                const angle = k === 0 ? -0.5 : 0.5;
                                 const newX = ball.x + (k === 0 ? -30 : 30);
                                 const newY = ball.y;
-                                createBall(newX, newY, ballData.nextSize, ball.type);
-                                // Give split balls gentle velocity
-                                balls[balls.length - 1].velX = angle * 2 * speedMultiplier;
-                                balls[balls.length - 1].velY = -2 * speedMultiplier; // Small upward push
+                                const newBall = createBall(newX, newY, ballData.nextSize, ball.type);
+                                newBall.velX = angle * 2.5 * speedMultiplier;
+                                newBall.velY = -3 * speedMultiplier;
                             }
                         }
                         
@@ -1074,24 +1102,20 @@
                     ball.glowIntensity *= 0.95;
                 }
                 
-                // Wall bouncing
                 if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
                     ball.velX *= -1;
                     ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
                     createParticles(ball.x, ball.y, 8, ball.color, true);
                 }
                 
-                // Bottom bouncing - controlled bounce
                 if (ball.y + ball.radius >= canvas.height - 150) {
                     ball.y = canvas.height - 150 - ball.radius;
-                    ball.velY = ball.bounceVelocity; // Controlled bounce velocity
-                    // Add slight random horizontal movement on bounce
+                    ball.velY = ball.bounceVelocity;
                     if (Math.abs(ball.velX) < 0.5) {
                         ball.velX = (Math.random() - 0.5) * 2;
                     }
                     createParticles(ball.x, ball.y + ball.radius, 12, ball.color, true);
                     
-                    // Visual bounce effect
                     visualEffects.push({
                         type: 'shockwave',
                         x: ball.x,
@@ -1103,19 +1127,16 @@
                     });
                 }
                 
-                // Top bouncing
                 if (ball.y - ball.radius <= 80) {
                     ball.y = 80 + ball.radius;
                     ball.velY = Math.abs(ball.velY) * 0.8;
                 }
                 
-                // Player collision
                 if (!player.shield && checkCircleRectCollision(ball, player)) {
                     lives--;
                     createParticles(player.x + player.width/2, player.y + player.height/2, 40, theme.colors.error);
-                    streak = 0; // Reset streak on hit
+                    streak = 0;
                     
-                    // Screen shake effect
                     visualEffects.push({
                         type: 'shake',
                         intensity: 20,
@@ -1137,45 +1158,27 @@
                 }
             }
             
-            if (balls.length === 0 && gameState === 'playing') {
+            if (balls.length === 0 && gameState === 'playing' && !levelTransitioning) {
+                levelTransitioning = true;
                 level++;
-                const bonus = timer * 20;
+                const bonus = timer * 10;
                 score += bonus;
                 addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + bonus);
                 updateScore();
                 
-                // Show level indicator
-                const levelDiv = document.createElement('div');
-                levelDiv.style.position = 'absolute';
-                levelDiv.style.top = '50%';
-                levelDiv.style.left = '50%';
-                levelDiv.style.transform = 'translate(-50%, -50%)';
-                levelDiv.style.fontSize = '48px';
-                levelDiv.style.fontWeight = '600';
-                levelDiv.style.color = theme.colors.primaryLight;
-                levelDiv.style.textShadow = '0 0 20px rgba(0, 212, 255, 0.8)';
-                levelDiv.style.animation = 'perfectPop 1.5s ease-out forwards';
-                levelDiv.style.pointerEvents = 'none';
-                levelDiv.style.zIndex = '20';
-                levelDiv.textContent = `Level ${level}`;
-                document.getElementById('gameContainer').appendChild(levelDiv);
-                
-                // Celebration effect
-                for (let i = 0; i < 50; i++) {
-                    setTimeout(() => {
-                        createParticles(
-                            Math.random() * canvas.width,
-                            Math.random() * canvas.height/2,
-                            5,
-                            ['#00b4a6', '#00d9ff', '#00e676', '#ffab00'][Math.floor(Math.random() * 4)]
-                        );
-                    }, i * 30);
+                // Simple celebration
+                for (let i = 0; i < 20; i++) {
+                    createParticles(
+                        Math.random() * canvas.width,
+                        Math.random() * canvas.height/2,
+                        3,
+                        ['#00b4a6', '#00d9ff', '#00e676'][Math.floor(Math.random() * 3)]
+                    );
                 }
                 
                 setTimeout(() => {
-                    levelDiv.remove();
                     initLevel();
-                }, 2000);
+                }, 1500);
             }
         }
         
@@ -1183,7 +1186,6 @@
             for (let i = powerUps.length - 1; i >= 0; i--) {
                 const powerUp = powerUps[i];
                 
-                // Magnet effect
                 if (player.magnetPower) {
                     const dx = (player.x + player.width/2) - powerUp.x;
                     const dy = (player.y + player.height/2) - powerUp.y;
@@ -1267,7 +1269,7 @@
         }
         
         function updateTimer() {
-            if (gameState === 'playing') {
+            if (gameState === 'playing' && !levelTransitioning) {
                 timer--;
                 if (timer <= 0) {
                     lives--;
@@ -1299,6 +1301,7 @@
         
         function gameOver() {
             gameState = 'gameOver';
+            levelTransitioning = false;
             
             if (score > bestScore) {
                 bestScore = score;
@@ -1319,7 +1322,6 @@
             
             const time = Date.now() * 0.0002;
             
-            // Animated background orbs
             ctx.globalAlpha = 0.15;
             
             const orb1 = ctx.createRadialGradient(
@@ -1362,7 +1364,6 @@
             const playerX = player.x;
             const playerY = player.y;
             
-            // Shield effect
             if (player.shield) {
                 const time = Date.now() * 0.003;
                 const shieldGradient = ctx.createRadialGradient(
@@ -1379,7 +1380,6 @@
                 ctx.fillStyle = shieldGradient;
                 ctx.fillRect(playerX - 30, playerY - 30, player.width + 60, player.height + 60);
                 
-                // Shield hexagon
                 ctx.strokeStyle = 'rgba(0, 230, 118, 0.6)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -1395,7 +1395,6 @@
                 ctx.stroke();
             }
             
-            // Player ship
             const gradient = ctx.createLinearGradient(
                 playerX, playerY,
                 playerX, playerY + player.height
@@ -1414,7 +1413,6 @@
             ctx.closePath();
             ctx.fill();
             
-            // Cockpit
             ctx.fillStyle = theme.colors.accent;
             ctx.beginPath();
             ctx.arc(playerX + player.width/2, playerY + player.height/2, 18, 0, Math.PI * 2);
@@ -1425,7 +1423,6 @@
             ctx.arc(playerX + player.width/2, playerY + player.height/2, 12, 0, Math.PI * 2);
             ctx.fill();
             
-            // Engine glow
             const engineTime = Date.now() * 0.01;
             const engineGlow = ctx.createRadialGradient(
                 playerX + player.width/2,
@@ -1446,7 +1443,6 @@
         
         function drawBalls() {
             for (let ball of balls) {
-                // Trail effect
                 for (let i = 0; i < ball.trail.length; i++) {
                     const trail = ball.trail[i];
                     const alpha = (i / ball.trail.length) * 0.4;
@@ -1457,7 +1453,6 @@
                     ctx.fill();
                 }
                 
-                // Ball glow
                 if (ball.glowIntensity > 0) {
                     const glowGradient = ctx.createRadialGradient(
                         ball.x, ball.y, ball.radius,
@@ -1469,7 +1464,6 @@
                     ctx.fillRect(ball.x - ball.radius * 2, ball.y - ball.radius * 2, ball.radius * 4, ball.radius * 4);
                 }
                 
-                // Main ball
                 const gradient = ctx.createRadialGradient(
                     ball.x - ball.radius * 0.3, 
                     ball.y - ball.radius * 0.3,
@@ -1488,7 +1482,6 @@
                 ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Pattern overlay
                 ctx.save();
                 ctx.translate(ball.x, ball.y);
                 ctx.rotate(ball.rotation);
@@ -1497,7 +1490,6 @@
                 ctx.lineWidth = 2;
                 
                 if (ball.type === 'bouncy') {
-                    // Spring pattern
                     for (let i = 0; i < 4; i++) {
                         const angle = (Math.PI / 2) * i;
                         ctx.beginPath();
@@ -1511,7 +1503,6 @@
                         ctx.stroke();
                     }
                 } else if (ball.type === 'special') {
-                    // Star pattern
                     ctx.beginPath();
                     for (let i = 0; i < 6; i++) {
                         const angle = (Math.PI / 3) * i;
@@ -1526,7 +1517,6 @@
                 
                 ctx.restore();
                 
-                // Highlight
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.beginPath();
                 ctx.arc(
@@ -1542,7 +1532,6 @@
         
         function drawBullets() {
             for (let bullet of bullets) {
-                // Trail
                 for (let i = 0; i < bullet.trail.length; i++) {
                     const trail = bullet.trail[i];
                     const alpha = (i / bullet.trail.length);
@@ -1559,7 +1548,6 @@
                     ctx.fillRect(trail.x - width/2, trail.y, width, 10);
                 }
                 
-                // Main bullet
                 const gradient = ctx.createLinearGradient(
                     bullet.x, bullet.y,
                     bullet.x, bullet.y + bullet.height
@@ -1572,7 +1560,6 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
                 
-                // Glow
                 ctx.shadowColor = bullet.color;
                 ctx.shadowBlur = 15;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
@@ -1590,7 +1577,6 @@
                 ctx.translate(powerUp.x, powerUp.y + bounce);
                 ctx.rotate(rotation);
                 
-                // Outer glow
                 const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, powerUp.size * 2);
                 glow.addColorStop(0, power.color + '60');
                 glow.addColorStop(0.5, power.color + '30');
@@ -1598,7 +1584,6 @@
                 ctx.fillStyle = glow;
                 ctx.fillRect(-powerUp.size * 2, -powerUp.size * 2, powerUp.size * 4, powerUp.size * 4);
                 
-                // Main circle
                 const gradient = ctx.createRadialGradient(
                     -powerUp.size * 0.3, -powerUp.size * 0.3, 0,
                     0, 0, powerUp.size
@@ -1612,20 +1597,17 @@
                 ctx.arc(0, 0, powerUp.size, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Inner circle
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                 ctx.beginPath();
                 ctx.arc(0, 0, powerUp.size * 0.8, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Icon
                 ctx.fillStyle = '#FFFFFF';
                 ctx.font = `${powerUp.size * 0.8}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(power.icon, 0, 0);
                 
-                // Sparkles
                 if (powerUp.magnetized) {
                     ctx.strokeStyle = '#2196f3';
                     ctx.lineWidth = 2;

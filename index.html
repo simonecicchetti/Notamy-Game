@@ -183,87 +183,81 @@
         }
         
         .game-icon {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             margin: 0 auto 20px;
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             z-index: 1;
-        }
-        
-        /* Crush game icon */
-        .crush-icon {
-            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            padding: 3px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
             animation: icon-pulse 2s ease-in-out infinite;
         }
         
-        .crush-icon-content {
+        .icon-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            background: #000000;
+            border: 1px solid #1A1A1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Crush game icon - candy grid */
+        .candy-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 2px;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
         }
         
-        .mini-candy {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 2px;
-            animation: mini-candy-pulse 2s ease-in-out infinite;
+        .logo-candy {
+            width: 100%;
+            height: 100%;
+            border-radius: 3px;
+            animation: logoCandy 2s ease-in-out infinite;
         }
         
-        .mini-candy:nth-child(odd) {
-            animation-delay: 0.5s;
+        @keyframes logoCandy {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.8); }
         }
         
-        @keyframes mini-candy-pulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(0.8); opacity: 0.6; }
-        }
-        
-        /* Blocks game icon */
-        .blocks-icon {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            animation: icon-pulse 2s ease-in-out infinite;
-            animation-delay: 1s;
-        }
-        
-        .blocks-icon-content {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 1px;
-            width: 40px;
-            height: 40px;
+        /* Blocks game icon - floating blocks */
+        .logo-blocks {
             position: relative;
+            width: 60px;
+            height: 60px;
         }
         
-        .tetris-block {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 1px;
+        .logo-block {
+            position: absolute;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 700;
+            animation: logoBlockFloat 4s ease-in-out infinite;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
-        .tetris-shape-1 {
-            grid-column: 1 / 3;
-            grid-row: 1 / 3;
-            background: rgba(255, 255, 255, 0.4);
-            animation: tetris-fall 3s ease-in-out infinite;
-        }
-        
-        .tetris-shape-2 {
-            grid-column: 3 / 5;
-            grid-row: 2 / 4;
-            background: rgba(255, 255, 255, 0.3);
-            animation: tetris-fall 3s ease-in-out infinite;
-            animation-delay: 1.5s;
-        }
-        
-        @keyframes tetris-fall {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(5px); }
+        @keyframes logoBlockFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(5px, -5px) scale(1.1); }
+            50% { transform: translate(-5px, -8px) scale(0.9); }
+            75% { transform: translate(-8px, 5px) scale(1.05); }
         }
         
         @keyframes icon-pulse {
@@ -339,6 +333,25 @@
             .game-title {
                 font-size: 24px;
             }
+            
+            .game-icon {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .candy-grid {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .logo-blocks {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .logo-block {
+                font-size: 9px;
+            }
         }
     </style>
 </head>
@@ -372,17 +385,19 @@
             <!-- Notamy Crush -->
             <a href="notamy-crash.html" class="game-card">
                 <div class="game-badge">Match-3</div>
-                <div class="game-icon crush-icon">
-                    <div class="crush-icon-content">
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
-                        <div class="mini-candy"></div>
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="candy-grid">
+                            <div class="logo-candy" style="background: #00b4a6; animation-delay: 0s;"></div>
+                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.1s;"></div>
+                            <div class="logo-candy" style="background: #ff6b6b; animation-delay: 0.2s;"></div>
+                            <div class="logo-candy" style="background: #ffab00; animation-delay: 0.3s;"></div>
+                            <div class="logo-candy" style="background: #00e676; animation-delay: 0.4s;"></div>
+                            <div class="logo-candy" style="background: #9c27b0; animation-delay: 0.5s;"></div>
+                            <div class="logo-candy" style="background: #ff5252; animation-delay: 0.6s;"></div>
+                            <div class="logo-candy" style="background: #00b4a6; animation-delay: 0.7s;"></div>
+                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.8s;"></div>
+                        </div>
                     </div>
                 </div>
                 <h2 class="game-title">Notamy Crush</h2>
@@ -395,13 +410,13 @@
             <a href="notamy-blocks.html" class="game-card">
                 <div class="game-badge">Puzzle</div>
                 <div class="game-icon blocks-icon">
-                    <div class="blocks-icon-content">
-                        <div class="tetris-shape-1"></div>
-                        <div class="tetris-shape-2"></div>
-                        <div class="tetris-block" style="grid-column: 1; grid-row: 3;"></div>
-                        <div class="tetris-block" style="grid-column: 2; grid-row: 4;"></div>
-                        <div class="tetris-block" style="grid-column: 3; grid-row: 4;"></div>
-                        <div class="tetris-block" style="grid-column: 4; grid-row: 4;"></div>
+                    <div class="icon-inner">
+                        <div class="logo-blocks">
+                            <div class="logo-block" style="width: 30px; height: 30px; background: #00d9ff; left: 15px; top: 15px; animation-delay: 0s;">30</div>
+                            <div class="logo-block" style="width: 22px; height: 22px; background: #00e676; left: 0px; top: 0px; animation-delay: 0.5s;">20</div>
+                            <div class="logo-block" style="width: 38px; height: 38px; background: #ff6b6b; left: 22px; top: 22px; animation-delay: 1s;">40</div>
+                            <div class="logo-block" style="width: 18px; height: 18px; background: #ffab00; left: 3px; top: 33px; animation-delay: 1.5s;">15</div>
+                        </div>
                     </div>
                 </div>
                 <h2 class="game-title">Notamy Blocks</h2>

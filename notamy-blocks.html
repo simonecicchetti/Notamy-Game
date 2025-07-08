@@ -364,14 +364,17 @@
                 const deltaX = touch.clientX - touchStartX;
                 const deltaY = touch.clientY - touchStartY;
                 
+                // Ignora piccoli movimenti accidentali
+                if (Math.abs(deltaX) < 20 && Math.abs(deltaY) < 20) return;
+                
                 // Horizontal movement - con soglia più alta
-                if (Math.abs(deltaX) > 40 && !isDragging) {
+                if (Math.abs(deltaX) > 70 && !isDragging) {
                     movePiece(deltaX > 0 ? 1 : -1, 0);
                     touchStartX = touch.clientX;
                 }
                 
                 // Vertical drag for fast drop
-                if (deltaY > 20) {
+                if (deltaY > 50) {
                     isDragging = true;
                     dropPiece();
                 }

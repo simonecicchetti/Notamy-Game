@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TETRIS MOBILE</title>
+    <title>Notamy Blocks</title>
     <style>
         * {
             margin: 0;
@@ -42,7 +42,7 @@
             justify-content: space-around;
             align-items: center;
             z-index: 100;
-            border-bottom: 1px solid #00ffff;
+            border-bottom: 1px solid #00b4a6;
             padding: 0 5px;
         }
         
@@ -53,7 +53,7 @@
         
         .info-label {
             font-size: 9px;
-            color: #00ffff;
+            color: #00d9ff;
             text-transform: uppercase;
             letter-spacing: 1px;
             opacity: 0.8;
@@ -72,7 +72,7 @@
         
         @keyframes pulse-red {
             0%, 100% { color: #fff; }
-            50% { color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+            50% { color: #ff6b6b; text-shadow: 0 0 20px #ff6b6b; }
         }
         
         /* Game Container */
@@ -93,10 +93,10 @@
         #gameCanvas {
             display: block;
             background: #050505;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 180, 166, 0.3);
         }
         
-        /* Start Screen */
+        /* Start Screen - Hidden by default when autostart is true */
         .start-screen {
             position: fixed;
             top: 0;
@@ -114,14 +114,18 @@
         .start-title {
             font-size: 60px;
             font-weight: 100;
-            color: #00ffff;
+            color: #00b4a6;
             margin-bottom: 50px;
             text-shadow: 0 0 30px currentColor;
             letter-spacing: 10px;
+            background: linear-gradient(45deg, #00b4a6, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .start-button {
-            background: linear-gradient(45deg, #00ffff, #00cccc);
+            background: linear-gradient(45deg, #00b4a6, #00d9ff);
             border: none;
             color: #000;
             padding: 20px 60px;
@@ -131,13 +135,13 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 3px;
-            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 180, 166, 0.5);
             animation: button-pulse 2s ease-in-out infinite;
         }
         
         @keyframes button-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 255, 255, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 60px rgba(0, 255, 255, 0.7); }
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 180, 166, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 60px rgba(0, 180, 166, 0.7); }
         }
         
         /* Game Over */
@@ -157,19 +161,19 @@
         
         .game-over-title {
             font-size: 48px;
-            color: #ff0066;
+            color: #ff6b6b;
             margin-bottom: 30px;
             text-shadow: 0 0 30px currentColor;
         }
         
         .final-score {
             font-size: 36px;
-            color: #00ffff;
+            color: #00d9ff;
             margin-bottom: 40px;
         }
         
         .restart-button {
-            background: linear-gradient(45deg, #ff0066, #ff3399);
+            background: linear-gradient(45deg, #ff6b6b, #ff9999);
             border: none;
             color: #fff;
             padding: 15px 40px;
@@ -178,7 +182,7 @@
             border-radius: 30px;
             cursor: pointer;
             text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(255, 0, 102, 0.5);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
         }
         
         /* Effects */
@@ -201,7 +205,7 @@
             position: absolute;
             font-size: 36px;
             font-weight: 900;
-            color: #ffff00;
+            color: #00e676;
             text-shadow: 0 0 20px currentColor;
             pointer-events: none;
             animation: combo-float 1.5s ease-out;
@@ -238,7 +242,7 @@
     
     <!-- Start Screen -->
     <div class="start-screen" id="startScreen">
-        <h1 class="start-title">TETRIS</h1>
+        <h1 class="start-title">NOTAMY BLOCKS</h1>
         <button class="start-button" onclick="startGame()">PLAY</button>
     </div>
     
@@ -269,42 +273,42 @@
             availableHeight / BOARD_HEIGHT
         ));
         
-        // Pieces
+        // Pieces - Updated colors to match Notamy theme
         const PIECES = [
             { // I
                 shape: [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]],
-                color: '#00ffff',
-                glow: '#00cccc'
+                color: '#00d9ff',
+                glow: '#00b4a6'
             },
             { // O
                 shape: [[1,1], [1,1]],
-                color: '#ffff00',
-                glow: '#cccc00'
+                color: '#ffab00',
+                glow: '#ff8800'
             },
             { // T
                 shape: [[0,1,0], [1,1,1], [0,0,0]],
-                color: '#ff00ff',
-                glow: '#cc00cc'
+                color: '#b366ff',
+                glow: '#9944ff'
             },
             { // S
                 shape: [[0,1,1], [1,1,0], [0,0,0]],
-                color: '#00ff00',
-                glow: '#00cc00'
+                color: '#00e676',
+                glow: '#00cc66'
             },
             { // Z
                 shape: [[1,1,0], [0,1,1], [0,0,0]],
-                color: '#ff0000',
-                glow: '#cc0000'
+                color: '#ff6b6b',
+                glow: '#ff4444'
             },
             { // J
                 shape: [[1,0,0], [1,1,1], [0,0,0]],
-                color: '#0066ff',
-                glow: '#0044cc'
+                color: '#00b4a6',
+                glow: '#009999'
             },
             { // L
                 shape: [[0,0,1], [1,1,1], [0,0,0]],
-                color: '#ff9900',
-                glow: '#cc6600'
+                color: '#00ffff',
+                glow: '#00cccc'
             }
         ];
         
@@ -337,17 +341,17 @@
             gameState.board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
             setupTouchControls();
             
-            // Check for autostart parameter
+            // Check for autostart parameter - IMMEDIATE CHECK
             const urlParams = new URLSearchParams(window.location.search);
             const autostart = urlParams.get('autostart');
             
             if (autostart === 'true') {
-                // Hide start screen and start the game immediately
+                // Hide start screen immediately
                 document.getElementById('startScreen').style.display = 'none';
-                // Small delay to ensure everything is loaded
+                // Start game after minimal delay to ensure DOM is ready
                 setTimeout(() => {
                     startGame();
-                }, 100);
+                }, 50);
             }
         }
         
@@ -379,10 +383,10 @@
                 const deltaX = touch.clientX - touchStartX;
                 const deltaY = touch.clientY - touchStartY;
                 
-                // Ignora piccoli movimenti accidentali
+                // Ignore small accidental movements
                 if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
                 
-                // Horizontal movement - con soglia più bassa
+                // Horizontal movement
                 if (Math.abs(deltaX) > 25 && !isDragging) {
                     const direction = deltaX > 0 ? 1 : -1;
                     movePiece(direction, 0);
@@ -419,7 +423,7 @@
                 const deltaX = Math.abs(touch.clientX - touchStartX);
                 const deltaY = Math.abs(touch.clientY - touchStartY);
                 
-                // Tap to rotate - più restrittivo
+                // Tap to rotate
                 if (touchDuration >= 50 && touchDuration < 200 && deltaX < 10 && deltaY < 10 && !isDragging) {
                     rotatePiece();
                 }
@@ -621,8 +625,8 @@
             lines.forEach(y => {
                 const flash = document.createElement('div');
                 flash.className = 'line-clear-flash';
-                flash.style.top = (y * BLOCK_SIZE + BLOCK_SIZE/2) + 'px';
-                canvas.parentElement.appendChild(flash);
+                flash.style.top = (y * BLOCK_SIZE + BLOCK_SIZE/2 + 35) + 'px';
+                document.body.appendChild(flash);
                 setTimeout(() => flash.remove(), 300);
             });
             
@@ -889,8 +893,8 @@
             }
         });
         
-        // Initialize
-        init();
+        // Initialize on load
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>

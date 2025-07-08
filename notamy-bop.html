@@ -67,6 +67,19 @@
             font-weight: 600;
         }
         
+        #scoreDisplay {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            font-weight: 100;
+            color: #FFFFFF;
+            text-align: center;
+            z-index: 10;
+            text-shadow: 0 4px 20px rgba(0, 217, 255, 0.5);
+        }
+        
         #gameCanvas {
             width: 100%;
             height: 100%;
@@ -293,7 +306,7 @@
         /* Combo indicator */
         #comboIndicator {
             position: absolute;
-            top: 120px;
+            top: 140px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ff6b6b, #ff8787);
@@ -309,6 +322,34 @@
         
         #comboIndicator.show {
             opacity: 1;
+            animation: comboShake 0.5s;
+        }
+        
+        @keyframes comboShake {
+            0%, 100% { transform: translateX(-50%) rotate(0); }
+            25% { transform: translateX(-50%) rotate(-5deg); }
+            75% { transform: translateX(-50%) rotate(5deg); }
+        }
+        
+        /* Perfect shot indicator */
+        .perfect-shot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: 600;
+            color: #00e676;
+            text-shadow: 0 0 20px rgba(0, 230, 118, 0.8);
+            animation: perfectPop 0.8s ease-out forwards;
+            pointer-events: none;
+            z-index: 20;
+        }
+        
+        @keyframes perfectPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
         
         /* Game over screen */
@@ -361,12 +402,31 @@
             letter-spacing: 0.5px;
         }
         
+        /* Streak indicator */
+        #streakIndicator {
+            position: absolute;
+            top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #ffab00;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-shadow: 0 0 10px rgba(255, 171, 0, 0.5);
+        }
+        
+        #streakIndicator.show {
+            opacity: 1;
+        }
+        
         /* Responsive adjustments */
         @media (max-height: 700px) {
             .menu-logo { width: 100px; height: 100px; }
             .menu-title { font-size: 36px; }
             .menu-subtitle { font-size: 16px; }
             #touchArea { height: 120px; }
+            #scoreDisplay { font-size: 36px; }
         }
         
         @media (orientation: landscape) {
@@ -374,6 +434,7 @@
             .status-item { padding: 6px 12px; }
             #touchArea { height: 100px; }
             .power-up-slot { width: 50px; height: 50px; }
+            #scoreDisplay { font-size: 36px; }
         }
     </style>
 </head>
@@ -384,9 +445,12 @@
             <div id="gameInfo">
                 <div class="status-item">LVL <span id="level">1</span></div>
                 <div class="status-item">❤️ <span id="lives">3</span></div>
-                <div class="status-item">⏱ <span id="timer">60</span></div>
+                <div class="status-item">⏱ <span id="timer">90</span></div>
             </div>
         </div>
+        
+        <!-- Score Display -->
+        <div id="scoreDisplay">0</div>
         
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
@@ -406,6 +470,9 @@
         <!-- Combo indicator -->
         <div id="comboIndicator">COMBO x<span id="comboMultiplier">2</span></div>
         
+        <!-- Streak indicator -->
+        <div id="streakIndicator">🔥 STREAK <span id="streakCount">5</span></div>
+        
         <!-- Menu Screen -->
         <div id="menuScreen">
             <div class="menu-logo">
@@ -423,7 +490,7 @@
             <div class="menu-instructions">
                 <span>Touch & Hold</span> to move<br>
                 <span>Auto-shoot</span> enabled<br>
-                <span>Collect power-ups</span> for fun!
+                <span>Hit bubbles</span> for mega points!
             </div>
         </div>
         
@@ -473,9 +540,11 @@
         let score = 0;
         let lives = 3;
         let level = 1;
-        let timer = 60;
+        let timer = 90;
         let combo = 0;
         let comboTimer = 0;
+        let streak = 0;
+        let perfectShots = 0;
         let bestScore = parseInt(localStorage.getItem('notamyBubblePopBest') || '0');
         
         // Touch controls
@@ -488,13 +557,14 @@
             y: 0,
             width: 60,
             height: 80,
-            speed: 14, // Increased for easier control
+            speed: 18, // Even faster for better control
             shootCooldown: 0,
-            autoShootInterval: 25, // Slower shooting
+            autoShootInterval: 20, // Slightly faster shooting
             powerUps: [],
             shield: false,
             multiShot: false,
-            rapidFire: false
+            rapidFire: false,
+            magnetPower: false
         };
         
         // Arrays
@@ -503,40 +573,42 @@
         let particles = [];
         let powerUps = [];
         let scorePopups = [];
+        let visualEffects = [];
         
-        // Ball types - More variety
+        // Ball types - Simplified and slower
         const ballTypes = {
             normal: {
                 sizes: {
-                    large: {radius: 45, nextSize: 'medium', color: theme.colors.primary, points: 10},
-                    medium: {radius: 30, nextSize: 'small', color: theme.colors.primaryLight, points: 20},
-                    small: {radius: 18, nextSize: null, color: theme.colors.accent, points: 50}
+                    large: {radius: 50, nextSize: 'medium', color: theme.colors.primary, points: 10},
+                    medium: {radius: 35, nextSize: 'small', color: theme.colors.primaryLight, points: 25},
+                    small: {radius: 20, nextSize: null, color: theme.colors.accent, points: 50}
                 }
             },
             bouncy: {
                 sizes: {
-                    large: {radius: 40, nextSize: 'medium', color: theme.colors.secondary, points: 15, bounceHeight: 1.3}, // Reduced bounce
-                    medium: {radius: 25, nextSize: 'small', color: theme.colors.secondaryLight, points: 30, bounceHeight: 1.3},
-                    small: {radius: 15, nextSize: null, color: '#ffab00', points: 60, bounceHeight: 1.3}
+                    large: {radius: 45, nextSize: 'medium', color: theme.colors.secondary, points: 15},
+                    medium: {radius: 30, nextSize: 'small', color: theme.colors.secondaryLight, points: 35},
+                    small: {radius: 18, nextSize: null, color: '#ffab00', points: 75}
                 }
             },
-            heavy: {
+            special: {
                 sizes: {
-                    large: {radius: 50, nextSize: 'medium', color: '#9c27b0', points: 20, gravity: 0.4}, // Reduced gravity
-                    medium: {radius: 32, nextSize: 'small', color: '#ba68c8', points: 40, gravity: 0.4},
-                    small: {radius: 20, nextSize: null, color: '#ce93d8', points: 80, gravity: 0.4}
+                    large: {radius: 55, nextSize: 'medium', color: '#9c27b0', points: 20},
+                    medium: {radius: 38, nextSize: 'small', color: '#ba68c8', points: 45},
+                    small: {radius: 22, nextSize: null, color: '#ce93d8', points: 100}
                 }
             }
         };
         
-        // Power-up types
+        // Power-up types - More frequent and powerful
         const powerUpTypes = {
-            shield: { icon: '🛡️', color: '#00e676', duration: 300 },
-            multishot: { icon: '🎯', color: '#00d9ff', duration: 400 },
-            rapidfire: { icon: '⚡', color: '#ffab00', duration: 350 },
+            shield: { icon: '🛡️', color: '#00e676', duration: 400 },
+            multishot: { icon: '🎯', color: '#00d9ff', duration: 500 },
+            rapidfire: { icon: '⚡', color: '#ffab00', duration: 450 },
             bomb: { icon: '💣', color: '#ff5252', instant: true },
             extralife: { icon: '❤️', color: '#ff6b6b', instant: true },
-            slowmo: { icon: '⏰', color: '#9c27b0', duration: 250 }
+            magnet: { icon: '🧲', color: '#2196f3', duration: 350 },
+            doublepoints: { icon: '✨', color: '#ffd700', duration: 300 }
         };
         
         // Touch event handlers
@@ -609,9 +681,11 @@
             score = 0;
             lives = 3;
             level = 1;
-            timer = 60;
+            timer = 90;
             combo = 0;
             comboTimer = 0;
+            streak = 0;
+            perfectShots = 0;
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - player.height - 100;
             player.shootCooldown = 0;
@@ -619,67 +693,70 @@
             player.shield = false;
             player.multiShot = false;
             player.rapidFire = false;
+            player.magnetPower = false;
             
             bullets = [];
             balls = [];
             particles = [];
             powerUps = [];
             scorePopups = [];
+            visualEffects = [];
             
             updatePowerUpDisplay();
+            updateScore();
         }
         
         function initLevel() {
             balls = [];
-            timer = 70 + (level * 10); // More time
-            const ballCount = Math.min(2 + Math.floor(level / 3), 5); // Fewer balls
-            const ballTypes = level > 3 ? ['normal', 'bouncy'] : ['normal'];
+            timer = 90 + (level * 15); // More time per level
+            const ballCount = Math.min(1 + Math.floor((level - 1) / 2), 4); // Start with 1 ball
+            const ballTypes = level > 2 ? ['normal', 'bouncy'] : ['normal'];
+            if (level > 5) ballTypes.push('special');
             
             for (let i = 0; i < ballCount; i++) {
                 const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
-                const x = 100 + (canvas.width - 200) / ballCount * i + Math.random() * 50;
-                const y = 50 + Math.random() * 100;
+                const x = 100 + (canvas.width - 200) / Math.max(ballCount, 2) * i + Math.random() * 50;
+                const y = 80 + Math.random() * 50;
                 createBall(x, y, 'large', type);
             }
         }
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
-            const maxBounceHeight = canvas.height - y - ballData.radius - 150;
             
             balls.push({
                 x: x,
                 y: y,
-                velX: (Math.random() - 0.5) * 3, // Slower movement
+                velX: (Math.random() - 0.5) * 2, // Slower horizontal movement
                 velY: 0,
                 radius: ballData.radius,
                 size: size,
                 type: type,
                 color: ballData.color,
                 points: ballData.points,
-                gravity: ballData.gravity || 0.3, // Reduced gravity
-                bounceHeight: ballData.bounceHeight || 0.9, // Reduced bounce
+                gravity: 0.25, // Constant gravity for all balls
+                bounceVelocity: -12, // Fixed bounce velocity to reach top
                 rotation: 0,
                 trail: [],
-                maxBounceHeight: maxBounceHeight
+                glowIntensity: 0
             });
         }
         
         function shootBullet() {
             if (player.shootCooldown > 0) return;
             
-            const cooldown = player.rapidFire ? 5 : player.autoShootInterval;
+            const cooldown = player.rapidFire ? 4 : player.autoShootInterval;
             player.shootCooldown = cooldown;
             
             if (player.multiShot) {
                 for (let i = -1; i <= 1; i++) {
                     bullets.push({
-                        x: player.x + player.width / 2 - 3,
+                        x: player.x + player.width / 2 - 4,
                         y: player.y,
-                        velX: i * 2,
-                        velY: -20,
-                        width: 6,
-                        height: 20,
+                        velX: i * 2.5,
+                        velY: -22,
+                        width: 8,
+                        height: 24,
                         damage: 1,
                         color: theme.colors.primaryLight,
                         trail: []
@@ -687,21 +764,24 @@
                 }
             } else {
                 bullets.push({
-                    x: player.x + player.width / 2 - 3,
+                    x: player.x + player.width / 2 - 4,
                     y: player.y,
                     velX: 0,
-                    velY: -20,
-                    width: 6,
-                    height: 20,
+                    velY: -22,
+                    width: 8,
+                    height: 24,
                     damage: 1,
                     color: theme.colors.primaryLight,
                     trail: []
                 });
             }
+            
+            // Visual feedback for shooting
+            createParticles(player.x + player.width/2, player.y, 5, theme.colors.primaryLight, true);
         }
         
         function createPowerUp(x, y) {
-            if (Math.random() < 0.35) { // Higher chance
+            if (Math.random() < 0.5) { // 50% chance for power-ups
                 const types = Object.keys(powerUpTypes);
                 const type = types[Math.floor(Math.random() * types.length)];
                 
@@ -709,10 +789,11 @@
                     x: x,
                     y: y,
                     type: type,
-                    velY: 2, // Slower fall
-                    size: 30,
+                    velY: 1.5, // Slow fall
+                    size: 35,
                     bounce: 0,
-                    collected: false
+                    collected: false,
+                    magnetized: false
                 });
             }
         }
@@ -720,17 +801,29 @@
         function collectPowerUp(powerUp) {
             const power = powerUpTypes[powerUp.type];
             
-            createParticles(powerUp.x, powerUp.y, 20, power.color);
+            createParticles(powerUp.x, powerUp.y, 30, power.color);
             addScorePopup(powerUp.x, powerUp.y, power.icon);
+            
+            // Visual effect
+            visualEffects.push({
+                type: 'ring',
+                x: powerUp.x,
+                y: powerUp.y,
+                radius: 0,
+                maxRadius: 100,
+                color: power.color,
+                life: 30
+            });
             
             if (power.instant) {
                 switch(powerUp.type) {
                     case 'bomb':
                         for (let ball of balls) {
-                            createParticles(ball.x, ball.y, 15, ball.color);
-                            score += ball.points;
+                            createParticles(ball.x, ball.y, 25, ball.color);
+                            score += ball.points * 2;
                         }
                         balls = [];
+                        addPerfectShot(canvas.width/2, canvas.height/2, 'BOOM!');
                         break;
                     case 'extralife':
                         lives = Math.min(lives + 1, 5);
@@ -752,10 +845,17 @@
                     case 'rapidfire':
                         player.rapidFire = true;
                         break;
+                    case 'magnet':
+                        player.magnetPower = true;
+                        break;
+                    case 'doublepoints':
+                        // Double points handled in scoring
+                        break;
                 }
             }
             
             updatePowerUpDisplay();
+            updateScore();
         }
         
         function updatePowerUpDisplay() {
@@ -788,17 +888,27 @@
             setTimeout(() => popup.remove(), 1000);
         }
         
-        function createParticles(x, y, count, color) {
+        function addPerfectShot(x, y, text = 'PERFECT!') {
+            const perfect = document.createElement('div');
+            perfect.className = 'perfect-shot';
+            perfect.textContent = text;
+            document.getElementById('gameContainer').appendChild(perfect);
+            
+            setTimeout(() => perfect.remove(), 800);
+        }
+        
+        function createParticles(x, y, count, color, small = false) {
             for (let i = 0; i < count; i++) {
-                const angle = (Math.PI * 2 / count) * i;
+                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+                const speed = small ? 2 : 4;
                 particles.push({
                     x: x,
                     y: y,
-                    velX: Math.cos(angle) * (3 + Math.random() * 3),
-                    velY: Math.sin(angle) * (3 + Math.random() * 3),
-                    life: 30,
+                    velX: Math.cos(angle) * (speed + Math.random() * 2),
+                    velY: Math.sin(angle) * (speed + Math.random() * 2),
+                    life: small ? 20 : 40,
                     color: color,
-                    size: Math.random() * 4 + 2
+                    size: small ? Math.random() * 3 + 1 : Math.random() * 5 + 2
                 });
             }
         }
@@ -822,7 +932,7 @@
             if (touchX !== null && touchActive) {
                 const targetX = touchX - player.width / 2;
                 const diff = targetX - player.x;
-                player.x += diff * 0.4; // Smoother movement
+                player.x += diff * 0.5; // Very smooth movement
             }
             
             player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
@@ -849,6 +959,9 @@
                         case 'rapidfire':
                             player.rapidFire = false;
                             break;
+                        case 'magnet':
+                            player.magnetPower = false;
+                            break;
                     }
                     
                     updatePowerUpDisplay();
@@ -861,7 +974,7 @@
                 const bullet = bullets[i];
                 
                 bullet.trail.push({x: bullet.x + bullet.width/2, y: bullet.y + bullet.height});
-                if (bullet.trail.length > 5) bullet.trail.shift();
+                if (bullet.trail.length > 8) bullet.trail.shift();
                 
                 bullet.x += bullet.velX;
                 bullet.y += bullet.velY;
@@ -874,33 +987,58 @@
                 for (let j = balls.length - 1; j >= 0; j--) {
                     const ball = balls[j];
                     if (checkCircleRectCollision(ball, bullet)) {
+                        // Score calculation
                         combo++;
-                        comboTimer = 60;
-                        const points = ball.points * (1 + Math.floor(combo / 5));
+                        comboTimer = 90;
+                        streak++;
+                        
+                        const hasDoublePoints = player.powerUps.some(p => p.type === 'doublepoints');
+                        const multiplier = (1 + Math.floor(combo / 3)) * (hasDoublePoints ? 2 : 1);
+                        const points = ball.points * multiplier;
                         score += points;
                         
-                        createParticles(ball.x, ball.y, 20, ball.color);
+                        // Visual effects
+                        ball.glowIntensity = 1;
+                        createParticles(ball.x, ball.y, 30, ball.color);
                         addScorePopup(ball.x, ball.y, '+' + points);
                         createPowerUp(ball.x, ball.y);
                         
-                        if (combo >= 5) {
+                        // Combo display
+                        if (combo >= 3) {
                             const comboDiv = document.getElementById('comboIndicator');
-                            document.getElementById('comboMultiplier').textContent = Math.floor(combo / 5) + 1;
+                            document.getElementById('comboMultiplier').textContent = Math.floor(combo / 3) + 1;
                             comboDiv.classList.add('show');
                         }
                         
+                        // Streak display
+                        if (streak >= 5 && streak % 5 === 0) {
+                            const streakDiv = document.getElementById('streakIndicator');
+                            document.getElementById('streakCount').textContent = streak;
+                            streakDiv.classList.add('show');
+                            setTimeout(() => streakDiv.classList.remove('show'), 2000);
+                        }
+                        
+                        // Perfect shot
+                        if (Math.abs(ball.x - (bullet.x + bullet.width/2)) < 10) {
+                            perfectShots++;
+                            addPerfectShot(ball.x, ball.y);
+                            score += 100;
+                        }
+                        
+                        // Split ball
                         const ballData = ballTypes[ball.type].sizes[ball.size];
                         if (ballData.nextSize) {
                             for (let k = 0; k < 2; k++) {
                                 const angle = (k / 2) * Math.PI * 2 + Math.random() * 0.5;
-                                const newX = ball.x + Math.cos(angle) * 30;
-                                const newY = ball.y + Math.sin(angle) * 30;
+                                const newX = ball.x + Math.cos(angle) * 40;
+                                const newY = ball.y + Math.sin(angle) * 40;
                                 createBall(newX, newY, ballData.nextSize, ball.type);
                             }
                         }
                         
                         balls.splice(j, 1);
                         bullets.splice(i, 1);
+                        updateScore();
                         break;
                     }
                 }
@@ -908,42 +1046,64 @@
         }
         
         function updateBalls() {
-            const slowmo = player.powerUps.some(p => p.type === 'slowmo');
-            const speedMult = slowmo ? 0.5 : 1;
-            
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
-                ball.trail.push({x: ball.x, y: ball.y});
-                if (ball.trail.length > 5) ball.trail.shift();
+                ball.trail.push({x: ball.x, y: ball.y, radius: ball.radius});
+                if (ball.trail.length > 8) ball.trail.shift();
                 
-                ball.x += ball.velX * speedMult;
-                ball.y += ball.velY * speedMult;
-                ball.velY += ball.gravity * speedMult;
-                ball.rotation += 0.05;
+                ball.x += ball.velX;
+                ball.y += ball.velY;
+                ball.velY += ball.gravity;
+                ball.rotation += 0.02;
                 
+                if (ball.glowIntensity > 0) {
+                    ball.glowIntensity *= 0.95;
+                }
+                
+                // Wall bouncing
                 if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
                     ball.velX *= -1;
                     ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
-                    createParticles(ball.x, ball.y, 5, ball.color);
+                    createParticles(ball.x, ball.y, 8, ball.color, true);
                 }
                 
+                // Bottom bouncing - always bounce to top
                 if (ball.y + ball.radius >= canvas.height - 150) {
                     ball.y = canvas.height - 150 - ball.radius;
-                    const targetHeight = ball.maxBounceHeight * ball.bounceHeight;
-                    const velocityNeeded = Math.sqrt(2 * ball.gravity * targetHeight);
-                    ball.velY = -velocityNeeded;
-                    createParticles(ball.x, ball.y, 8, ball.color);
+                    ball.velY = ball.bounceVelocity; // Fixed velocity to reach top
+                    createParticles(ball.x, ball.y + ball.radius, 12, ball.color, true);
+                    
+                    // Visual bounce effect
+                    visualEffects.push({
+                        type: 'shockwave',
+                        x: ball.x,
+                        y: canvas.height - 150,
+                        radius: 0,
+                        maxRadius: 60,
+                        color: ball.color,
+                        life: 20
+                    });
                 }
                 
+                // Top bouncing
                 if (ball.y - ball.radius <= 80) {
                     ball.y = 80 + ball.radius;
-                    ball.velY = Math.abs(ball.velY);
+                    ball.velY = Math.abs(ball.velY) * 0.8;
                 }
                 
+                // Player collision
                 if (!player.shield && checkCircleRectCollision(ball, player)) {
                     lives--;
-                    createParticles(player.x + player.width/2, player.y + player.height/2, 30, theme.colors.error);
+                    createParticles(player.x + player.width/2, player.y + player.height/2, 40, theme.colors.error);
+                    streak = 0; // Reset streak on hit
+                    
+                    // Screen shake effect
+                    visualEffects.push({
+                        type: 'shake',
+                        intensity: 20,
+                        duration: 30
+                    });
                     
                     player.x = canvas.width / 2 - player.width / 2;
                     
@@ -953,7 +1113,7 @@
                         player.shield = true;
                         player.powerUps.push({
                             type: 'shield',
-                            duration: 60
+                            duration: 90
                         });
                         updatePowerUpDisplay();
                     }
@@ -962,9 +1122,24 @@
             
             if (balls.length === 0 && gameState === 'playing') {
                 level++;
-                score += timer * 10;
-                addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + (timer * 10));
-                setTimeout(() => initLevel(), 1500);
+                const bonus = timer * 20;
+                score += bonus;
+                addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + bonus);
+                updateScore();
+                
+                // Celebration effect
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        createParticles(
+                            Math.random() * canvas.width,
+                            Math.random() * canvas.height/2,
+                            5,
+                            ['#00b4a6', '#00d9ff', '#00e676', '#ffab00'][Math.floor(Math.random() * 4)]
+                        );
+                    }, i * 30);
+                }
+                
+                setTimeout(() => initLevel(), 2000);
             }
         }
         
@@ -972,7 +1147,23 @@
             for (let i = powerUps.length - 1; i >= 0; i--) {
                 const powerUp = powerUps[i];
                 
-                powerUp.y += powerUp.velY;
+                // Magnet effect
+                if (player.magnetPower) {
+                    const dx = (player.x + player.width/2) - powerUp.x;
+                    const dy = (player.y + player.height/2) - powerUp.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 200) {
+                        powerUp.magnetized = true;
+                        powerUp.x += dx * 0.08;
+                        powerUp.y += dy * 0.08;
+                    }
+                }
+                
+                if (!powerUp.magnetized) {
+                    powerUp.y += powerUp.velY;
+                }
+                
                 powerUp.bounce += 0.1;
                 
                 if (powerUp.y > canvas.height) {
@@ -996,13 +1187,36 @@
                 const particle = particles[i];
                 particle.x += particle.velX;
                 particle.y += particle.velY;
-                particle.velX *= 0.95;
-                particle.velY *= 0.95;
-                particle.velY += 0.2;
+                particle.velX *= 0.98;
+                particle.velY *= 0.98;
+                particle.velY += 0.1;
                 particle.life--;
                 
                 if (particle.life <= 0) {
                     particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateVisualEffects() {
+            for (let i = visualEffects.length - 1; i >= 0; i--) {
+                const effect = visualEffects[i];
+                
+                switch(effect.type) {
+                    case 'ring':
+                    case 'shockwave':
+                        effect.radius += (effect.maxRadius - effect.radius) * 0.2;
+                        effect.life--;
+                        if (effect.life <= 0) {
+                            visualEffects.splice(i, 1);
+                        }
+                        break;
+                    case 'shake':
+                        effect.duration--;
+                        if (effect.duration <= 0) {
+                            visualEffects.splice(i, 1);
+                        }
+                        break;
                 }
             }
         }
@@ -1024,8 +1238,25 @@
                     if (lives <= 0) {
                         gameOver();
                     } else {
-                        timer = 70;
+                        timer = 90;
+                        addScorePopup(canvas.width/2, canvas.height/2, 'Time Up! -1 ❤️');
                     }
+                }
+            }
+        }
+        
+        function updateScore() {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const currentDisplayScore = parseInt(scoreDisplay.textContent);
+            
+            if (currentDisplayScore !== score) {
+                const diff = score - currentDisplayScore;
+                const step = Math.ceil(Math.abs(diff) / 10);
+                const newScore = currentDisplayScore + (diff > 0 ? step : -step);
+                scoreDisplay.textContent = Math.min(score, newScore);
+                
+                if (newScore !== score) {
+                    requestAnimationFrame(updateScore);
                 }
             }
         }
@@ -1050,84 +1281,159 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const time = Date.now() * 0.0003;
+            const time = Date.now() * 0.0002;
             
-            ctx.globalAlpha = 0.1;
+            // Animated background orbs
+            ctx.globalAlpha = 0.15;
             
             const orb1 = ctx.createRadialGradient(
-                Math.sin(time) * 100 + canvas.width/2,
-                Math.cos(time) * 50 + 200,
+                Math.sin(time) * 150 + canvas.width/2,
+                Math.cos(time * 0.8) * 100 + 300,
                 0,
-                Math.sin(time) * 100 + canvas.width/2,
-                Math.cos(time) * 50 + 200,
-                150
+                Math.sin(time) * 150 + canvas.width/2,
+                Math.cos(time * 0.8) * 100 + 300,
+                200
             );
             orb1.addColorStop(0, theme.colors.primary);
             orb1.addColorStop(1, 'transparent');
             ctx.fillStyle = orb1;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            const orb2 = ctx.createRadialGradient(
+                Math.cos(time * 1.2) * 100 + canvas.width/3,
+                Math.sin(time * 0.9) * 80 + 200,
+                0,
+                Math.cos(time * 1.2) * 100 + canvas.width/3,
+                Math.sin(time * 0.9) * 80 + 200,
+                150
+            );
+            orb2.addColorStop(0, theme.colors.primaryLight);
+            orb2.addColorStop(1, 'transparent');
+            ctx.fillStyle = orb2;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             ctx.globalAlpha = 1;
         }
         
         function drawPlayer() {
+            const shakeEffect = visualEffects.find(e => e.type === 'shake');
+            const shakeX = shakeEffect ? (Math.random() - 0.5) * shakeEffect.intensity : 0;
+            const shakeY = shakeEffect ? (Math.random() - 0.5) * shakeEffect.intensity : 0;
+            
+            ctx.save();
+            ctx.translate(shakeX, shakeY);
+            
             const playerX = player.x;
             const playerY = player.y;
             
+            // Shield effect
             if (player.shield) {
+                const time = Date.now() * 0.003;
                 const shieldGradient = ctx.createRadialGradient(
                     playerX + player.width/2,
                     playerY + player.height/2,
-                    0,
+                    30,
                     playerX + player.width/2,
                     playerY + player.height/2,
-                    50
+                    60
                 );
-                shieldGradient.addColorStop(0, 'rgba(0, 230, 118, 0.3)');
+                shieldGradient.addColorStop(0, 'rgba(0, 230, 118, 0.4)');
+                shieldGradient.addColorStop(0.5, 'rgba(0, 230, 118, 0.2)');
                 shieldGradient.addColorStop(1, 'transparent');
                 ctx.fillStyle = shieldGradient;
-                ctx.fillRect(playerX - 20, playerY - 20, player.width + 40, player.height + 40);
+                ctx.fillRect(playerX - 30, playerY - 30, player.width + 60, player.height + 60);
+                
+                // Shield hexagon
+                ctx.strokeStyle = 'rgba(0, 230, 118, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const hexRadius = 45 + Math.sin(time) * 5;
+                for (let i = 0; i < 6; i++) {
+                    const angle = (Math.PI / 3) * i + time * 0.5;
+                    const x = playerX + player.width/2 + Math.cos(angle) * hexRadius;
+                    const y = playerY + player.height/2 + Math.sin(angle) * hexRadius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
             }
             
-            ctx.fillStyle = theme.colors.primaryLight;
+            // Player ship
+            const gradient = ctx.createLinearGradient(
+                playerX, playerY,
+                playerX, playerY + player.height
+            );
+            gradient.addColorStop(0, theme.colors.primaryLight);
+            gradient.addColorStop(1, theme.colors.primary);
+            
+            ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.moveTo(playerX + player.width/2, playerY);
             ctx.lineTo(playerX + player.width, playerY + player.height);
-            ctx.lineTo(playerX + player.width/2, playerY + player.height - 10);
+            ctx.lineTo(playerX + player.width * 0.7, playerY + player.height - 10);
+            ctx.lineTo(playerX + player.width/2, playerY + player.height - 15);
+            ctx.lineTo(playerX + player.width * 0.3, playerY + player.height - 10);
             ctx.lineTo(playerX, playerY + player.height);
             ctx.closePath();
             ctx.fill();
             
-            ctx.fillStyle = theme.colors.primary;
+            // Cockpit
+            ctx.fillStyle = theme.colors.accent;
             ctx.beginPath();
-            ctx.arc(playerX + player.width/2, playerY + player.height/2, 15, 0, Math.PI * 2);
+            ctx.arc(playerX + player.width/2, playerY + player.height/2, 18, 0, Math.PI * 2);
             ctx.fill();
             
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(playerX + player.width/2, playerY + player.height/2, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Engine glow
+            const engineTime = Date.now() * 0.01;
             const engineGlow = ctx.createRadialGradient(
                 playerX + player.width/2,
                 playerY + player.height,
                 0,
                 playerX + player.width/2,
                 playerY + player.height,
-                20
+                30 + Math.sin(engineTime) * 5
             );
             engineGlow.addColorStop(0, theme.colors.accent);
+            engineGlow.addColorStop(0.5, theme.colors.primaryLight + '80');
             engineGlow.addColorStop(1, 'transparent');
             ctx.fillStyle = engineGlow;
-            ctx.fillRect(playerX - 10, playerY + player.height - 10, player.width + 20, 30);
+            ctx.fillRect(playerX - 20, playerY + player.height - 20, player.width + 40, 40);
+            
+            ctx.restore();
         }
         
         function drawBalls() {
             for (let ball of balls) {
+                // Trail effect
                 for (let i = 0; i < ball.trail.length; i++) {
                     const trail = ball.trail[i];
-                    const alpha = (i / ball.trail.length) * 0.3;
+                    const alpha = (i / ball.trail.length) * 0.4;
+                    const scale = 0.8 + (i / ball.trail.length) * 0.2;
                     ctx.fillStyle = ball.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
                     ctx.beginPath();
-                    ctx.arc(trail.x, trail.y, ball.radius * 0.8, 0, Math.PI * 2);
+                    ctx.arc(trail.x, trail.y, trail.radius * scale, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
+                // Ball glow
+                if (ball.glowIntensity > 0) {
+                    const glowGradient = ctx.createRadialGradient(
+                        ball.x, ball.y, ball.radius,
+                        ball.x, ball.y, ball.radius * 2
+                    );
+                    glowGradient.addColorStop(0, ball.color + Math.floor(ball.glowIntensity * 100).toString(16).padStart(2, '0'));
+                    glowGradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = glowGradient;
+                    ctx.fillRect(ball.x - ball.radius * 2, ball.y - ball.radius * 2, ball.radius * 4, ball.radius * 4);
+                }
+                
+                // Main ball
                 const gradient = ctx.createRadialGradient(
                     ball.x - ball.radius * 0.3, 
                     ball.y - ball.radius * 0.3,
@@ -1137,62 +1443,102 @@
                     ball.radius
                 );
                 gradient.addColorStop(0, ball.color);
-                gradient.addColorStop(0.7, ball.color + 'CC');
-                gradient.addColorStop(1, ball.color + '66');
+                gradient.addColorStop(0.6, ball.color + 'DD');
+                gradient.addColorStop(0.9, ball.color + '88');
+                gradient.addColorStop(1, ball.color + '44');
                 
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Pattern overlay
                 ctx.save();
                 ctx.translate(ball.x, ball.y);
                 ctx.rotate(ball.rotation);
                 
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
                 ctx.lineWidth = 2;
                 
                 if (ball.type === 'bouncy') {
-                    for (let i = 0; i < 3; i++) {
+                    // Spring pattern
+                    for (let i = 0; i < 4; i++) {
+                        const angle = (Math.PI / 2) * i;
                         ctx.beginPath();
-                        ctx.arc(0, 0, ball.radius * (0.3 + i * 0.3), 0, Math.PI * 2);
+                        ctx.arc(
+                            Math.cos(angle) * ball.radius * 0.5,
+                            Math.sin(angle) * ball.radius * 0.5,
+                            ball.radius * 0.3,
+                            0,
+                            Math.PI
+                        );
                         ctx.stroke();
                     }
-                } else if (ball.type === 'heavy') {
+                } else if (ball.type === 'special') {
+                    // Star pattern
                     ctx.beginPath();
-                    ctx.moveTo(-ball.radius * 0.7, 0);
-                    ctx.lineTo(ball.radius * 0.7, 0);
-                    ctx.moveTo(0, -ball.radius * 0.7);
-                    ctx.lineTo(0, ball.radius * 0.7);
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI / 3) * i;
+                        const x = Math.cos(angle) * ball.radius * 0.7;
+                        const y = Math.sin(angle) * ball.radius * 0.7;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
                     ctx.stroke();
                 }
                 
                 ctx.restore();
+                
+                // Highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(
+                    ball.x - ball.radius * 0.3,
+                    ball.y - ball.radius * 0.3,
+                    ball.radius * 0.3,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
             }
         }
         
         function drawBullets() {
             for (let bullet of bullets) {
+                // Trail
                 for (let i = 0; i < bullet.trail.length; i++) {
                     const trail = bullet.trail[i];
-                    const alpha = (i / bullet.trail.length) * 0.8;
-                    ctx.fillStyle = bullet.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
-                    ctx.fillRect(trail.x - 1, trail.y, 2, 4);
+                    const alpha = (i / bullet.trail.length);
+                    const width = bullet.width * (0.5 + (i / bullet.trail.length) * 0.5);
+                    
+                    const gradient = ctx.createLinearGradient(
+                        trail.x, trail.y,
+                        trail.x, trail.y + 10
+                    );
+                    gradient.addColorStop(0, bullet.color + Math.floor(alpha * 255).toString(16).padStart(2, '0'));
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(trail.x - width/2, trail.y, width, 10);
                 }
                 
+                // Main bullet
                 const gradient = ctx.createLinearGradient(
                     bullet.x, bullet.y,
                     bullet.x, bullet.y + bullet.height
                 );
                 gradient.addColorStop(0, '#FFFFFF');
-                gradient.addColorStop(0.3, bullet.color);
+                gradient.addColorStop(0.2, bullet.color);
+                gradient.addColorStop(0.8, bullet.color + 'CC');
                 gradient.addColorStop(1, bullet.color + '66');
                 
                 ctx.fillStyle = gradient;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
                 
+                // Glow
                 ctx.shadowColor = bullet.color;
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
                 ctx.shadowBlur = 0;
             }
@@ -1201,40 +1547,66 @@
         function drawPowerUps() {
             for (let powerUp of powerUps) {
                 const power = powerUpTypes[powerUp.type];
-                const bounce = Math.sin(powerUp.bounce) * 5;
+                const bounce = Math.sin(powerUp.bounce) * 8;
+                const rotation = powerUp.bounce * 0.5;
                 
-                const glow = ctx.createRadialGradient(
-                    powerUp.x, powerUp.y + bounce,
-                    0,
-                    powerUp.x, powerUp.y + bounce,
-                    powerUp.size * 1.5
-                );
-                glow.addColorStop(0, power.color + '40');
+                ctx.save();
+                ctx.translate(powerUp.x, powerUp.y + bounce);
+                ctx.rotate(rotation);
+                
+                // Outer glow
+                const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, powerUp.size * 2);
+                glow.addColorStop(0, power.color + '60');
+                glow.addColorStop(0.5, power.color + '30');
                 glow.addColorStop(1, 'transparent');
                 ctx.fillStyle = glow;
-                ctx.fillRect(
-                    powerUp.x - powerUp.size * 1.5,
-                    powerUp.y + bounce - powerUp.size * 1.5,
-                    powerUp.size * 3,
-                    powerUp.size * 3
-                );
+                ctx.fillRect(-powerUp.size * 2, -powerUp.size * 2, powerUp.size * 4, powerUp.size * 4);
                 
-                ctx.fillStyle = power.color;
+                // Main circle
+                const gradient = ctx.createRadialGradient(
+                    -powerUp.size * 0.3, -powerUp.size * 0.3, 0,
+                    0, 0, powerUp.size
+                );
+                gradient.addColorStop(0, power.color);
+                gradient.addColorStop(0.7, power.color + 'DD');
+                gradient.addColorStop(1, power.color + '88');
+                
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(powerUp.x, powerUp.y + bounce, powerUp.size, 0, Math.PI * 2);
+                ctx.arc(0, 0, powerUp.size, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.fillStyle = '#000000';
-                ctx.font = `${powerUp.size}px Arial`;
+                // Inner circle
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.beginPath();
+                ctx.arc(0, 0, powerUp.size * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Icon
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = `${powerUp.size * 0.8}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(power.icon, powerUp.x, powerUp.y + bounce);
+                ctx.fillText(power.icon, 0, 0);
+                
+                // Sparkles
+                if (powerUp.magnetized) {
+                    ctx.strokeStyle = '#2196f3';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, powerUp.size + 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                
+                ctx.restore();
             }
         }
         
         function drawParticles() {
             for (let particle of particles) {
-                const alpha = particle.life / 30;
+                const alpha = particle.life / 40;
                 ctx.fillStyle = particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
                 ctx.fillRect(
                     particle.x - particle.size/2,
@@ -1242,6 +1614,30 @@
                     particle.size,
                     particle.size
                 );
+            }
+        }
+        
+        function drawVisualEffects() {
+            for (let effect of visualEffects) {
+                switch(effect.type) {
+                    case 'ring':
+                        const ringAlpha = effect.life / 30;
+                        ctx.strokeStyle = effect.color + Math.floor(ringAlpha * 255).toString(16).padStart(2, '0');
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                        
+                    case 'shockwave':
+                        const shockAlpha = effect.life / 20;
+                        ctx.strokeStyle = effect.color + Math.floor(shockAlpha * 255).toString(16).padStart(2, '0');
+                        ctx.lineWidth = 5;
+                        ctx.beginPath();
+                        ctx.arc(effect.x, effect.y, effect.radius, 0, Math.PI * 2);
+                        ctx.stroke();
+                        break;
+                }
             }
         }
         
@@ -1262,6 +1658,7 @@
                 updateBalls();
                 updatePowerUps();
                 updateParticles();
+                updateVisualEffects();
                 updateCombo();
                 
                 if (Date.now() % 1000 < 16) {
@@ -1269,11 +1666,12 @@
                 }
             }
             
+            drawParticles();
             drawPowerUps();
             drawBalls();
             drawBullets();
             drawPlayer();
-            drawParticles();
+            drawVisualEffects();
             
             drawUI();
             

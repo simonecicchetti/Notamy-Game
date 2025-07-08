@@ -218,18 +218,34 @@
             font-weight: 500;
         }
         
+        .touch-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px dashed rgba(0, 212, 255, 0.5);
+            padding: 10px 30px;
+            border-radius: 999px;
+            color: #00d9ff;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
         /* Touch controls */
         #touchArea {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 150px;
-            z-index: 15;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
+            top: 0;
+            z-index: 5;
+            pointer-events: all;
+            display: none;
         }
         
         #touchIndicator {
@@ -299,8 +315,8 @@
         }
         
         @keyframes scoreFloat {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+            0% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(-50px) scale(1.5); opacity: 0; }
         }
         
         /* Combo indicator */
@@ -483,6 +499,9 @@
             <div id="touchIndicator"></div>
         </div>
         
+        <!-- Touch hint -->
+        <div class="touch-hint" id="touchHint">Touch to move ← →</div>
+        
         <!-- Power-ups display -->
         <div id="powerUps">
             <div class="power-up-slot" id="powerSlot1"></div>
@@ -585,7 +604,7 @@
             width: 60,
             height: 80,
             speed: 18,
-            shootCooldown: 0,
+            shootCooldown: 30, // Small initial cooldown
             autoShootInterval: 20,
             powerUps: [],
             shield: false,
@@ -638,33 +657,35 @@
             doublepoints: { icon: '✨', color: '#ffd700', duration: 300 }
         };
         
+        const touchArea = document.getElementById('touchArea');
+        
         // Touch event handlers
-        canvas.addEventListener('touchstart', (e) => {
+        touchArea.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            touchX = touch.clientX - rect.left;
-            touchActive = true;
-            
-            const indicator = document.getElementById('touchIndicator');
-            indicator.style.display = 'block';
-            indicator.style.left = touchX - 40 + 'px';
-            indicator.style.bottom = '60px';
+            if (gameState === 'playing') {
+                const touch = e.touches[0];
+                touchX = touch.clientX;
+                touchActive = true;
+                
+                const indicator = document.getElementById('touchIndicator');
+                indicator.style.display = 'block';
+                indicator.style.left = touchX - 40 + 'px';
+                indicator.style.bottom = '60px';
+            }
         });
         
-        canvas.addEventListener('touchmove', (e) => {
+        touchArea.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (touchActive) {
+            if (touchActive && gameState === 'playing') {
                 const touch = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                touchX = touch.clientX - rect.left;
+                touchX = touch.clientX;
                 
                 const indicator = document.getElementById('touchIndicator');
                 indicator.style.left = touchX - 40 + 'px';
             }
         });
         
-        canvas.addEventListener('touchend', (e) => {
+        touchArea.addEventListener('touchend', (e) => {
             e.preventDefault();
             touchActive = false;
             touchX = null;
@@ -672,18 +693,20 @@
         });
         
         // Mouse controls for testing
-        canvas.addEventListener('mousedown', (e) => {
-            touchX = e.clientX - canvas.getBoundingClientRect().left;
-            touchActive = true;
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
-            if (touchActive) {
-                touchX = e.clientX - canvas.getBoundingClientRect().left;
+        touchArea.addEventListener('mousedown', (e) => {
+            if (gameState === 'playing') {
+                touchX = e.clientX;
+                touchActive = true;
             }
         });
         
-        canvas.addEventListener('mouseup', () => {
+        touchArea.addEventListener('mousemove', (e) => {
+            if (touchActive && gameState === 'playing') {
+                touchX = e.clientX;
+            }
+        });
+        
+        touchArea.addEventListener('mouseup', () => {
             touchActive = false;
             touchX = null;
         });
@@ -691,8 +714,16 @@
         function startGame() {
             gameState = 'playing';
             document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('touchArea').style.display = 'block';
             resetGame();
             initLevel();
+            
+            // Show touch hint briefly on first play
+            const touchHint = document.getElementById('touchHint');
+            touchHint.style.opacity = '1';
+            setTimeout(() => {
+                touchHint.style.opacity = '0';
+            }, 3000);
         }
         
         function restartGame() {
@@ -713,25 +744,22 @@
             
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - player.height - 100;
-            player.shootCooldown = 0;
+            player.shootCooldown = 30; // Small delay before first shot
             player.powerUps = [];
             player.shield = false;
             player.multiShot = false;
             player.rapidFire = false;
             player.magnetPower = false;
             
-            clearGameArrays();
-            updatePowerUpDisplay();
-            updateScore();
-        }
-        
-        function clearGameArrays() {
             bullets = [];
             balls = [];
             particles = [];
             powerUps = [];
             scorePopups = [];
             visualEffects = [];
+            
+            updatePowerUpDisplay();
+            updateScore();
         }
         
         function initLevel() {
@@ -747,8 +775,12 @@
             
             // Reset combo and hide indicators
             combo = 0;
+            comboTimer = 0;
             document.getElementById('comboIndicator').classList.remove('show');
             document.getElementById('streakIndicator').classList.remove('show');
+            
+            // Reset player shoot cooldown
+            player.shootCooldown = 30;
             
             // Set timer for new level
             timer = 90 + (level * 10);
@@ -758,6 +790,11 @@
             levelDiv.textContent = `Level ${level}`;
             levelDiv.style.opacity = '1';
             
+            // Hide level indicator after animation
+            setTimeout(() => {
+                levelDiv.style.opacity = '0';
+            }, 2000);
+            
             // Create single ball from top after short delay
             setTimeout(() => {
                 // Always start with just one normal ball
@@ -765,6 +802,7 @@
                 const y = 100;
                 
                 createBall(x, y, 'large', 'normal');
+                player.shootCooldown = 0; // Enable shooting when ball appears
             }, 1000);
         }
         
@@ -793,7 +831,7 @@
         }
         
         function shootBullet() {
-            if (player.shootCooldown > 0 || levelTransitioning) return;
+            if (player.shootCooldown > 0 || levelTransitioning || gameState !== 'playing') return;
             
             const cooldown = player.rapidFire ? 4 : player.autoShootInterval;
             player.shootCooldown = cooldown;
@@ -851,7 +889,7 @@
             const power = powerUpTypes[powerUp.type];
             
             createParticles(powerUp.x, powerUp.y, 30, power.color);
-            addScorePopup(powerUp.x, powerUp.y, power.icon);
+            addScorePopup(powerUp.y, power.icon);
             
             visualEffects.push({
                 type: 'ring',
@@ -922,12 +960,13 @@
             });
         }
         
-        function addScorePopup(x, y, text) {
+        function addScorePopup(y, text) {
             const popup = document.createElement('div');
             popup.className = 'score-popup';
             popup.textContent = text;
-            popup.style.left = x + 'px';
+            popup.style.left = '50%';
             popup.style.top = y + 'px';
+            popup.style.transform = 'translateX(-50%)';
             document.getElementById('gameContainer').appendChild(popup);
             
             setTimeout(() => popup.remove(), 1000);
@@ -977,14 +1016,15 @@
             if (touchX !== null && touchActive && !levelTransitioning) {
                 const targetX = touchX - player.width / 2;
                 const diff = targetX - player.x;
-                player.x += diff * 0.5;
+                player.x += diff * 0.5; // Increased responsiveness
             }
             
             player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
             
+            // Auto-shoot - always active during gameplay
             if (player.shootCooldown > 0) {
                 player.shootCooldown--;
-            } else if (!levelTransitioning) {
+            } else if (!levelTransitioning && gameState === 'playing') {
                 shootBullet();
             }
             
@@ -1043,7 +1083,7 @@
                         
                         ball.glowIntensity = 1;
                         createParticles(ball.x, ball.y, 30, ball.color);
-                        addScorePopup(ball.x, ball.y, '+' + points);
+                        addScorePopup(ball.y, '+' + points);
                         createPowerUp(ball.x, ball.y);
                         
                         if (combo >= 3) {
@@ -1170,7 +1210,7 @@
                 level++;
                 const bonus = timer * 10;
                 score += bonus;
-                addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + bonus);
+                addScorePopup(canvas.height/2, 'Level Complete! +' + bonus);
                 updateScore();
                 
                 // Wait a bit then start next level clean
@@ -1275,7 +1315,7 @@
                         gameOver();
                     } else {
                         timer = 90;
-                        addScorePopup(canvas.width/2, canvas.height/2, 'Time Up! -1 ❤️');
+                        addScorePopup(canvas.height/2, 'Time Up! -1 ❤️');
                     }
                 }
             }
@@ -1300,6 +1340,7 @@
         function gameOver() {
             gameState = 'gameOver';
             levelTransitioning = false;
+            document.getElementById('touchArea').style.display = 'none';
             
             if (score > bestScore) {
                 bestScore = score;

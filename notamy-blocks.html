@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
-    <title>NOTAMY TETRIS - Ultimate Experience</title>
+    <title>NOTAMY TETRIS</title>
     <style>
         * {
             margin: 0;
@@ -39,313 +39,94 @@
             background: #000;
             display: flex;
             flex-direction: column;
+        }
+        
+        /* Top UI */
+        .top-ui {
+            position: absolute;
+            top: env(safe-area-inset-top, 10px);
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
+            padding: 10px 20px;
+            z-index: 100;
         }
         
-        /* Epic background animation */
-        .bg-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
-        
-        .bg-gradient {
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            top: -50%;
-            left: -50%;
-            background: radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 50%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(0, 255, 136, 0.2) 0%, transparent 50%);
-            animation: bgRotate 30s linear infinite;
-        }
-        
-        @keyframes bgRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .bg-particles {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .bg-particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #00d9ff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px currentColor;
-            animation: particleFloat 20s linear infinite;
-        }
-        
-        @keyframes particleFloat {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
-        }
-        
-        /* Main game area */
-        #gameArea {
-            position: relative;
-            background: rgba(0, 0, 0, 0.95);
-            border: 3px solid transparent;
-            border-image: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b, #ffab00) 1;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 0 100px rgba(0, 217, 255, 0.5),
-                        inset 0 0 50px rgba(0, 0, 0, 0.5);
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            animation: gameAreaGlow 4s ease-in-out infinite;
-        }
-        
-        @keyframes gameAreaGlow {
-            0%, 100% { 
-                box-shadow: 0 0 100px rgba(0, 217, 255, 0.5),
-                           inset 0 0 50px rgba(0, 0, 0, 0.5);
-            }
-            50% { 
-                box-shadow: 0 0 150px rgba(0, 255, 136, 0.7),
-                           inset 0 0 50px rgba(0, 0, 0, 0.5);
-            }
-        }
-        
-        /* Game board */
-        #board {
-            position: relative;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 20, 0.9) 100%);
-            border: 2px solid rgba(0, 217, 255, 0.3);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: inset 0 0 50px rgba(0, 217, 255, 0.1);
-        }
-        
-        #gameCanvas {
-            display: block;
-            position: relative;
-            z-index: 2;
-        }
-        
-        /* Canvas overlay effects */
-        .canvas-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 3;
-            background: linear-gradient(180deg, transparent 0%, rgba(0, 217, 255, 0.05) 100%);
-        }
-        
-        /* Side panel with glass effect */
-        #sidePanel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 180px;
-        }
-        
-        /* Timer with epic design */
-        #timerContainer {
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 82, 82, 0.1));
+        .time-display {
+            background: rgba(0, 0, 0, 0.8);
             border: 3px solid #ff6b6b;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5),
-                        inset 0 0 20px rgba(255, 107, 107, 0.2);
+            border-radius: 25px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
         }
         
-        #timerBar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ff5252, #ff6b6b);
-            background-size: 200% 100%;
-            transform-origin: bottom;
-            transition: transform 0.1s linear;
-            opacity: 0.3;
-            animation: timerGradient 2s linear infinite;
-        }
-        
-        @keyframes timerGradient {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
-        }
-        
-        #timerDisplay {
-            position: relative;
-            font-size: 48px;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 30px #ff6b6b,
-                         0 0 60px #ff6b6b;
-            z-index: 1;
-            animation: timerPulse 1s ease-in-out infinite;
-        }
-        
-        @keyframes timerPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .timer-label {
+        .time-label {
             font-size: 14px;
             color: #ff6b6b;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
             font-weight: 700;
-            text-shadow: 0 0 10px currentColor;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        /* Score with neon effect */
-        .score-container {
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 153, 204, 0.1));
-            border: 2px solid #00d9ff;
-            border-radius: 20px;
-            padding: 20px;
+        .time-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px #ff6b6b;
+            min-width: 40px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5),
-                        inset 0 0 20px rgba(0, 217, 255, 0.2);
-            position: relative;
-            overflow: hidden;
         }
         
-        .score-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #00d9ff, transparent, #00ff88);
-            border-radius: 20px;
-            opacity: 0;
-            z-index: -1;
-            animation: scoreGlow 3s ease-in-out infinite;
-        }
-        
-        @keyframes scoreGlow {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 0.5; }
+        .score-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00d9ff;
+            border-radius: 25px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
         }
         
         .score-label {
             font-size: 14px;
             color: #00d9ff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .score-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 900;
             color: #fff;
             text-shadow: 0 0 20px #00d9ff;
-            transition: all 0.3s;
+            min-width: 80px;
+            text-align: right;
         }
         
-        /* Next piece preview */
-        .next-container {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 204, 106, 0.1));
-            border: 2px solid #00ff88;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5),
-                        inset 0 0 20px rgba(0, 255, 136, 0.2);
-        }
-        
-        .next-label {
-            font-size: 14px;
-            color: #00ff88;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            font-weight: 700;
-            text-shadow: 0 0 10px currentColor;
-        }
-        
-        #nextCanvas {
-            border-radius: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-        }
-        
-        /* Level & Lines */
-        .stat-container {
-            background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(139, 92, 246, 0.1));
-            border: 2px solid #a78bfa;
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(167, 139, 250, 0.5),
-                        inset 0 0 20px rgba(167, 139, 250, 0.2);
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #a78bfa;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 15px #a78bfa;
-        }
-        
-        /* Mobile swipe areas */
-        .swipe-areas {
+        /* Canvas area */
+        .canvas-area {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            z-index: 5;
-            pointer-events: none;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00d9ff;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 0 50px rgba(0, 217, 255, 0.5);
         }
         
-        .swipe-left, .swipe-right {
-            flex: 1;
-            height: 100%;
-            pointer-events: auto;
+        #gameCanvas {
+            display: block;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 20, 0.9) 100%);
+            border-radius: 10px;
         }
         
         /* Time bonus popup */
@@ -354,211 +135,100 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 900;
             color: #00ff88;
-            text-shadow: 0 0 50px currentColor,
-                         0 0 100px currentColor;
+            text-shadow: 0 0 50px currentColor;
             pointer-events: none;
             opacity: 0;
-            z-index: 100;
+            z-index: 200;
             text-align: center;
         }
         
         .time-bonus.show {
-            animation: timeBonusEpic 1.5s ease-out;
+            animation: timeBonusAnim 1.5s ease-out;
         }
         
-        @keyframes timeBonusEpic {
+        @keyframes timeBonusAnim {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0) rotate(-720deg);
+                transform: translate(-50%, -50%) scale(0) rotate(-360deg);
             }
             50% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1.5) rotate(-360deg);
+                transform: translate(-50%, -50%) scale(1.5) rotate(0deg);
             }
             100% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(1) rotate(0) translateY(-200px);
+                transform: translate(-50%, -50%) scale(1) translateY(-100px);
             }
         }
         
-        /* Epic particle system */
+        /* Particles */
         .particle {
             position: absolute;
-            pointer-events: none;
-            z-index: 200;
-        }
-        
-        .particle-glow {
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, currentColor 0%, transparent 70%);
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            filter: blur(2px);
-        }
-        
-        /* Line clear explosion */
-        .line-explosion {
-            position: absolute;
-            width: 100%;
-            height: 30px;
             pointer-events: none;
-            z-index: 50;
+            z-index: 150;
         }
         
-        .line-explosion-wave {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                #fff, 
-                #00d9ff,
-                #fff,
-                transparent);
-            opacity: 0;
-            animation: lineExplosion 0.6s ease-out;
-        }
-        
-        @keyframes lineExplosion {
-            0% {
-                transform: scaleX(0) scaleY(1);
-                opacity: 0;
-            }
-            50% {
-                transform: scaleX(1) scaleY(3);
-                opacity: 1;
-            }
-            100% {
-                transform: scaleX(1.2) scaleY(0);
-                opacity: 0;
-            }
-        }
-        
-        /* Game over with style */
-        .game-over-overlay {
+        /* Game over */
+        .game-over {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.95), #000);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(20px);
-        }
-        
-        .game-over-content {
-            text-align: center;
-            padding: 20px;
-            max-width: 450px;
-            animation: gameOverSlide 0.5s ease-out;
-        }
-        
-        @keyframes gameOverSlide {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
         
         .game-over-title {
-            font-size: 72px;
+            font-size: 56px;
             font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #ffab00, #ff6b6b);
-            background-size: 200% 100%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 30px;
-            animation: gameOverGradient 2s linear infinite;
-            text-transform: uppercase;
-            letter-spacing: 5px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px currentColor;
+            animation: pulse 1s ease-in-out infinite;
         }
         
-        @keyframes gameOverGradient {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
-        .final-stats {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            padding: 30px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 50px rgba(0, 217, 255, 0.3);
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-            font-size: 20px;
-        }
-        
-        .stat-row .label {
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .stat-row .value {
+        .final-score {
+            font-size: 32px;
             color: #fff;
-            font-weight: 900;
-            text-shadow: 0 0 10px currentColor;
+            margin-bottom: 40px;
         }
         
-        /* Epic buttons */
-        .epic-button {
+        .restart-btn {
             background: linear-gradient(135deg, #00d9ff, #00ff88);
             border: none;
             color: #000;
-            padding: 20px 60px;
-            border-radius: 50px;
+            padding: 15px 50px;
+            border-radius: 40px;
             font-size: 24px;
             font-weight: 900;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            margin: 10px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
+            letter-spacing: 2px;
             box-shadow: 0 10px 40px rgba(0, 217, 255, 0.5);
         }
         
-        .epic-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: left 0.5s;
-        }
-        
-        .epic-button:hover::before {
-            left: 100%;
-        }
-        
-        .epic-button:active {
+        .restart-btn:active {
             transform: scale(0.95);
         }
         
         /* Welcome screen */
-        .welcome-screen {
+        .welcome {
             position: absolute;
             top: 0;
             left: 0;
@@ -573,237 +243,128 @@
             padding: 20px;
         }
         
-        .welcome-content {
-            text-align: center;
-            animation: welcomeFade 1s ease-out;
-        }
-        
-        @keyframes welcomeFade {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
         .welcome-title {
-            font-size: 100px;
+            font-size: 72px;
             font-weight: 900;
-            background: linear-gradient(45deg, 
-                #00d9ff, #00ff88, #ff6b6b, #ffab00, #a78bfa, #00d9ff);
-            background-size: 300% 300%;
+            background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
-            animation: epicGradient 5s ease-in-out infinite;
+            margin-bottom: 40px;
+            text-shadow: 0 0 50px rgba(0, 217, 255, 0.5);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border: none;
+            color: #000;
+            padding: 20px 60px;
+            border-radius: 50px;
+            font-size: 28px;
+            font-weight: 900;
+            cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 10px;
-            text-shadow: 0 0 100px rgba(0, 217, 255, 0.5);
+            letter-spacing: 3px;
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.5);
+            animation: btnPulse 2s ease-in-out infinite;
         }
         
-        @keyframes epicGradient {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
-        .welcome-subtitle {
-            font-size: 32px;
-            color: #00ff88;
-            margin-bottom: 50px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 0 0 30px currentColor;
-            animation: subtitleGlow 2s ease-in-out infinite;
+        .start-btn:active {
+            transform: scale(0.95);
         }
         
-        @keyframes subtitleGlow {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+        /* Line explosion */
+        .line-explosion {
+            position: absolute;
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
         }
         
-        .welcome-description {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 50px;
-            text-align: center;
-            max-width: 500px;
-            line-height: 1.6;
-            opacity: 0.9;
+        .line-explosion.show {
+            animation: lineExplosion 0.5s ease-out;
         }
         
-        /* Epic screen shake */
-        @keyframes screenShake {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-5px, -5px); }
-            20% { transform: translate(5px, -5px); }
-            30% { transform: translate(-5px, 5px); }
-            40% { transform: translate(5px, 5px); }
-            50% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, -2px); }
-            70% { transform: translate(-2px, 2px); }
-            80% { transform: translate(2px, 2px); }
-            90% { transform: translate(0, 0); }
+        @keyframes lineExplosion {
+            0% {
+                transform: scaleX(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scaleX(1.2);
+                opacity: 0;
+            }
         }
         
-        .shake {
-            animation: screenShake 0.5s ease-in-out;
-        }
-        
-        /* Responsive design */
-        @media (max-width: 768px) {
-            #gameArea {
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
+        @media (max-height: 700px) {
+            .top-ui {
+                padding: 5px 15px;
             }
             
-            #sidePanel {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                min-width: auto;
-                gap: 10px;
-                width: 100%;
+            .time-display, .score-display {
+                padding: 5px 15px;
             }
             
-            #sidePanel > * {
-                flex: 1;
-                min-width: 120px;
-            }
-            
-            .welcome-title {
-                font-size: 60px;
-                letter-spacing: 5px;
-            }
-            
-            .welcome-subtitle {
-                font-size: 24px;
-                letter-spacing: 3px;
-            }
-            
-            #timerDisplay {
-                font-size: 36px;
-            }
-            
-            .score-value {
+            .time-value, .score-value {
                 font-size: 24px;
             }
-        }
-        
-        /* Power mode effect */
-        .power-mode {
-            animation: powerMode 0.5s ease-in-out;
-        }
-        
-        @keyframes powerMode {
-            0%, 100% { filter: brightness(1) contrast(1); }
-            50% { filter: brightness(1.5) contrast(1.2); }
+            
+            .time-label, .score-label {
+                font-size: 12px;
+            }
+            
+            .canvas-area {
+                top: 60px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <!-- Epic background -->
-        <div class="bg-container">
-            <div class="bg-gradient"></div>
-            <div class="bg-particles" id="bgParticles"></div>
+        <!-- Top UI -->
+        <div class="top-ui">
+            <div class="time-display">
+                <span class="time-label">TIME</span>
+                <span class="time-value" id="timeDisplay">30</span>
+            </div>
+            <div class="score-display">
+                <span class="score-label">SCORE</span>
+                <span class="score-value" id="scoreDisplay">0</span>
+            </div>
+        </div>
+        
+        <!-- Canvas -->
+        <div class="canvas-area">
+            <canvas id="gameCanvas"></canvas>
         </div>
         
         <!-- Time bonus popup -->
         <div class="time-bonus" id="timeBonusPopup"></div>
         
-        <!-- Main game area -->
-        <div id="gameArea">
-            <!-- Game board -->
-            <div id="board">
-                <canvas id="gameCanvas"></canvas>
-                <div class="canvas-overlay"></div>
-                <!-- Touch areas for mobile -->
-                <div class="swipe-areas">
-                    <div class="swipe-left" id="swipeLeft"></div>
-                    <div class="swipe-right" id="swipeRight"></div>
-                </div>
-            </div>
-            
-            <!-- Side panel -->
-            <div id="sidePanel">
-                <!-- Timer -->
-                <div id="timerContainer">
-                    <div id="timerBar"></div>
-                    <div class="timer-label">TEMPO</div>
-                    <div id="timerDisplay">30</div>
-                </div>
-                
-                <!-- Score -->
-                <div class="score-container">
-                    <div class="score-label">PUNTI</div>
-                    <div class="score-value" id="scoreDisplay">0</div>
-                </div>
-                
-                <!-- Next piece -->
-                <div class="next-container">
-                    <div class="next-label">PROSSIMO</div>
-                    <canvas id="nextCanvas" width="100" height="100"></canvas>
-                </div>
-                
-                <!-- Stats -->
-                <div class="stat-container">
-                    <div class="stat-label">LIVELLO</div>
-                    <div class="stat-value" id="levelDisplay">1</div>
-                </div>
-                
-                <div class="stat-container">
-                    <div class="stat-label">LINEE</div>
-                    <div class="stat-value" id="linesDisplay">0</div>
-                </div>
-            </div>
-        </div>
-        
         <!-- Welcome screen -->
-        <div class="welcome-screen" id="welcomeScreen">
-            <div class="welcome-content">
-                <h1 class="welcome-title">TETRIS</h1>
-                <h2 class="welcome-subtitle">TIME ATTACK</h2>
-                <p class="welcome-description">
-                    Completa le linee per guadagnare tempo!<br>
-                    <strong>Tocca lo schermo per ruotare</strong><br>
-                    Swipe per muovere i blocchi
-                </p>
-                <button class="epic-button" onclick="startGame()">INIZIA</button>
-            </div>
+        <div class="welcome" id="welcomeScreen">
+            <h1 class="welcome-title">TETRIS</h1>
+            <button class="start-btn" onclick="startGame()">PLAY</button>
         </div>
         
-        <!-- Game over overlay -->
-        <div class="game-over-overlay" id="gameOverOverlay">
-            <div class="game-over-content">
-                <h1 class="game-over-title">GAME OVER</h1>
-                
-                <div class="final-stats">
-                    <div class="stat-row">
-                        <span class="label">Punteggio</span>
-                        <span class="value" id="finalScore">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Linee</span>
-                        <span class="value" id="finalLines">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Livello</span>
-                        <span class="value" id="finalLevel">1</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Record</span>
-                        <span class="value" id="bestScore">0</span>
-                    </div>
-                </div>
-                
-                <button class="epic-button" onclick="restartGame()">RIGIOCA</button>
-                <button class="epic-button" onclick="showWelcome()">MENU</button>
-            </div>
+        <!-- Game over -->
+        <div class="game-over" id="gameOverScreen">
+            <h1 class="game-over-title">GAME OVER</h1>
+            <div class="final-score">Score: <span id="finalScore">0</span></div>
+            <button class="restart-btn" onclick="restartGame()">PLAY AGAIN</button>
         </div>
     </div>
 
@@ -811,70 +372,59 @@
         // Configuration
         const BOARD_WIDTH = 10;
         const BOARD_HEIGHT = 20;
-        const BLOCK_SIZE = 30;
+        const BLOCK_SIZE = Math.min(
+            Math.floor((window.innerWidth - 40) / BOARD_WIDTH),
+            Math.floor((window.innerHeight - 200) / BOARD_HEIGHT),
+            35
+        );
         const INITIAL_TIME = 30;
         const DROP_SPEED = 800;
-        const FAST_DROP_SPEED = 50;
         
-        // Notamy Style Tetromino pieces
+        // Tetromino pieces
         const PIECES = [
-            // I - Cyan Neon
+            // I
             {
                 shape: [[1,1,1,1]],
-                color: '#00d9ff',
-                glow: '#00d9ff',
-                gradient: ['#00d9ff', '#0099cc', '#006699']
+                color: '#00d9ff'
             },
-            // O - Golden Orange
+            // O
             {
                 shape: [[1,1],[1,1]],
-                color: '#ffab00',
-                glow: '#ffab00',
-                gradient: ['#ffab00', '#ff8800', '#cc6600']
+                color: '#ffab00'
             },
-            // T - Cosmic Purple
+            // T
             {
                 shape: [[0,1,0],[1,1,1]],
-                color: '#a78bfa',
-                glow: '#a78bfa',
-                gradient: ['#a78bfa', '#8b5cf6', '#6b3cf6']
+                color: '#a78bfa'
             },
-            // S - Neon Green
+            // S
             {
                 shape: [[0,1,1],[1,1,0]],
-                color: '#00ff88',
-                glow: '#00ff88',
-                gradient: ['#00ff88', '#00cc6a', '#009950']
+                color: '#00ff88'
             },
-            // Z - Hot Pink
+            // Z
             {
                 shape: [[1,1,0],[0,1,1]],
-                color: '#ff6b6b',
-                glow: '#ff6b6b',
-                gradient: ['#ff6b6b', '#ff4444', '#cc2222']
+                color: '#ff6b6b'
             },
-            // J - Deep Blue
+            // J
             {
                 shape: [[1,0,0],[1,1,1]],
-                color: '#3f51b5',
-                glow: '#3f51b5',
-                gradient: ['#3f51b5', '#303f9f', '#1a237e']
+                color: '#3f51b5'
             },
-            // L - Electric Red
+            // L
             {
                 shape: [[0,0,1],[1,1,1]],
-                color: '#ff5252',
-                glow: '#ff5252',
-                gradient: ['#ff5252', '#ff1744', '#d50000']
+                color: '#ff5252'
             }
         ];
         
-        // Time bonuses
+        // Time bonuses - FIXED!
         const TIME_BONUSES = {
-            1: 3,
-            2: 8,
-            3: 15,
-            4: 25
+            1: 3,   // +3 seconds for 1 line
+            2: 8,   // +8 seconds for 2 lines
+            3: 15,  // +15 seconds for 3 lines
+            4: 25   // +25 seconds for 4 lines (TETRIS!)
         };
         
         // Game state
@@ -882,32 +432,24 @@
         let currentPiece = null;
         let nextPiece = null;
         let score = 0;
-        let lines = 0;
-        let level = 1;
         let timeLeft = INITIAL_TIME;
         let gameActive = false;
         let dropTimer = 0;
-        let currentDropSpeed = DROP_SPEED;
-        let bestScore = 0;
         let lastTime = 0;
-        let keys = {};
-        let touchStartX = null;
-        let touchStartY = null;
-        let lastTouchTime = 0;
         
         // Canvas
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const nextCanvas = document.getElementById('nextCanvas');
-        const nextCtx = nextCanvas.getContext('2d');
         
+        // Set canvas size
         canvas.width = BOARD_WIDTH * BLOCK_SIZE;
         canvas.height = BOARD_HEIGHT * BLOCK_SIZE;
         
+        // Update canvas area size
+        document.querySelector('.canvas-area').style.width = canvas.width + 20 + 'px';
+        
         // Initialize
         function init() {
-            createBackgroundParticles();
-            loadBestScore();
             createBoard();
             setupControls();
             
@@ -917,46 +459,63 @@
             }
         }
         
-        // Create background particles
-        function createBackgroundParticles() {
-            const container = document.getElementById('bgParticles');
-            const colors = ['#00d9ff', '#00ff88', '#ff6b6b', '#ffab00', '#a78bfa'];
-            
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'bg-particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-                container.appendChild(particle);
-            }
-        }
-        
         // Create board
         function createBoard() {
             board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
         }
         
-        // Load best score
-        function loadBestScore() {
-            bestScore = parseInt(localStorage.getItem('notamyTetrisBest') || '0');
-        }
-        
-        // Save best score
-        function saveBestScore() {
-            if (score > bestScore) {
-                bestScore = score;
-                localStorage.setItem('notamyTetrisBest', bestScore);
-            }
-        }
-        
         // Setup controls
         function setupControls() {
-            // Keyboard
-            document.addEventListener('keydown', (e) => {
-                keys[e.key] = true;
+            let touchStartX = null;
+            let touchStartTime = null;
+            
+            // Touch controls for canvas
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!gameActive) return;
                 
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const canvasCenter = canvas.width / 2;
+                
+                touchStartX = x;
+                touchStartTime = Date.now();
+            });
+            
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                if (!gameActive || touchStartX === null) return;
+                
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                
+                // Quick tap = rotate
+                if (touchDuration < 200) {
+                    rotatePiece();
+                }
+                
+                touchStartX = null;
+            });
+            
+            // Swipe controls
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!gameActive || touchStartX === null) return;
+                
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const deltaX = x - touchStartX;
+                
+                if (Math.abs(deltaX) > 30) {
+                    movePiece(deltaX > 0 ? 1 : -1, 0);
+                    touchStartX = x;
+                }
+            });
+            
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
                 if (!gameActive) return;
                 
                 switch(e.key) {
@@ -970,7 +529,7 @@
                         rotatePiece();
                         break;
                     case 'ArrowDown':
-                        currentDropSpeed = FAST_DROP_SPEED;
+                        dropPiece();
                         break;
                     case ' ':
                         hardDrop();
@@ -978,82 +537,6 @@
                 }
                 
                 e.preventDefault();
-            });
-            
-            document.addEventListener('keyup', (e) => {
-                keys[e.key] = false;
-                
-                if (e.key === 'ArrowDown') {
-                    currentDropSpeed = DROP_SPEED - (level - 1) * 50;
-                }
-            });
-            
-            // Touch on canvas for rotation
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameActive) {
-                    const currentTime = Date.now();
-                    if (currentTime - lastTouchTime < 300) {
-                        // Double tap for hard drop
-                        hardDrop();
-                    } else {
-                        // Single tap for rotation
-                        rotatePiece();
-                        createRotateEffect();
-                    }
-                    lastTouchTime = currentTime;
-                }
-            });
-            
-            // Swipe areas
-            let swipeStartX = 0;
-            let swipeTimer = null;
-            
-            document.getElementById('swipeLeft').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameActive) {
-                    movePiece(-1, 0);
-                    swipeTimer = setInterval(() => {
-                        if (gameActive) movePiece(-1, 0);
-                    }, 100);
-                }
-            });
-            
-            document.getElementById('swipeRight').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (gameActive) {
-                    movePiece(1, 0);
-                    swipeTimer = setInterval(() => {
-                        if (gameActive) movePiece(1, 0);
-                    }, 100);
-                }
-            });
-            
-            document.addEventListener('touchend', () => {
-                if (swipeTimer) {
-                    clearInterval(swipeTimer);
-                    swipeTimer = null;
-                }
-                currentDropSpeed = DROP_SPEED - (level - 1) * 50;
-            });
-            
-            // Swipe down for fast drop
-            let touchY = 0;
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                if (touchY && touch.clientY - touchY > 30) {
-                    currentDropSpeed = FAST_DROP_SPEED;
-                }
-            });
-            
-            canvas.addEventListener('touchstart', (e) => {
-                touchY = e.touches[0].clientY;
-            });
-            
-            canvas.addEventListener('touchend', () => {
-                touchY = 0;
-                currentDropSpeed = DROP_SPEED - (level - 1) * 50;
             });
         }
         
@@ -1065,10 +548,7 @@
                 y: 0,
                 shape: piece.shape,
                 color: piece.color,
-                glow: piece.glow,
-                gradient: piece.gradient,
-                type: type,
-                rotation: 0
+                type: type
             };
         }
         
@@ -1101,39 +581,50 @@
             if (isValidPosition(currentPiece, dx, dy)) {
                 currentPiece.x += dx;
                 currentPiece.y += dy;
-                createMoveEffect(dx);
                 return true;
             }
             return false;
         }
         
-        // Rotate piece
+        // Rotate piece - FIXED!
         function rotatePiece() {
-            const rotated = currentPiece.shape[0].map((_, i) =>
-                currentPiece.shape.map(row => row[i]).reverse()
+            // Create rotated shape
+            const rotated = currentPiece.shape[0].map((_, index) =>
+                currentPiece.shape.map(row => row[index]).reverse()
             );
             
+            // Save old shape
             const oldShape = currentPiece.shape;
             currentPiece.shape = rotated;
-            currentPiece.rotation = (currentPiece.rotation + 90) % 360;
             
+            // Check if valid position
             if (!isValidPosition(currentPiece)) {
                 // Try wall kicks
-                const kicks = [-1, 1, -2, 2];
-                let kicked = false;
+                const kicks = [0, -1, 1, -2, 2];
+                let validKick = false;
                 
                 for (let kick of kicks) {
                     if (isValidPosition(currentPiece, kick, 0)) {
                         currentPiece.x += kick;
-                        kicked = true;
+                        validKick = true;
                         break;
                     }
                 }
                 
-                if (!kicked) {
+                // If no valid position, revert
+                if (!validKick) {
                     currentPiece.shape = oldShape;
-                    currentPiece.rotation = (currentPiece.rotation - 90) % 360;
                 }
+            }
+            
+            // Create rotation effect
+            createRotationEffect();
+        }
+        
+        // Drop piece
+        function dropPiece() {
+            if (!movePiece(0, 1)) {
+                lockPiece();
             }
         }
         
@@ -1144,20 +635,13 @@
                 dropDistance++;
                 score += 2;
             }
-            
-            if (dropDistance > 0) {
-                createHardDropEffect();
-                document.getElementById('gameArea').classList.add('shake');
-                setTimeout(() => {
-                    document.getElementById('gameArea').classList.remove('shake');
-                }, 500);
-            }
-            
             lockPiece();
+            updateScore();
         }
         
         // Lock piece
         function lockPiece() {
+            // Add piece to board
             for (let y = 0; y < currentPiece.shape.length; y++) {
                 for (let x = 0; x < currentPiece.shape[y].length; x++) {
                     if (currentPiece.shape[y][x]) {
@@ -1171,26 +655,23 @@
                 }
             }
             
-            // Create lock effect
-            createLockEffect();
-            
-            // Check lines
+            // Check for completed lines
             const clearedLines = checkLines();
             
-            // New piece
-            currentPiece = createPiece(nextPiece);
-            nextPiece = getRandomPiece();
+            // Create new piece
+            currentPiece = createPiece(getRandomPiece());
             
-            // Game over check
+            // Check game over
             if (!isValidPosition(currentPiece)) {
                 gameOver();
             }
         }
         
-        // Check lines
+        // Check lines - FIXED TIME BONUS!
         function checkLines() {
             const linesToClear = [];
             
+            // Find completed lines
             for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
                 if (board[y].every(cell => cell !== 0)) {
                     linesToClear.push(y);
@@ -1198,22 +679,20 @@
             }
             
             if (linesToClear.length > 0) {
-                clearLines(linesToClear);
-                
-                lines += linesToClear.length;
-                score += [40, 100, 300, 1200][linesToClear.length - 1] * level;
-                
-                const timeBonus = TIME_BONUSES[linesToClear.length];
+                // Add time bonus
+                const timeBonus = TIME_BONUSES[linesToClear.length] || 0;
                 timeLeft += timeBonus;
+                
+                // Show time bonus popup
                 showTimeBonus(timeBonus, linesToClear.length);
                 
-                if (lines >= level * 10) {
-                    level++;
-                    currentDropSpeed = DROP_SPEED - (level - 1) * 50;
-                    createLevelUpEffect();
-                }
+                // Update score
+                const points = [40, 100, 300, 1200][linesToClear.length - 1];
+                score += points;
+                updateScore();
                 
-                updateUI();
+                // Clear lines with animation
+                clearLines(linesToClear);
             }
             
             return linesToClear.length;
@@ -1221,10 +700,12 @@
         
         // Clear lines
         function clearLines(linesToClear) {
+            // Create explosion effect
             linesToClear.forEach(y => {
                 createLineExplosion(y);
             });
             
+            // Remove lines after animation
             setTimeout(() => {
                 linesToClear.forEach(y => {
                     board.splice(y, 1);
@@ -1233,174 +714,88 @@
             }, 200);
         }
         
-        // Effects
-        function createRotateEffect() {
-            const rect = canvas.getBoundingClientRect();
-            const centerX = rect.left + (currentPiece.x + currentPiece.shape[0].length / 2) * BLOCK_SIZE;
-            const centerY = rect.top + (currentPiece.y + currentPiece.shape.length / 2) * BLOCK_SIZE;
+        // Show time bonus
+        function showTimeBonus(bonus, lines) {
+            const popup = document.getElementById('timeBonusPopup');
+            const messages = {
+                1: 'SINGLE!',
+                2: 'DOUBLE!',
+                3: 'TRIPLE!',
+                4: 'TETRIS!'
+            };
+            
+            popup.innerHTML = `+${bonus}s<br><span style="font-size: 36px">${messages[lines]}</span>`;
+            popup.classList.add('show');
+            
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 1500);
+        }
+        
+        // Create effects
+        function createRotationEffect() {
+            const centerX = (currentPiece.x + currentPiece.shape[0].length / 2) * BLOCK_SIZE;
+            const centerY = (currentPiece.y + currentPiece.shape.length / 2) * BLOCK_SIZE;
             
             for (let i = 0; i < 8; i++) {
                 const angle = (i / 8) * Math.PI * 2;
                 createParticle(centerX, centerY, {
-                    vx: Math.cos(angle) * 200,
-                    vy: Math.sin(angle) * 200,
-                    color: currentPiece.glow,
-                    size: 4,
-                    type: 'rotate'
+                    vx: Math.cos(angle) * 100,
+                    vy: Math.sin(angle) * 100,
+                    color: currentPiece.color
                 });
-            }
-        }
-        
-        function createMoveEffect(direction) {
-            const rect = canvas.getBoundingClientRect();
-            const x = rect.left + (currentPiece.x + (direction > 0 ? currentPiece.shape[0].length : 0)) * BLOCK_SIZE;
-            const y = rect.top + currentPiece.y * BLOCK_SIZE;
-            
-            for (let i = 0; i < 3; i++) {
-                createParticle(x, y + i * BLOCK_SIZE * 0.5, {
-                    vx: direction * -100,
-                    vy: Math.random() * 50 - 25,
-                    color: currentPiece.glow,
-                    size: 3,
-                    type: 'move'
-                });
-            }
-        }
-        
-        function createHardDropEffect() {
-            const rect = canvas.getBoundingClientRect();
-            const bottomY = rect.top + (currentPiece.y + currentPiece.shape.length) * BLOCK_SIZE;
-            
-            for (let x = 0; x < currentPiece.shape[0].length; x++) {
-                if (currentPiece.shape[currentPiece.shape.length - 1][x]) {
-                    const particleX = rect.left + (currentPiece.x + x) * BLOCK_SIZE + BLOCK_SIZE / 2;
-                    
-                    for (let i = 0; i < 10; i++) {
-                        createParticle(particleX, bottomY, {
-                            vx: (Math.random() - 0.5) * 300,
-                            vy: -Math.random() * 200 - 100,
-                            color: currentPiece.glow,
-                            size: 6,
-                            type: 'impact'
-                        });
-                    }
-                }
-            }
-        }
-        
-        function createLockEffect() {
-            const rect = canvas.getBoundingClientRect();
-            
-            for (let y = 0; y < currentPiece.shape.length; y++) {
-                for (let x = 0; x < currentPiece.shape[y].length; x++) {
-                    if (currentPiece.shape[y][x]) {
-                        const px = rect.left + (currentPiece.x + x) * BLOCK_SIZE + BLOCK_SIZE / 2;
-                        const py = rect.top + (currentPiece.y + y) * BLOCK_SIZE + BLOCK_SIZE / 2;
-                        
-                        createParticle(px, py, {
-                            vx: (Math.random() - 0.5) * 100,
-                            vy: (Math.random() - 0.5) * 100,
-                            color: currentPiece.glow,
-                            size: 2,
-                            type: 'lock'
-                        });
-                    }
-                }
             }
         }
         
         function createLineExplosion(y) {
+            // Visual explosion
             const explosion = document.createElement('div');
-            explosion.className = 'line-explosion';
+            explosion.className = 'line-explosion show';
             explosion.style.top = (y * BLOCK_SIZE) + 'px';
+            document.querySelector('.canvas-area').appendChild(explosion);
             
-            const wave = document.createElement('div');
-            wave.className = 'line-explosion-wave';
-            explosion.appendChild(wave);
-            
-            document.getElementById('board').appendChild(explosion);
-            
-            setTimeout(() => explosion.remove(), 600);
+            setTimeout(() => explosion.remove(), 500);
             
             // Particles
-            const rect = canvas.getBoundingClientRect();
             for (let x = 0; x < BOARD_WIDTH; x++) {
-                const px = rect.left + x * BLOCK_SIZE + BLOCK_SIZE / 2;
-                const py = rect.top + y * BLOCK_SIZE + BLOCK_SIZE / 2;
+                const px = x * BLOCK_SIZE + BLOCK_SIZE / 2;
+                const py = y * BLOCK_SIZE + BLOCK_SIZE / 2;
                 
                 for (let i = 0; i < 5; i++) {
-                    const piece = PIECES[board[y][x] - 1];
                     createParticle(px, py, {
-                        vx: (Math.random() - 0.5) * 400,
-                        vy: -Math.random() * 300 - 100,
-                        color: piece ? piece.glow : '#fff',
-                        size: 8,
-                        type: 'explosion'
+                        vx: (Math.random() - 0.5) * 200,
+                        vy: -Math.random() * 150 - 50,
+                        color: PIECES[board[y][x] - 1]?.color || '#fff'
                     });
                 }
             }
         }
         
-        function createLevelUpEffect() {
-            document.getElementById('gameContainer').classList.add('power-mode');
-            
-            const rect = canvas.getBoundingClientRect();
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    createParticle(
-                        rect.left + Math.random() * canvas.width,
-                        rect.top + canvas.height,
-                        {
-                            vx: (Math.random() - 0.5) * 200,
-                            vy: -Math.random() * 400 - 200,
-                            color: PIECES[Math.floor(Math.random() * PIECES.length)].glow,
-                            size: 10,
-                            type: 'levelup'
-                        }
-                    );
-                }, i * 20);
-            }
-            
-            setTimeout(() => {
-                document.getElementById('gameContainer').classList.remove('power-mode');
-            }, 1000);
-        }
-        
         function createParticle(x, y, options) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-            particle.style.width = options.size + 'px';
-            particle.style.height = options.size + 'px';
-            particle.style.color = options.color;
             
-            const glow = document.createElement('div');
-            glow.className = 'particle-glow';
-            particle.appendChild(glow);
+            const rect = document.querySelector('.canvas-area').getBoundingClientRect();
+            particle.style.left = rect.left + x + 'px';
+            particle.style.top = rect.top + y + 'px';
+            particle.style.background = options.color;
+            particle.style.boxShadow = `0 0 10px ${options.color}`;
             
             document.getElementById('gameContainer').appendChild(particle);
             
-            let opacity = 1;
             let posX = 0;
             let posY = 0;
-            let velocityX = options.vx;
-            let velocityY = options.vy;
-            let size = options.size;
+            let opacity = 1;
             
             const animate = () => {
-                velocityY += 300 * 0.016; // gravity
-                velocityX *= 0.98; // friction
+                posX += options.vx * 0.016;
+                posY += options.vy * 0.016;
+                options.vy += 300 * 0.016; // gravity
                 
-                posX += velocityX * 0.016;
-                posY += velocityY * 0.016;
-                
-                opacity -= options.type === 'explosion' ? 0.03 : 0.02;
-                size *= options.type === 'levelup' ? 1.02 : 0.98;
+                opacity -= 0.02;
                 
                 particle.style.transform = `translate(${posX}px, ${posY}px)`;
                 particle.style.opacity = opacity;
-                particle.style.width = particle.style.height = size + 'px';
                 
                 if (opacity > 0) {
                     requestAnimationFrame(animate);
@@ -1412,28 +807,6 @@
             requestAnimationFrame(animate);
         }
         
-        // Show time bonus
-        function showTimeBonus(bonus, linesCleared) {
-            const popup = document.getElementById('timeBonusPopup');
-            const messages = ['', 'SINGLE!', 'DOUBLE!!', 'TRIPLE!!!', 'TETRIS!!!!'];
-            popup.innerHTML = `
-                <div style="font-size: 96px; font-weight: 900;">+${bonus}s</div>
-                <div style="font-size: 48px; margin-top: -20px;">${messages[linesCleared]}</div>
-            `;
-            popup.classList.add('show');
-            
-            setTimeout(() => {
-                popup.classList.remove('show');
-            }, 1500);
-            
-            if (linesCleared >= 3) {
-                document.getElementById('gameContainer').classList.add('power-mode');
-                setTimeout(() => {
-                    document.getElementById('gameContainer').classList.remove('power-mode');
-                }, 1000);
-            }
-        }
-        
         // Update game
         function update(currentTime) {
             if (!gameActive) return;
@@ -1441,7 +814,7 @@
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
             
-            // Timer
+            // Update timer
             timeLeft -= deltaTime / 1000;
             if (timeLeft <= 0) {
                 gameOver();
@@ -1450,13 +823,11 @@
             
             updateTimer();
             
-            // Drop
+            // Drop piece
             dropTimer += deltaTime;
-            if (dropTimer >= currentDropSpeed) {
+            if (dropTimer >= DROP_SPEED) {
                 dropTimer = 0;
-                if (!movePiece(0, 1)) {
-                    lockPiece();
-                }
+                dropPiece();
             }
             
             draw();
@@ -1465,10 +836,11 @@
         
         // Draw game
         function draw() {
-            ctx.fillStyle = '#000';
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Epic grid
+            // Draw grid
             ctx.strokeStyle = 'rgba(0, 217, 255, 0.1)';
             ctx.lineWidth = 1;
             for (let x = 0; x <= BOARD_WIDTH; x++) {
@@ -1489,7 +861,7 @@
                 for (let x = 0; x < BOARD_WIDTH; x++) {
                     if (board[y][x]) {
                         const piece = PIECES[board[y][x] - 1];
-                        drawNotamyBlock(x * BLOCK_SIZE, y * BLOCK_SIZE, piece, 1);
+                        drawBlock(x * BLOCK_SIZE, y * BLOCK_SIZE, piece.color);
                     }
                 }
             }
@@ -1499,261 +871,125 @@
                 for (let y = 0; y < currentPiece.shape.length; y++) {
                     for (let x = 0; x < currentPiece.shape[y].length; x++) {
                         if (currentPiece.shape[y][x]) {
-                            drawNotamyBlock(
+                            drawBlock(
                                 (currentPiece.x + x) * BLOCK_SIZE,
                                 (currentPiece.y + y) * BLOCK_SIZE,
-                                currentPiece,
-                                1,
+                                currentPiece.color,
                                 true
                             );
                         }
                     }
                 }
             }
-            
-            drawNextPiece();
         }
         
-        // Draw Notamy style block
-        function drawNotamyBlock(x, y, piece, alpha, isActive = false) {
+        // Draw block
+        function drawBlock(x, y, color, active = false) {
             const padding = 2;
             const bx = x + padding;
             const by = y + padding;
             const size = BLOCK_SIZE - padding * 2;
             
-            ctx.save();
-            
             // Glow effect
-            if (isActive) {
-                ctx.shadowColor = piece.glow;
-                ctx.shadowBlur = 20;
+            if (active) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
             }
             
-            // Background glow
-            const glowGradient = ctx.createRadialGradient(
-                bx + size/2, by + size/2, 0,
-                bx + size/2, by + size/2, size
-            );
-            glowGradient.addColorStop(0, piece.glow + '33');
-            glowGradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = glowGradient;
-            ctx.fillRect(bx - 10, by - 10, size + 20, size + 20);
-            
-            // Main block with gradient
+            // Main block
             const gradient = ctx.createLinearGradient(bx, by, bx + size, by + size);
-            piece.gradient.forEach((color, i) => {
-                gradient.addColorStop(i / (piece.gradient.length - 1), color);
-            });
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, shadeColor(color, -30));
             
             ctx.fillStyle = gradient;
             ctx.fillRect(bx, by, size, size);
             
-            // Inner border
-            ctx.strokeStyle = piece.glow;
+            // Border
+            ctx.strokeStyle = color;
             ctx.lineWidth = 2;
-            ctx.strokeRect(bx + 1, by + 1, size - 2, size - 2);
+            ctx.strokeRect(bx, by, size, size);
             
-            // Corner highlights
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.fillRect(bx + 2, by + 2, 8, 2);
-            ctx.fillRect(bx + 2, by + 2, 2, 8);
-            ctx.fillRect(bx + size - 10, by + 2, 8, 2);
-            ctx.fillRect(bx + size - 4, by + 2, 2, 8);
+            // Highlight
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(bx + 2, by + 2, size - 4, 2);
+            ctx.fillRect(bx + 2, by + 2, 2, size - 4);
             
-            // Center gem
-            const gemSize = 8;
-            const gemX = bx + size/2 - gemSize/2;
-            const gemY = by + size/2 - gemSize/2;
-            
-            const gemGradient = ctx.createRadialGradient(
-                gemX + gemSize/2, gemY + gemSize/2, 0,
-                gemX + gemSize/2, gemY + gemSize/2, gemSize
-            );
-            gemGradient.addColorStop(0, '#fff');
-            gemGradient.addColorStop(0.5, piece.glow);
-            gemGradient.addColorStop(1, piece.gradient[2]);
-            
-            ctx.fillStyle = gemGradient;
-            ctx.fillRect(gemX, gemY, gemSize, gemSize);
-            
-            // Animated pulse
-            if (isActive) {
-                const pulse = Math.sin(Date.now() * 0.005) * 0.2 + 0.8;
-                ctx.strokeStyle = piece.glow + Math.floor(pulse * 255).toString(16);
-                ctx.lineWidth = 3;
-                ctx.strokeRect(bx - 2, by - 2, size + 4, size + 4);
-            }
-            
-            ctx.restore();
+            ctx.shadowBlur = 0;
         }
         
-        // Draw next piece
-        function drawNextPiece() {
-            nextCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+        // Shade color
+        function shadeColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
             
-            if (nextPiece !== null) {
-                const piece = PIECES[nextPiece];
-                const blockSize = 22;
-                const offsetX = (nextCanvas.width - piece.shape[0].length * blockSize) / 2;
-                const offsetY = (nextCanvas.height - piece.shape.length * blockSize) / 2;
-                
-                // Draw grid background
-                nextCtx.strokeStyle = 'rgba(0, 217, 255, 0.1)';
-                nextCtx.lineWidth = 1;
-                for (let i = 0; i <= 4; i++) {
-                    nextCtx.beginPath();
-                    nextCtx.moveTo(i * blockSize + offsetX - blockSize/2, 0);
-                    nextCtx.lineTo(i * blockSize + offsetX - blockSize/2, nextCanvas.height);
-                    nextCtx.stroke();
-                    
-                    nextCtx.beginPath();
-                    nextCtx.moveTo(0, i * blockSize + offsetY - blockSize/2);
-                    nextCtx.lineTo(nextCanvas.width, i * blockSize + offsetY - blockSize/2);
-                    nextCtx.stroke();
-                }
-                
-                for (let y = 0; y < piece.shape.length; y++) {
-                    for (let x = 0; x < piece.shape[y].length; x++) {
-                        if (piece.shape[y][x]) {
-                            const bx = offsetX + x * blockSize;
-                            const by = offsetY + y * blockSize;
-                            
-                            // Mini version of Notamy block
-                            const gradient = nextCtx.createLinearGradient(
-                                bx, by, bx + blockSize, by + blockSize
-                            );
-                            piece.gradient.forEach((color, i) => {
-                                gradient.addColorStop(i / (piece.gradient.length - 1), color);
-                            });
-                            
-                            nextCtx.fillStyle = gradient;
-                            nextCtx.fillRect(bx + 1, by + 1, blockSize - 2, blockSize - 2);
-                            
-                            nextCtx.strokeStyle = piece.glow;
-                            nextCtx.lineWidth = 1;
-                            nextCtx.strokeRect(bx + 1, by + 1, blockSize - 2, blockSize - 2);
-                            
-                            // Mini highlight
-                            nextCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                            nextCtx.fillRect(bx + 2, by + 2, 4, 1);
-                            nextCtx.fillRect(bx + 2, by + 2, 1, 4);
-                        }
-                    }
-                }
-            }
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
         }
         
         // Update UI
-        function updateUI() {
-            const scoreEl = document.getElementById('scoreDisplay');
-            const oldScore = parseInt(scoreEl.textContent);
-            scoreEl.textContent = score.toLocaleString();
-            
-            if (score > oldScore) {
-                scoreEl.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    scoreEl.style.transform = 'scale(1)';
-                }, 200);
-            }
-            
-            document.getElementById('linesDisplay').textContent = lines;
-            document.getElementById('levelDisplay').textContent = level;
-        }
-        
-        // Update timer
         function updateTimer() {
-            const display = document.getElementById('timerDisplay');
-            const bar = document.getElementById('timerBar');
-            
+            const display = document.getElementById('timeDisplay');
             display.textContent = Math.ceil(timeLeft);
             
-            const percentage = Math.max(0, timeLeft / INITIAL_TIME);
-            bar.style.transform = `scaleY(${percentage})`;
-            
             if (timeLeft < 10) {
-                display.style.animation = 'timerPulse 0.5s ease-in-out infinite';
-                bar.style.background = 'linear-gradient(90deg, #ff6b6b, #ff5252, #ff6b6b)';
+                display.style.color = '#ff6b6b';
+                display.style.animation = 'pulse 0.5s ease-in-out infinite';
+            } else {
+                display.style.color = '#fff';
+                display.style.animation = 'none';
             }
         }
         
-        // Start game
+        function updateScore() {
+            document.getElementById('scoreDisplay').textContent = score.toLocaleString();
+        }
+        
+        // Game functions
         function startGame() {
             document.getElementById('welcomeScreen').style.display = 'none';
-            document.getElementById('gameOverOverlay').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
             
+            // Reset game
             createBoard();
             score = 0;
-            lines = 0;
-            level = 1;
             timeLeft = INITIAL_TIME;
-            currentDropSpeed = DROP_SPEED;
             dropTimer = 0;
             gameActive = true;
             
+            // Create first piece
             currentPiece = createPiece(getRandomPiece());
-            nextPiece = getRandomPiece();
             
-            updateUI();
+            // Update UI
+            updateScore();
             
+            // Start game loop
             lastTime = performance.now();
             requestAnimationFrame(update);
         }
         
-        // Game over
         function gameOver() {
             gameActive = false;
-            saveBestScore();
             
             document.getElementById('finalScore').textContent = score.toLocaleString();
-            document.getElementById('finalLines').textContent = lines;
-            document.getElementById('finalLevel').textContent = level;
-            document.getElementById('bestScore').textContent = bestScore.toLocaleString();
+            document.getElementById('gameOverScreen').style.display = 'flex';
             
-            document.getElementById('gameOverOverlay').style.display = 'flex';
-            
-            // Epic explosion
-            for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
-                for (let x = 0; x < BOARD_WIDTH; x++) {
-                    if (board[y][x]) {
-                        setTimeout(() => {
-                            const rect = canvas.getBoundingClientRect();
-                            const px = rect.left + x * BLOCK_SIZE + BLOCK_SIZE / 2;
-                            const py = rect.top + y * BLOCK_SIZE + BLOCK_SIZE / 2;
-                            const piece = PIECES[board[y][x] - 1];
-                            
-                            for (let i = 0; i < 8; i++) {
-                                createParticle(px, py, {
-                                    vx: (Math.random() - 0.5) * 500,
-                                    vy: -Math.random() * 400 - 200,
-                                    color: piece.glow,
-                                    size: 12,
-                                    type: 'explosion'
-                                });
-                            }
-                        }, (BOARD_HEIGHT - y) * 30);
-                    }
-                }
+            // Save best score
+            const best = localStorage.getItem('tetrisBest') || 0;
+            if (score > best) {
+                localStorage.setItem('tetrisBest', score);
             }
         }
         
-        // Restart
         function restartGame() {
             startGame();
         }
         
-        // Show welcome
-        function showWelcome() {
-            document.getElementById('gameOverOverlay').style.display = 'none';
-            document.getElementById('welcomeScreen').style.display = 'flex';
-        }
-        
         // Initialize
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
+        init();
     </script>
 </body>
 </html>

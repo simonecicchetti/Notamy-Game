@@ -384,6 +384,28 @@
             color: rgba(255, 255, 255, 0.3);
         }
 
+        /* Ready message */
+        .ready-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 100;
+            color: var(--yellow-neon);
+            text-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .ready-message.active {
+            opacity: 1;
+        }
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .game-title {
@@ -411,6 +433,10 @@
             .stats-container {
                 gap: 20px;
             }
+            
+            .ready-message {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
@@ -425,6 +451,7 @@
                 <div class="powerup-fill" id="powerupFill"></div>
             </div>
         </div>
+        <div class="ready-message" id="readyMessage">GET READY!</div>
     </div>
     
     <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</div>
@@ -484,10 +511,10 @@
         
         // Difficulty settings - RESO PIÙ FACILE
         const difficulties = {
-            easy: { pipeSpeed: 1.5, pipeGap: 250, gravity: 0.3, jumpForce: -8, scoreMultiplier: 1 },
-            normal: { pipeSpeed: 2, pipeGap: 220, gravity: 0.4, jumpForce: -8.5, scoreMultiplier: 1.5 },
-            hard: { pipeSpeed: 2.5, pipeGap: 200, gravity: 0.5, jumpForce: -9, scoreMultiplier: 2 },
-            insane: { pipeSpeed: 3, pipeGap: 180, gravity: 0.6, jumpForce: -9.5, scoreMultiplier: 3 }
+            easy: { pipeSpeed: 1.5, pipeGap: 280, gravity: 0.15, jumpForce: -6, scoreMultiplier: 1 },
+            normal: { pipeSpeed: 2, pipeGap: 250, gravity: 0.25, jumpForce: -7, scoreMultiplier: 1.5 },
+            hard: { pipeSpeed: 2.5, pipeGap: 220, gravity: 0.35, jumpForce: -8, scoreMultiplier: 2 },
+            insane: { pipeSpeed: 3, pipeGap: 200, gravity: 0.45, jumpForce: -9, scoreMultiplier: 3 }
         };
         
         let currentDifficulty = 'easy';
@@ -552,7 +579,7 @@
             x: WIDTH * 0.3,
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 25, // Aumentato il raggio per rendere l'uccellino più visibile
+            radius: 35, // Aumentato il raggio per rendere l'uccellino più visibile
             trail: [],
             angle: 0,
             shielded: false,
@@ -663,26 +690,35 @@
                 }, 300);
             }
             
+            // Show ready message
+            const readyMessage = document.getElementById('readyMessage');
+            readyMessage.classList.add('active');
+            setTimeout(() => {
+                readyMessage.classList.remove('active');
+            }, 2000);
+            
             gameState = 'playing';
             score = 0;
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
             bird.y = HEIGHT / 2;
-            bird.velocity = 0;
+            bird.velocity = -3; // Inizia con una piccola spinta verso l'alto
             bird.trail = [];
             bird.shielded = false;
             bird.shieldTime = 0;
             bird.magnetized = false;
             bird.magnetTime = 0;
-            bird.invincible = false;
-            bird.invincibleTime = 0;
+            bird.invincible = true; // Inizia invincibile
+            bird.invincibleTime = 120; // 2 secondi di invincibilità iniziale
             pipes = [];
             particles = [];
             powerups = [];
             
-            // Create first pipe
-            createPipe();
+            // Create first pipe più lontano
+            setTimeout(() => {
+                createPipe();
+            }, 500);
         }
         
         function createPipe() {
@@ -1174,9 +1210,25 @@
                 }
             }
             
-            // Invincibility effect
-            if (bird.invincible && frameCount % 10 < 5) {
-                ctx.globalAlpha = 0.5;
+            // Invincibility effect (più visibile)
+            if (bird.invincible) {
+                // Effetto scudo lampeggiante
+                if (frameCount % 10 < 5) {
+                    ctx.globalAlpha = 0.5;
+                }
+                
+                // Cerchio di protezione
+                const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2);
+                invincibleGradient.addColorStop(0, 'transparent');
+                invincibleGradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.1)');
+                invincibleGradient.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
+                ctx.fillStyle = invincibleGradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, bird.radius * 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Ripristina alpha
+                ctx.globalAlpha = 1;
             }
             
             // Bird glow
@@ -1188,51 +1240,64 @@
             
             // Draw bird as a stylized bird shape
             ctx.fillStyle = COLORS.bird;
+            ctx.strokeStyle = COLORS.birdGlow;
+            ctx.lineWidth = 2;
             
-            // Body
+            // Body (più grande)
             ctx.beginPath();
-            ctx.ellipse(0, 0, bird.radius * 0.9, bird.radius * 0.7, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, bird.radius * 1.1, bird.radius * 0.9, 0, 0, Math.PI * 2);
             ctx.fill();
+            ctx.stroke();
             
-            // Head
+            // Head (più grande)
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.5, -bird.radius * 0.2, bird.radius * 0.4, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.6, -bird.radius * 0.3, bird.radius * 0.5, 0, Math.PI * 2);
             ctx.fill();
+            ctx.stroke();
             
-            // Eye
+            // Eye bianco grande
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.6, -bird.radius * 0.25, bird.radius * 0.12, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.7, -bird.radius * 0.35, bird.radius * 0.2, 0, Math.PI * 2);
             ctx.fill();
             
+            // Pupilla
             ctx.fillStyle = '#000000';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.62, -bird.radius * 0.25, bird.radius * 0.06, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.75, -bird.radius * 0.35, bird.radius * 0.1, 0, Math.PI * 2);
             ctx.fill();
             
-            // Beak
-            ctx.fillStyle = COLORS.orange;
+            // Beak più grande e visibile
+            ctx.fillStyle = '#ff6600';
+            ctx.strokeStyle = '#ff3300';
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(bird.radius * 0.8, -bird.radius * 0.15);
-            ctx.lineTo(bird.radius * 1.1, -bird.radius * 0.1);
-            ctx.lineTo(bird.radius * 0.8, -bird.radius * 0.05);
+            ctx.moveTo(bird.radius * 0.9, -bird.radius * 0.25);
+            ctx.lineTo(bird.radius * 1.3, -bird.radius * 0.15);
+            ctx.lineTo(bird.radius * 0.9, -bird.radius * 0.05);
             ctx.closePath();
             ctx.fill();
+            ctx.stroke();
             
-            // Wing (animated)
-            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 5;
+            // Wing (animated) più grande
+            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 8;
+            ctx.fillStyle = '#0099cc';
+            ctx.strokeStyle = COLORS.birdGlow;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(-bird.radius * 0.3, wingOffset, bird.radius * 0.8, bird.radius * 0.4, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Tail più visibile
             ctx.fillStyle = COLORS.bird;
             ctx.beginPath();
-            ctx.ellipse(-bird.radius * 0.2, wingOffset, bird.radius * 0.6, bird.radius * 0.3, -0.3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Tail
-            ctx.beginPath();
-            ctx.moveTo(-bird.radius * 0.6, 0);
-            ctx.lineTo(-bird.radius * 1.1, -bird.radius * 0.2);
-            ctx.lineTo(-bird.radius * 1.1, bird.radius * 0.2);
+            ctx.moveTo(-bird.radius * 0.7, 0);
+            ctx.lineTo(-bird.radius * 1.3, -bird.radius * 0.3);
+            ctx.lineTo(-bird.radius * 1.3, bird.radius * 0.3);
             ctx.closePath();
             ctx.fill();
+            ctx.stroke();
             
             // Inner highlight on body
             const highlightGradient = ctx.createRadialGradient(bird.radius * 0.2, -bird.radius * 0.2, 0, bird.radius * 0.2, -bird.radius * 0.2, bird.radius * 0.5);
@@ -1429,29 +1494,40 @@
             settings = difficulties[currentDifficulty];
             // Start game immediately
             setTimeout(() => {
+                // Show ready message
+                const readyMessage = document.getElementById('readyMessage');
+                readyMessage.classList.add('active');
+                setTimeout(() => {
+                    readyMessage.classList.remove('active');
+                }, 2000);
+                
                 gameState = 'playing';
                 score = 0;
                 combo = 0;
                 maxCombo = 0;
                 powerupsCollected = 0;
                 bird.y = HEIGHT / 2;
-                bird.velocity = 0;
+                bird.velocity = -3; // Inizia con una piccola spinta verso l'alto
                 bird.trail = [];
                 bird.shielded = false;
                 bird.shieldTime = 0;
                 bird.magnetized = false;
                 bird.magnetTime = 0;
-                bird.invincible = false;
-                bird.invincibleTime = 0;
+                bird.invincible = true; // Inizia invincibile
+                bird.invincibleTime = 120; // 2 secondi di invincibilità iniziale
                 pipes = [];
                 particles = [];
                 powerups = [];
-                createPipe();
+                
+                // Crea il primo tubo dopo un delay
+                setTimeout(() => {
+                    createPipe();
+                }, 1000);
                 
                 // Auto-jump dopo un breve delay per dare tempo al giocatore di prepararsi
                 setTimeout(() => {
                     jump();
-                }, 250);
+                }, 500);
             }, 100);
         }
         

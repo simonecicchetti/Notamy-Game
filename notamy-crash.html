@@ -128,7 +128,8 @@
             left: 0;
             right: 0;
             z-index: 10;
-            padding: env(safe-area-inset-top) 16px 16px;
+            padding: env(safe-area-inset-top, 20px) 16px 16px;
+            padding-top: max(env(safe-area-inset-top), 20px);
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
         }
         
@@ -153,7 +154,7 @@
             flex: 1;
             text-align: center;
             min-width: 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease, transform 0.2s ease;
         }
         
         .status-item::before {
@@ -209,7 +210,16 @@
         }
         
         #timeItem.decay {
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            box-shadow: 
+                0 0 40px rgba(255, 107, 107, 0.8),
+                inset 0 0 20px rgba(255, 0, 0, 0.3);
+            animation: timeCritical 0.3s ease-in-out infinite;
+        }
+        
+        #timeItem.decay span {
+            color: #ff3333 !important;
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.9);
+            animation: pulse 0.4s ease-in-out infinite;
         }
         
         @keyframes timeWarning {
@@ -276,7 +286,7 @@
         
         #comboIndicator {
             position: absolute;
-            top: 90px;
+            top: 100px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--gradient-main);
@@ -317,7 +327,7 @@
         
         #streakIndicator {
             position: absolute;
-            top: 145px;
+            top: 160px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, var(--orange-neon), var(--secondary-red));
@@ -389,35 +399,56 @@
             }
         }
         
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1); 
+                opacity: 0.8;
+            }
+        }
+        
         #inactivityWarning {
             position: absolute;
-            top: 90px;
+            top: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--secondary-red), var(--secondary-light));
+            background: linear-gradient(135deg, #ff4444, #ff6666);
             padding: 16px 60px;
             border-radius: 999px;
             color: var(--white);
             font-weight: 900;
-            font-size: 26px;
+            font-size: 28px;
             letter-spacing: 1px;
             z-index: 100;
             box-shadow: 
-                0 0 60px rgba(255, 107, 107, 0.8),
-                inset 0 0 20px rgba(255, 255, 255, 0.2);
+                0 0 60px rgba(255, 68, 68, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
             animation: urgentPulse 0.3s ease-in-out infinite;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            text-shadow: 
+                0 0 15px rgba(255, 68, 68, 0.8),
+                0 2px 10px rgba(0, 0, 0, 0.6);
             text-transform: uppercase;
         }
         
         @keyframes urgentPulse {
             0%, 100% { 
-                transform: translateX(-50%) scale(1); 
+                transform: translateX(-50%) scale(1) translateY(0); 
                 filter: brightness(1);
             }
+            25% {
+                transform: translateX(-50%) scale(1.08) translateY(-2px); 
+                filter: brightness(1.5);
+            }
             50% { 
-                transform: translateX(-50%) scale(1.05); 
+                transform: translateX(-50%) scale(1.05) translateY(0); 
                 filter: brightness(1.3);
+            }
+            75% {
+                transform: translateX(-50%) scale(1.08) translateY(2px); 
+                filter: brightness(1.5);
             }
         }
         
@@ -611,7 +642,7 @@
         <div id="gameHeader">
             <div id="gameInfo">
                 <div class="status-item">SCORE <span id="score">0</span></div>
-                <div class="status-item" id="timeItem">TIME <span id="time">90</span></div>
+                <div class="status-item" id="timeItem">TIME <span id="time">60</span></div>
                 <div class="status-item">LEVEL <span id="level">1</span></div>
             </div>
         </div>
@@ -932,8 +963,14 @@
         
         function resetHintTimer() {
             clearTimeout(hintTimer);
+            const wasInactive = timeDecayRate > 2;
             lastMoveTime = Date.now();
             timeDecayRate = 1;
+            
+            // Bonus time for breaking inactivity streak
+            if (wasInactive && gameState === 'playing') {
+                timeLeft = Math.min(60, timeLeft + 0.5); // Small bonus for moving
+            }
             
             // Clear any existing hints
             for (let row = 0; row < GRID_SIZE; row++) {
@@ -944,8 +981,8 @@
                 }
             }
             
-            // Set new timer
-            hintTimer = setTimeout(showHint, 5000); // Reduced from 8000ms to 5000ms
+            // Set new timer - hints after reasonable time
+            hintTimer = setTimeout(showHint, 4000); // 4 seconds for hints
         }
         
         // Check matches at position
@@ -1310,6 +1347,16 @@
                 const candy1HasPowerUp = board[pos2.row][pos2.col].powerUp;
                 const candy2HasPowerUp = board[pos1.row][pos1.col].powerUp;
                 
+                // Bonus points for breaking inactivity
+                if (timeDecayRate > 2.5) {
+                    score += 50; // Activity bonus
+                    createScorePopup(
+                        (candy1.x + candy2.x) / 2 + CANDY_SIZE/2,
+                        (candy1.y + candy2.y) / 2 + CANDY_SIZE/2,
+                        50
+                    );
+                }
+                
                 if (candy1HasPowerUp || candy2HasPowerUp) {
                     // Activate power-ups
                     if (candy1HasPowerUp) {
@@ -1465,7 +1512,7 @@
             // Apply time bonus IMMEDIATELY
             if (totalTimeBonus > 0 && gameState === 'playing') {
                 const oldTime = timeLeft;
-                timeLeft = Math.min(120, timeLeft + totalTimeBonus);
+                timeLeft = Math.min(60, timeLeft + totalTimeBonus); // Max 60 seconds
                 const actualBonus = timeLeft - oldTime;
                 
                 if (actualBonus > 0) {
@@ -1520,7 +1567,7 @@
             
             switch(type) {
                 case 'bomb':
-                    bonusTime = 5; // Increased from 2
+                    bonusTime = 2; // Reduced from 5
                     // Explode 3x3 area
                     for (let r = row - 1; r <= row + 1; r++) {
                         for (let c = col - 1; c <= col + 1; c++) {
@@ -1541,7 +1588,7 @@
                     break;
                     
                 case 'rocket':
-                    bonusTime = 7; // Increased from 3
+                    bonusTime = 3; // Reduced from 7
                     // Clear entire row and column
                     for (let r = 0; r < GRID_SIZE; r++) {
                         if (board[r][col] && !board[r][col].marked) {
@@ -1570,7 +1617,7 @@
                     break;
                     
                 case 'rainbow':
-                    bonusTime = 10; // Increased from 5
+                    bonusTime = 5; // Reduced from 10
                     // Rainbow power-up: clear a random candy type
                     let targetType;
                     if (board[row][col] && !board[row][col].powerUp) {
@@ -1600,7 +1647,7 @@
             // Add time bonus for power-up
             if (bonusTime > 0 && gameState === 'playing') {
                 const oldTime = timeLeft;
-                timeLeft = Math.min(120, timeLeft + bonusTime);
+                timeLeft = Math.min(60, timeLeft + bonusTime); // Max 60 seconds
                 const actualBonus = timeLeft - oldTime;
                 
                 if (actualBonus > 0) {
@@ -1871,39 +1918,86 @@
                 // Check inactivity
                 const inactiveTime = Date.now() - lastMoveTime;
                 
-                // Increase decay rate after 6 seconds of inactivity
-                if (inactiveTime > 6000) {
-                    timeDecayRate = Math.min(1.5, 1 + (inactiveTime - 6000) / 6000); // Max 1.5x, very gradual increase
-                    document.getElementById('timeItem').classList.add('decay');
-                    document.getElementById('inactivityWarning').style.display = 'block';
-                    // Add screen shake effect when time is speeding up
-                    if (timeDecayRate > 1.5) {
-                        canvas.style.transform = `translate(-50%, -50%) rotate(${Math.sin(Date.now() * 0.01) * 1}deg)`; // Reduced shake
+                // Progressive decay system - balanced for fun and challenge
+                if (inactiveTime > 4000) { // Start warning after 4 seconds
+                    if (inactiveTime <= 5000) {
+                        // Pre-warning phase - gentle reminder
+                        timeDecayRate = 1.3;
+                        document.getElementById('timeItem').classList.add('warning');
+                    } else if (inactiveTime <= 6500) {
+                        // MOVE FASTER appears - noticeable decay
+                        timeDecayRate = 2.5; // 2.5x speed when warning appears
+                        document.getElementById('timeItem').classList.add('decay');
+                        document.getElementById('timeItem').classList.remove('warning');
+                        document.getElementById('inactivityWarning').style.display = 'block';
+                    } else if (inactiveTime <= 8000) {
+                        // Aggressive decay - pressure increases
+                        timeDecayRate = 4.0; // 4x speed
+                        canvas.style.transform = `translate(-50%, -50%) rotate(${Math.sin(Date.now() * 0.02) * 1}deg)`;
+                    } else if (inactiveTime <= 10000) {
+                        // Very aggressive - last chance
+                        timeDecayRate = 6.0; // 6x speed
+                        canvas.style.transform = `translate(-50%, -50%) rotate(${Math.sin(Date.now() * 0.025) * 1.5}deg)`;
+                        // Flash warning effect
+                        if (Math.floor(Date.now() / 300) % 2 === 0) {
+                            document.getElementById('gameCanvas').style.boxShadow = 
+                                '0 0 80px rgba(255, 107, 107, 0.6), inset 0 0 40px rgba(255, 107, 107, 0.1)';
+                        } else {
+                            document.getElementById('gameCanvas').style.boxShadow = 
+                                '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)';
+                        }
+                    } else {
+                        // Maximum decay - critical moment
+                        timeDecayRate = 8.0; // 8x speed maximum
+                        canvas.style.transform = `translate(-50%, -50%) rotate(${Math.sin(Date.now() * 0.03) * 2}deg)`;
+                        // Intense flash warning effect
+                        if (Math.floor(Date.now() / 200) % 2 === 0) {
+                            document.getElementById('gameCanvas').style.boxShadow = 
+                                '0 0 100px rgba(255, 0, 0, 0.8), inset 0 0 50px rgba(255, 0, 0, 0.2)';
+                        } else {
+                            document.getElementById('gameCanvas').style.boxShadow = 
+                                '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)';
+                        }
                     }
                 } else {
                     timeDecayRate = 1;
-                    document.getElementById('timeItem').classList.remove('decay');
+                    document.getElementById('timeItem').classList.remove('decay', 'warning');
                     document.getElementById('inactivityWarning').style.display = 'none';
                     canvas.style.transform = 'translate(-50%, -50%)';
+                    document.getElementById('gameCanvas').style.boxShadow = 
+                        '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)';
                 }
                 
                 // Decrease time with decay rate (0.1 seconds every 100ms = 1 second per second)
                 timeLeft -= (0.1 * timeDecayRate);
                 
                 // Update time display
-                const displayTime = Math.ceil(timeLeft);
-                document.getElementById('time').textContent = displayTime;
+                if (timeDecayRate >= 4 || timeLeft <= 10) {
+                    // Show decimals when time is decaying fast or running low
+                    document.getElementById('time').textContent = timeLeft.toFixed(1);
+                } else {
+                    document.getElementById('time').textContent = Math.ceil(timeLeft);
+                }
                 
                 // Visual warnings
                 const timeItem = document.getElementById('timeItem');
-                if (timeLeft <= 10) {
+                if (timeLeft <= 5) {
                     timeItem.classList.add('critical');
                     timeItem.classList.remove('warning');
+                    // Final countdown effect
+                    const scale = 1 + (5 - timeLeft) * 0.1;
+                    timeItem.style.transform = `scale(${scale})`;
+                } else if (timeLeft <= 10) {
+                    timeItem.classList.add('critical');
+                    timeItem.classList.remove('warning');
+                    timeItem.style.transform = 'scale(1)';
                 } else if (timeLeft <= 20) {
                     timeItem.classList.add('warning');
                     timeItem.classList.remove('critical');
+                    timeItem.style.transform = 'scale(1)';
                 } else {
                     timeItem.classList.remove('warning', 'critical');
+                    timeItem.style.transform = 'scale(1)';
                 }
                 
                 if (timeLeft <= 0) {
@@ -1919,7 +2013,7 @@
             popup.className = 'time-bonus';
             popup.textContent = `+${seconds}s!`;
             popup.style.left = '50%';
-            popup.style.top = (rect.top + 120) + 'px';
+            popup.style.top = (rect.top + 140) + 'px';
             document.body.appendChild(popup);
             
             setTimeout(() => popup.remove(), 1200);
@@ -1936,7 +2030,7 @@
         function startGame() {
             gameState = 'playing';
             score = 0;
-            timeLeft = 90; // Reduced from 120 to 90 seconds
+            timeLeft = 60; // 60 seconds for more challenge
             level = 1;
             combo = 0;
             streak = 0;
@@ -1962,6 +2056,8 @@
             clearInterval(gameTimer);
             document.getElementById('inactivityWarning').style.display = 'none';
             canvas.style.transform = 'translate(-50%, -50%)'; // Reset canvas transform
+            document.getElementById('gameCanvas').style.boxShadow = 
+                '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)'; // Reset shadow
             
             if (score > bestScore) {
                 bestScore = score;

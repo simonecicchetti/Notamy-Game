@@ -36,7 +36,7 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000 100%);
+            background: #000;
         }
         
         #gameUI {
@@ -53,20 +53,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .home-button {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             border: 2px solid #333;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             backdrop-filter: blur(10px);
             transition: all 0.3s;
@@ -78,78 +78,99 @@
         }
         
         .score-display {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 12px 20px;
-            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
             border: 2px solid #00d9ff;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
             text-shadow: 0 0 10px #00d9ff;
             backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .score-display .score-value {
             color: #00ff88;
-            font-size: 24px;
+            font-size: 20px;
+        }
+        
+        .combo-indicator {
+            background: linear-gradient(135deg, #ff6b6b, #ffab00);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 900;
+            display: none;
+            animation: comboGlow 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes comboGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         
         .level-badge {
-            background: linear-gradient(135deg, #ff6b6b, #ff5252);
-            padding: 8px 16px;
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            padding: 8px 14px;
             border-radius: 20px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #fff;
-            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.5);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
         }
         
-        #sizeBar {
+        #progressBar {
             position: relative;
             width: 100%;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.7);
+            height: 20px;
+            background: rgba(0, 0, 0, 0.8);
             border: 2px solid #333;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
             backdrop-filter: blur(10px);
         }
         
-        #sizeFill {
+        #progressFill {
             height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00d9ff, #ff6b6b);
+            background: linear-gradient(90deg, #00ff88, #00d9ff);
             width: 0%;
             transition: width 0.3s ease-out;
             box-shadow: 0 0 20px currentColor;
-            position: relative;
         }
         
-        #sizeFill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 4px;
-            height: 100%;
-            background: #fff;
-            box-shadow: 0 0 10px #fff;
-            animation: pulse 1s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .size-label {
+        .progress-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #fff;
             text-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+        
+        #powerupIndicator {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffab00, #ff5252);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            display: none;
+            animation: powerupPulse 0.5s ease-in-out infinite;
+            box-shadow: 0 4px 20px rgba(255, 171, 0, 0.6);
+        }
+        
+        @keyframes powerupPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
         }
         
         #comboDisplay {
@@ -157,14 +178,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 72px;
+            font-size: 48px;
             font-weight: 900;
-            color: #00ff88;
+            color: #fff;
             text-shadow: 0 0 40px currentColor;
             display: none;
             z-index: 100;
             animation: comboPopup 0.5s ease-out;
             pointer-events: none;
+            text-align: center;
         }
         
         @keyframes comboPopup {
@@ -198,39 +220,39 @@
         }
         
         .logo-animation {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
             position: relative;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
         .logo-block {
             position: absolute;
             background: linear-gradient(135deg, #00d9ff, #00ff88);
-            border-radius: 20%;
+            border-radius: 15%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #000;
             font-weight: 900;
-            font-size: 24px;
-            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.5);
+            font-size: 18px;
+            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.5);
         }
         
         @keyframes float1 {
             0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            33% { transform: translate(20px, -20px) rotate(10deg) scale(1.1); }
-            66% { transform: translate(-20px, 10px) rotate(-10deg) scale(0.9); }
+            33% { transform: translate(15px, -15px) rotate(10deg) scale(1.1); }
+            66% { transform: translate(-15px, 8px) rotate(-10deg) scale(0.9); }
         }
         
         @keyframes float2 {
             0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            33% { transform: translate(-20px, 20px) rotate(-15deg) scale(0.9); }
-            66% { transform: translate(20px, -10px) rotate(15deg) scale(1.1); }
+            33% { transform: translate(-15px, 15px) rotate(-15deg) scale(0.9); }
+            66% { transform: translate(15px, -8px) rotate(15deg) scale(1.1); }
         }
         
         .title {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: 900;
             background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b);
             -webkit-background-clip: text;
@@ -244,13 +266,13 @@
             background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
             color: #000;
-            padding: 20px 80px;
-            border-radius: 50px;
-            font-size: 28px;
+            padding: 16px 60px;
+            border-radius: 40px;
+            font-size: 24px;
             font-weight: 900;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
             text-transform: uppercase;
             letter-spacing: 2px;
             margin: 20px 0;
@@ -258,8 +280,8 @@
         }
         
         @keyframes buttonPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(0, 255, 136, 0.7); }
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 40px rgba(0, 255, 136, 0.7); }
         }
         
         .play-button:active {
@@ -269,58 +291,15 @@
         .instructions {
             text-align: center;
             color: #aaa;
-            font-size: 18px;
-            line-height: 1.6;
-            max-width: 350px;
+            font-size: 16px;
+            line-height: 1.5;
+            max-width: 300px;
         }
         
         .instructions em {
             color: #00ff88;
             font-style: normal;
             font-weight: 600;
-        }
-        
-        #tutorialOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            z-index: 50;
-            backdrop-filter: blur(5px);
-        }
-        
-        .tutorial-hand {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
-            border: 3px solid #00ff88;
-            border-radius: 50%;
-            animation: tutorialMove 3s ease-in-out infinite;
-        }
-        
-        @keyframes tutorialMove {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(100px, -50px); }
-            100% { transform: translate(0, 0); }
-        }
-        
-        .tutorial-text {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px 40px;
-            border-radius: 30px;
-            border: 2px solid #00ff88;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 600;
-            text-align: center;
         }
         
         #gameOverScreen {
@@ -339,10 +318,10 @@
         }
         
         .game-over-title {
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 900;
             color: #ff5252;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-shadow: 0 0 40px rgba(255, 82, 82, 0.8);
             animation: gameOverShake 0.5s ease-in-out;
         }
@@ -354,19 +333,19 @@
         }
         
         .final-score {
-            font-size: 80px;
+            font-size: 64px;
             font-weight: 900;
             background: linear-gradient(45deg, #00ff88, #00d9ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .best-score {
-            font-size: 24px;
+            font-size: 20px;
             color: #aaa;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
         .best-score .best-value {
@@ -378,12 +357,12 @@
             background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
             color: #000;
-            padding: 16px 60px;
-            border-radius: 50px;
-            font-size: 24px;
+            padding: 14px 50px;
+            border-radius: 40px;
+            font-size: 20px;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
             text-transform: uppercase;
             animation: buttonPulse 2s ease-in-out infinite;
         }
@@ -394,26 +373,10 @@
             border-radius: 50%;
         }
         
-        .powerup-effect {
+        .floating-text {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            border: 4px solid #ffab00;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: powerupRing 1s ease-out forwards;
-        }
-        
-        @keyframes powerupRing {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-        }
-        
-        .floating-score {
-            position: absolute;
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 900;
-            color: #00ff88;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
             text-shadow: 0 0 10px currentColor;
@@ -424,24 +387,49 @@
             50% { transform: translate(-50%, -150%) scale(1.5); opacity: 1; }
             100% { transform: translate(-50%, -250%) scale(1); opacity: 0; }
         }
+        
+        .screen-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 90;
+        }
+        
+        @keyframes screenFlash {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
+        <!-- Screen Flash Effect -->
+        <div class="screen-flash" id="screenFlash"></div>
+        
         <!-- Game UI -->
         <div id="gameUI">
             <div class="ui-top">
                 <button class="home-button" onclick="goHome()">🏠</button>
                 <div class="score-display">
                     <span class="score-value" id="score">0</span>
+                    <span class="combo-indicator" id="comboIndicator">2x</span>
                 </div>
                 <div class="level-badge">LV <span id="level">1</span></div>
             </div>
-            <div id="sizeBar">
-                <div id="sizeFill"></div>
-                <div class="size-label"><span id="playerSize">30</span> / 100</div>
+            <div id="progressBar">
+                <div id="progressFill"></div>
+                <div class="progress-text"><span id="currentSize">10</span> / <span id="targetSize">50</span></div>
             </div>
         </div>
+        
+        <!-- Power-up Indicator -->
+        <div id="powerupIndicator"></div>
         
         <!-- Combo Display -->
         <div id="comboDisplay"></div>
@@ -449,18 +437,12 @@
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
         
-        <!-- Tutorial Overlay -->
-        <div id="tutorialOverlay">
-            <div class="tutorial-hand"></div>
-            <div class="tutorial-text">Tocca e trascina per muoverti!</div>
-        </div>
-        
         <!-- Menu Screen -->
-        <div id="menuScreen" style="display: none;">
+        <div id="menuScreen">
             <div class="logo-animation">
-                <div class="logo-block" style="width: 60px; height: 60px; top: 20px; left: 20px; animation: float1 4s ease-in-out infinite;">30</div>
-                <div class="logo-block" style="width: 80px; height: 80px; top: 50px; right: 10px; animation: float2 4s ease-in-out infinite; animation-delay: 0.5s;">50</div>
-                <div class="logo-block" style="width: 50px; height: 50px; bottom: 20px; left: 40px; animation: float1 4s ease-in-out infinite; animation-delay: 1s;">20</div>
+                <div class="logo-block" style="width: 40px; height: 40px; top: 20px; left: 20px; animation: float1 3s ease-in-out infinite;">10</div>
+                <div class="logo-block" style="width: 60px; height: 60px; top: 40px; right: 10px; animation: float2 3s ease-in-out infinite; animation-delay: 0.5s;">30</div>
+                <div class="logo-block" style="width: 35px; height: 35px; bottom: 20px; left: 35px; animation: float1 3s ease-in-out infinite; animation-delay: 1s;">15</div>
             </div>
             
             <div class="title">BLOCKS</div>
@@ -468,9 +450,9 @@
             <button class="play-button" onclick="startGame()">GIOCA</button>
             
             <div class="instructions">
-                Mangia i blocchi <em>più piccoli</em> per crescere<br>
+                Mangia i blocchi <em>più piccoli</em><br>
                 Evita quelli <em>più grandi</em>!<br>
-                Raggiungi taglia <em>100</em> per salire di livello
+                Combo e power-up per <em>dominare</em>!
             </div>
         </div>
         
@@ -511,134 +493,211 @@
         let combo = 0;
         let comboTimer = 0;
         let bestScore = parseInt(localStorage.getItem('notamyBlocksBest') || '0');
+        let cameraZoom = 1;
+        let targetZoom = 1;
+        let screenShake = 0;
+        let powerupActive = '';
+        let powerupTimer = 0;
         
         // If autostart, show game immediately
         if (shouldAutostart) {
             document.getElementById('menuScreen').style.display = 'none';
-        } else {
-            document.getElementById('menuScreen').style.display = 'flex';
+            startGame();
         }
         
         // Player
         const player = {
             x: 0,
             y: 0,
-            size: 30,
+            size: 10,
             targetX: 0,
             targetY: 0,
-            speed: 0.15,
+            speed: 0.2,
             color: '#00d9ff',
-            growthAnimation: 0
+            growthAnimation: 0,
+            trail: []
         };
         
-        // Game settings - EASIER!
-        const LEVEL_SIZE = 100;
-        const WORLD_SIZE = 800; // Smaller world for mobile
-        const MIN_BLOCK_SIZE = 10;
-        const MAX_BLOCK_SIZE = 60; // Smaller max size
-        const INITIAL_BLOCKS = 20; // Fewer blocks
-        const SPAWN_SAFE_DISTANCE = 200;
-        const EAT_GROWTH_MULTIPLIER = 0.3; // More growth per eat
-        const SPEED_INCREASE_PER_LEVEL = 0.1; // Slower speed increase
+        // Game settings - Optimized for mobile
+        const LEVEL_SIZES = [50, 80, 120, 180, 250]; // Progressive level sizes
+        const MIN_BLOCK_SIZE = 5;
+        const MAX_BLOCK_SIZE = 40;
+        const INITIAL_BLOCKS = 12;
+        const MAX_BLOCKS = 25;
+        const SPAWN_RATE = 180; // frames between spawns
+        const POWERUP_CHANCE = 0.15;
+        const COMBO_DECAY = 180; // 3 seconds at 60fps
+        
+        // Dynamic world size based on screen
+        let WORLD_WIDTH = Math.min(window.innerWidth * 1.5, 600);
+        let WORLD_HEIGHT = Math.min(window.innerHeight * 1.5, 900);
         
         // Arrays
         let blocks = [];
         let particles = [];
         let effects = [];
+        let spawnTimer = 0;
         
-        // Block types with friendly colors
-        const blockTypes = [
-            { color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)' },
-            { color: '#00d9ff', shadow: 'rgba(0, 217, 255, 0.5)' },
-            { color: '#ffab00', shadow: 'rgba(255, 171, 0, 0.5)' },
-            { color: '#ff6b6b', shadow: 'rgba(255, 107, 107, 0.5)' },
-            { color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)' }
-        ];
+        // Block types with special effects
+        const blockTypes = {
+            normal: [
+                { color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)' },
+                { color: '#00d9ff', shadow: 'rgba(0, 217, 255, 0.5)' },
+                { color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)' }
+            ],
+            danger: { color: '#ff5252', shadow: 'rgba(255, 82, 82, 0.5)' },
+            powerup: [
+                { type: 'speed', color: '#ffab00', shadow: 'rgba(255, 171, 0, 0.5)', icon: '⚡' },
+                { type: 'magnet', color: '#ff6b6b', shadow: 'rgba(255, 107, 107, 0.5)', icon: '🧲' },
+                { type: 'shield', color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)', icon: '🛡️' },
+                { type: 'multi', color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)', icon: '×2' }
+            ]
+        };
         
         // Initialize game
         function initGame() {
             // Reset player
-            player.x = WORLD_SIZE / 2;
-            player.y = WORLD_SIZE / 2;
+            player.x = WORLD_WIDTH / 2;
+            player.y = WORLD_HEIGHT / 2;
             player.targetX = player.x;
             player.targetY = player.y;
-            player.size = 30;
+            player.size = 10;
             player.growthAnimation = 0;
+            player.trail = [];
+            
+            // Reset camera
+            cameraZoom = 1;
+            targetZoom = 1;
             
             // Clear arrays
             blocks = [];
             particles = [];
             effects = [];
+            spawnTimer = 0;
             
-            // Create blocks with easier distribution
-            for (let i = 0; i < INITIAL_BLOCKS + level * 2; i++) {
-                createBlock();
+            // Create initial blocks
+            for (let i = 0; i < INITIAL_BLOCKS; i++) {
+                createBlock(true);
             }
         }
         
-        // Create block with balanced difficulty
-        function createBlock() {
+        // Create block with smart spawning
+        function createBlock(initial = false) {
+            if (blocks.length >= MAX_BLOCKS) return;
+            
             let size;
             const rand = Math.random();
             
-            // 70% smaller blocks (easier!)
-            if (rand < 0.7) {
+            // Size distribution based on player size
+            if (rand < 0.6) {
+                // 60% smaller (easy)
                 size = MIN_BLOCK_SIZE + Math.random() * (player.size * 0.8 - MIN_BLOCK_SIZE);
-            } 
-            // 20% similar size
-            else if (rand < 0.9) {
+            } else if (rand < 0.85) {
+                // 25% similar size
                 size = player.size * 0.8 + Math.random() * player.size * 0.4;
-            } 
-            // 10% bigger (danger!)
-            else {
-                size = player.size * 1.1 + Math.random() * (MAX_BLOCK_SIZE - player.size * 1.1);
+            } else {
+                // 15% bigger (danger)
+                size = player.size * 1.2 + Math.random() * (MAX_BLOCK_SIZE - player.size);
             }
             
             size = Math.max(MIN_BLOCK_SIZE, Math.min(MAX_BLOCK_SIZE, size));
             
-            // Spawn away from player
+            // Spawn position (always from edges)
             let x, y;
-            do {
-                x = Math.random() * WORLD_SIZE;
-                y = Math.random() * WORLD_SIZE;
-            } while (Math.hypot(x - player.x, y - player.y) < SPAWN_SAFE_DISTANCE);
+            if (initial) {
+                // Random position for initial blocks
+                x = Math.random() * WORLD_WIDTH;
+                y = Math.random() * WORLD_HEIGHT;
+            } else {
+                // Spawn from edges
+                const edge = Math.floor(Math.random() * 4);
+                switch(edge) {
+                    case 0: x = -size; y = Math.random() * WORLD_HEIGHT; break;
+                    case 1: x = WORLD_WIDTH + size; y = Math.random() * WORLD_HEIGHT; break;
+                    case 2: x = Math.random() * WORLD_WIDTH; y = -size; break;
+                    case 3: x = Math.random() * WORLD_WIDTH; y = WORLD_HEIGHT + size; break;
+                }
+            }
             
-            const type = blockTypes[Math.floor(Math.random() * blockTypes.length)];
-            const speedMultiplier = 1 + (level - 1) * SPEED_INCREASE_PER_LEVEL;
+            // Determine type
+            let type, isPowerup = false, powerupType = null;
+            
+            if (!initial && Math.random() < POWERUP_CHANCE && size < player.size) {
+                // Power-up block
+                isPowerup = true;
+                powerupType = blockTypes.powerup[Math.floor(Math.random() * blockTypes.powerup.length)];
+                type = powerupType;
+            } else if (size >= player.size) {
+                // Danger block
+                type = blockTypes.danger;
+            } else {
+                // Normal block
+                type = blockTypes.normal[Math.floor(Math.random() * blockTypes.normal.length)];
+            }
+            
+            const speedMultiplier = 1 + (level - 1) * 0.15;
+            const baseSpeed = (20 / size) * speedMultiplier;
             
             blocks.push({
                 x: x,
                 y: y,
                 size: size,
-                speed: (15 / size) * speedMultiplier * 0.5,
+                speed: baseSpeed * 0.8,
                 type: type,
-                direction: Math.random() * Math.PI * 2,
-                directionChange: 0,
+                direction: Math.atan2(player.y - y, player.x - x) + (Math.random() - 0.5) * Math.PI / 4,
                 pulseAnimation: 0,
-                isEdible: size < player.size
+                isEdible: size < player.size,
+                isPowerup: isPowerup,
+                powerupType: powerupType ? powerupType.type : null,
+                lifetime: 0,
+                targetPlayer: Math.random() < 0.3 // 30% chance to target player
             });
         }
         
-        // Simple AI movement
-        function updateBlockAI(block) {
-            block.directionChange--;
-            if (block.directionChange <= 0) {
-                block.directionChange = 60 + Math.random() * 60;
-                block.direction += (Math.random() - 0.5) * Math.PI * 0.5;
+        // Update block movement
+        function updateBlock(block, index) {
+            block.lifetime++;
+            
+            // Update edibility
+            block.isEdible = block.size < player.size;
+            
+            // Pulse animation
+            if (block.isEdible) {
+                block.pulseAnimation = (block.pulseAnimation + 0.1) % (Math.PI * 2);
             }
             
-            // Move
+            // Movement AI
+            if (block.targetPlayer && block.lifetime % 60 === 0) {
+                // Re-target player occasionally
+                const angle = Math.atan2(player.y - block.y, player.x - block.x);
+                block.direction = angle + (Math.random() - 0.5) * Math.PI / 6;
+            } else if (block.lifetime % 120 === 0) {
+                // Random direction change
+                block.direction += (Math.random() - 0.5) * Math.PI / 2;
+            }
+            
+            // Apply magnet effect
+            if (powerupActive === 'magnet' && block.isEdible) {
+                const dist = Math.hypot(player.x - block.x, player.y - block.y);
+                if (dist < 150) {
+                    const angle = Math.atan2(player.y - block.y, player.x - block.x);
+                    const force = (150 - dist) / 150 * 0.5;
+                    block.x += Math.cos(angle) * force * block.speed;
+                    block.y += Math.sin(angle) * force * block.speed;
+                }
+            }
+            
+            // Normal movement
             block.x += Math.cos(block.direction) * block.speed;
             block.y += Math.sin(block.direction) * block.speed;
             
-            // Bounce off walls
-            if (block.x <= block.size || block.x >= WORLD_SIZE - block.size) {
-                block.direction = Math.PI - block.direction;
-                block.x = Math.max(block.size, Math.min(WORLD_SIZE - block.size, block.x));
-            }
-            if (block.y <= block.size || block.y >= WORLD_SIZE - block.size) {
-                block.direction = -block.direction;
-                block.y = Math.max(block.size, Math.min(WORLD_SIZE - block.size, block.y));
+            // Remove if out of bounds for too long
+            const margin = 100;
+            if (block.x < -margin || block.x > WORLD_WIDTH + margin || 
+                block.y < -margin || block.y > WORLD_HEIGHT + margin) {
+                if (block.lifetime > 180) {
+                    blocks.splice(index, 1);
+                }
             }
         }
         
@@ -646,54 +705,76 @@
         function update() {
             if (gameState !== 'playing') return;
             
-            // Smooth player movement
+            // Update world size dynamically
+            WORLD_WIDTH = Math.min(window.innerWidth * 1.5, 600);
+            WORLD_HEIGHT = Math.min(window.innerHeight * 1.5, 900);
+            
+            // Player movement with speed boost
+            const speedMultiplier = powerupActive === 'speed' ? 1.5 : 1;
             const dx = player.targetX - player.x;
             const dy = player.targetY - player.y;
-            player.x += dx * player.speed;
-            player.y += dy * player.speed;
+            player.x += dx * player.speed * speedMultiplier;
+            player.y += dy * player.speed * speedMultiplier;
             
             // Keep in bounds
-            player.x = Math.max(player.size, Math.min(WORLD_SIZE - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(WORLD_SIZE - player.size, player.y));
+            player.x = Math.max(player.size, Math.min(WORLD_WIDTH - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(WORLD_HEIGHT - player.size, player.y));
+            
+            // Update trail
+            player.trail.push({ x: player.x, y: player.y });
+            if (player.trail.length > 10) player.trail.shift();
+            
+            // Update camera zoom
+            targetZoom = Math.max(0.5, Math.min(1, 40 / player.size));
+            cameraZoom += (targetZoom - cameraZoom) * 0.1;
             
             // Update animations
-            player.growthAnimation *= 0.95;
+            player.growthAnimation *= 0.92;
+            screenShake *= 0.9;
             if (comboTimer > 0) comboTimer--;
+            if (powerupTimer > 0) {
+                powerupTimer--;
+                if (powerupTimer === 0) powerupActive = '';
+            }
+            
+            // Spawn new blocks
+            spawnTimer++;
+            if (spawnTimer >= SPAWN_RATE / (1 + level * 0.1)) {
+                spawnTimer = 0;
+                createBlock();
+            }
             
             // Update blocks
-            blocks.forEach((block, index) => {
-                updateBlockAI(block);
-                
-                // Update edibility
-                block.isEdible = block.size < player.size;
-                
-                // Pulse animation for edible blocks
-                if (block.isEdible) {
-                    block.pulseAnimation = (block.pulseAnimation + 0.1) % (Math.PI * 2);
-                }
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                const block = blocks[i];
+                updateBlock(block, i);
                 
                 // Check collision
                 const dist = Math.hypot(player.x - block.x, player.y - block.y);
-                const minDist = (player.size + block.size) * 0.8; // More forgiving collision
+                const minDist = (player.size + block.size) * 0.85;
                 
                 if (dist < minDist) {
                     if (block.isEdible) {
-                        // EAT!
-                        eatBlock(block, index);
-                    } else {
-                        // Game over
+                        eatBlock(block, i);
+                    } else if (powerupActive !== 'shield') {
                         gameOver();
+                    } else {
+                        // Shield protection
+                        blocks.splice(i, 1);
+                        createShieldEffect();
+                        powerupTimer = 0;
+                        powerupActive = '';
                     }
                 }
-            });
+            }
             
             // Update particles
             particles = particles.filter(p => {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life--;
-                p.vx *= 0.95;
-                p.vy *= 0.95;
+                p.vx *= 0.98;
+                p.vy *= 0.98;
                 return p.life > 0;
             });
             
@@ -701,175 +782,285 @@
             updateUI();
         }
         
-        // Eat block with juicy feedback
+        // Eat block with effects
         function eatBlock(block, index) {
-            // Calculate growth
-            const growth = block.size * EAT_GROWTH_MULTIPLIER;
+            // Growth calculation
+            const growthBase = block.size * 0.15;
+            const comboMultiplier = 1 + combo * 0.1;
+            const growth = growthBase * comboMultiplier * (powerupActive === 'multi' ? 2 : 1);
+            
             player.size += growth;
             player.growthAnimation = 1;
             
-            // Score with combo
-            const baseScore = Math.floor(block.size);
+            // Score calculation
+            const baseScore = Math.floor(block.size * 10);
+            const comboBonus = combo * 50;
+            const totalScore = (baseScore + comboBonus) * (powerupActive === 'multi' ? 2 : 1);
+            score += totalScore;
+            
+            // Update combo
             combo++;
-            comboTimer = 60; // 1 second at 60fps
-            const comboBonus = combo > 1 ? combo * 10 : 0;
-            score += baseScore + comboBonus;
+            comboTimer = COMBO_DECAY;
             
-            // Show combo
-            if (combo > 2) {
-                showCombo(combo);
+            // Show effects
+            if (combo > 1) {
+                showCombo();
+                if (combo % 5 === 0) {
+                    screenFlash();
+                }
             }
             
-            // Particles explosion
-            createParticles(block.x, block.y, block.type, block.size);
+            // Power-up effect
+            if (block.isPowerup) {
+                activatePowerup(block.powerupType);
+            }
             
-            // Floating score
-            showFloatingScore(block.x, block.y, baseScore + comboBonus);
+            // Effects
+            createEatEffects(block, totalScore);
             
-            // Haptic feedback
+            // Haptic
             if (navigator.vibrate) {
-                navigator.vibrate(20);
+                navigator.vibrate(combo > 5 ? [20, 10, 20] : 20);
             }
             
-            // Remove and replace
-            blocks.splice(index, 1);
-            createBlock();
+            // Screen shake on big eats
+            if (block.size > player.size * 0.7) {
+                screenShake = 10;
+            }
             
-            // Check level up
-            if (player.size >= LEVEL_SIZE) {
+            // Remove and check level
+            blocks.splice(index, 1);
+            checkLevelUp();
+        }
+        
+        // Check level up
+        function checkLevelUp() {
+            const targetSize = LEVEL_SIZES[Math.min(level - 1, LEVEL_SIZES.length - 1)];
+            if (player.size >= targetSize) {
                 levelUp();
             }
         }
         
-        // Level up celebration
+        // Level up
         function levelUp() {
             level++;
-            player.size = 30;
-            combo = 0;
+            player.size = 10 + level * 2; // Start slightly bigger each level
             
-            // Big celebration
-            showCombo("LEVEL UP!");
-            createPowerupEffect(player.x, player.y);
+            // Effects
+            showCombo("LEVEL " + level + "!");
+            screenFlash('#00ff88');
+            screenShake = 20;
+            
+            // Clear screen dramatically
+            blocks.forEach(block => {
+                createParticles(block.x, block.y, block.type, block.size / 2);
+            });
+            blocks = [];
             
             // Haptic
             if (navigator.vibrate) {
-                navigator.vibrate([50, 100, 50]);
+                navigator.vibrate([50, 100, 50, 100, 50]);
             }
             
-            // Regenerate world
-            blocks = [];
-            for (let i = 0; i < INITIAL_BLOCKS + level * 2; i++) {
-                createBlock();
-            }
+            // Refill with new blocks
+            setTimeout(() => {
+                for (let i = 0; i < INITIAL_BLOCKS + level; i++) {
+                    createBlock(true);
+                }
+            }, 500);
         }
         
-        // Show combo popup
-        function showCombo(text) {
-            const comboEl = document.getElementById('comboDisplay');
-            comboEl.textContent = typeof text === 'number' ? `${text}x COMBO!` : text;
-            comboEl.style.display = 'block';
+        // Activate powerup
+        function activatePowerup(type) {
+            powerupActive = type;
+            powerupTimer = 300; // 5 seconds
+            
+            const indicator = document.getElementById('powerupIndicator');
+            const messages = {
+                speed: '⚡ VELOCITÀ!',
+                magnet: '🧲 MAGNETE!',
+                shield: '🛡️ SCUDO!',
+                multi: '×2 DOPPIO!'
+            };
+            
+            indicator.textContent = messages[type];
+            indicator.style.display = 'block';
+            
+            screenFlash('#ffab00');
+        }
+        
+        // Show combo
+        function showCombo() {
+            const display = document.getElementById('comboDisplay');
+            const indicator = document.getElementById('comboIndicator');
+            
+            display.innerHTML = `<div style="font-size: 64px">${combo}×</div><div style="font-size: 24px">COMBO!</div>`;
+            display.style.display = 'block';
+            display.style.color = combo > 10 ? '#ff6b6b' : combo > 5 ? '#ffab00' : '#00ff88';
+            
+            indicator.textContent = combo + 'x';
+            indicator.style.display = combo > 1 ? 'block' : 'none';
             
             setTimeout(() => {
-                comboEl.style.display = 'none';
-            }, 1000);
+                display.style.display = 'none';
+            }, 800);
         }
         
-        // Create particles
+        // Create effects
+        function createEatEffects(block, points) {
+            // Particles
+            createParticles(block.x, block.y, block.type, block.size);
+            
+            // Floating text
+            showFloatingText(block.x, block.y, '+' + points, '#00ff88');
+        }
+        
         function createParticles(x, y, type, size) {
-            const count = Math.min(20, Math.floor(size / 3));
+            const count = Math.min(15, Math.floor(size / 2));
             for (let i = 0; i < count; i++) {
-                const angle = (Math.PI * 2 / count) * i;
-                const speed = 2 + Math.random() * 3;
+                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+                const speed = 1 + Math.random() * 3;
                 particles.push({
                     x: x,
                     y: y,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
-                    life: 30,
+                    life: 20 + Math.random() * 10,
                     color: type.color,
-                    size: 3 + Math.random() * 5
+                    size: 2 + Math.random() * 4
                 });
             }
         }
         
-        // Show floating score
-        function showFloatingScore(x, y, points) {
+        function showFloatingText(x, y, text, color) {
             const el = document.createElement('div');
-            el.className = 'floating-score';
-            el.textContent = '+' + points;
+            el.className = 'floating-text';
+            el.textContent = text;
+            el.style.color = color;
             
-            const screenX = (x - player.x) + canvas.width / 2;
-            const screenY = (y - player.y) + canvas.height / 2;
-            
-            el.style.left = screenX + 'px';
-            el.style.top = screenY + 'px';
+            const screenPos = worldToScreen(x, y);
+            el.style.left = screenPos.x + 'px';
+            el.style.top = screenPos.y + 'px';
             
             document.getElementById('gameContainer').appendChild(el);
             setTimeout(() => el.remove(), 1000);
         }
         
-        // Create powerup effect
-        function createPowerupEffect(x, y) {
-            const el = document.createElement('div');
-            el.className = 'powerup-effect';
+        function createShieldEffect() {
+            screenFlash('#00ff88');
+            for (let i = 0; i < 30; i++) {
+                const angle = (Math.PI * 2 / 30) * i;
+                particles.push({
+                    x: player.x + Math.cos(angle) * player.size,
+                    y: player.y + Math.sin(angle) * player.size,
+                    vx: Math.cos(angle) * 2,
+                    vy: Math.sin(angle) * 2,
+                    life: 30,
+                    color: '#00ff88',
+                    size: 4
+                });
+            }
+        }
+        
+        function screenFlash(color = '#fff') {
+            const flash = document.getElementById('screenFlash');
+            flash.style.background = `radial-gradient(circle, ${color}33, transparent)`;
+            flash.style.animation = 'screenFlash 0.3s ease-out';
+            setTimeout(() => {
+                flash.style.animation = '';
+            }, 300);
+        }
+        
+        // World to screen coordinates
+        function worldToScreen(x, y) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
             
-            const screenX = (x - player.x) + canvas.width / 2;
-            const screenY = (y - player.y) + canvas.height / 2;
-            
-            el.style.left = screenX + 'px';
-            el.style.top = screenY + 'px';
-            
-            document.getElementById('gameContainer').appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+            return {
+                x: centerX + (x - player.x) * cameraZoom,
+                y: centerY + (y - player.y) * cameraZoom
+            };
         }
         
         // Update UI
         function updateUI() {
-            document.getElementById('score').textContent = score;
+            document.getElementById('score').textContent = score.toLocaleString();
             document.getElementById('level').textContent = level;
-            document.getElementById('playerSize').textContent = Math.floor(player.size);
+            document.getElementById('currentSize').textContent = Math.floor(player.size);
             
-            const progress = ((player.size - 30) / (LEVEL_SIZE - 30)) * 100;
-            document.getElementById('sizeFill').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            const targetSize = LEVEL_SIZES[Math.min(level - 1, LEVEL_SIZES.length - 1)];
+            document.getElementById('targetSize').textContent = targetSize;
             
-            if (comboTimer <= 0) combo = 0;
+            const progress = ((player.size - 10) / (targetSize - 10)) * 100;
+            document.getElementById('progressFill').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            
+            // Powerup indicator
+            if (powerupTimer <= 0) {
+                document.getElementById('powerupIndicator').style.display = 'none';
+            }
+            
+            // Combo decay
+            if (comboTimer <= 0 && combo > 0) {
+                combo = 0;
+                document.getElementById('comboIndicator').style.display = 'none';
+            }
         }
         
         // Drawing
         function draw() {
-            if (gameState !== 'playing') return;
-            
             // Clear
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Camera follow player
+            if (gameState !== 'playing') return;
+            
             ctx.save();
-            ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
             
-            // Draw grid
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-            ctx.lineWidth = 1;
-            const gridSize = 50;
-            
-            for (let x = 0; x < WORLD_SIZE; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, WORLD_SIZE);
-                ctx.stroke();
+            // Camera shake
+            if (screenShake > 0) {
+                ctx.translate(
+                    (Math.random() - 0.5) * screenShake,
+                    (Math.random() - 0.5) * screenShake
+                );
             }
             
-            for (let y = 0; y < WORLD_SIZE; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(WORLD_SIZE, y);
-                ctx.stroke();
+            // Camera zoom and center
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(cameraZoom, cameraZoom);
+            ctx.translate(-player.x, -player.y);
+            
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1 / cameraZoom;
+            const gridSize = 40;
+            
+            const startX = Math.floor((player.x - canvas.width / cameraZoom) / gridSize) * gridSize;
+            const endX = Math.ceil((player.x + canvas.width / cameraZoom) / gridSize) * gridSize;
+            const startY = Math.floor((player.y - canvas.height / cameraZoom) / gridSize) * gridSize;
+            const endY = Math.ceil((player.y + canvas.height / cameraZoom) / gridSize) * gridSize;
+            
+            for (let x = startX; x <= endX; x += gridSize) {
+                if (x >= 0 && x <= WORLD_WIDTH) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, Math.max(0, startY));
+                    ctx.lineTo(x, Math.min(WORLD_HEIGHT, endY));
+                    ctx.stroke();
+                }
+            }
+            
+            for (let y = startY; y <= endY; y += gridSize) {
+                if (y >= 0 && y <= WORLD_HEIGHT) {
+                    ctx.beginPath();
+                    ctx.moveTo(Math.max(0, startX), y);
+                    ctx.lineTo(Math.min(WORLD_WIDTH, endX), y);
+                    ctx.stroke();
+                }
             }
             
             // Draw world border
             ctx.strokeStyle = '#ff5252';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+            ctx.lineWidth = 3 / cameraZoom;
+            ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
             
             // Draw particles
             particles.forEach(p => {
@@ -880,84 +1071,124 @@
                 ctx.fill();
             });
             
+            // Draw player trail
+            if (player.trail.length > 1) {
+                ctx.strokeStyle = 'rgba(0, 217, 255, 0.3)';
+                ctx.lineWidth = player.size * 0.8;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(player.trail[0].x, player.trail[0].y);
+                for (let i = 1; i < player.trail.length; i++) {
+                    const alpha = i / player.trail.length;
+                    ctx.globalAlpha = alpha * 0.5;
+                    ctx.lineTo(player.trail[i].x, player.trail[i].y);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
             // Draw blocks
             blocks.forEach(block => {
-                const scale = block.isEdible ? 1 + Math.sin(block.pulseAnimation) * 0.05 : 1;
+                const scale = block.isEdible ? 1 + Math.sin(block.pulseAnimation) * 0.08 : 1;
                 
                 ctx.save();
                 ctx.translate(block.x, block.y);
                 ctx.scale(scale, scale);
                 
-                // Shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.fillRect(-block.size/2 + 2, -block.size/2 + 2, block.size, block.size);
+                // Block shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.beginPath();
+                ctx.arc(2, 2, block.size, 0, Math.PI * 2);
+                ctx.fill();
                 
-                // Block with gradient
-                const gradient = ctx.createLinearGradient(-block.size/2, -block.size/2, block.size/2, block.size/2);
-                if (block.isEdible) {
-                    gradient.addColorStop(0, block.type.color);
-                    gradient.addColorStop(1, block.type.shadow);
-                } else {
-                    gradient.addColorStop(0, '#ff5252');
-                    gradient.addColorStop(1, 'rgba(255, 82, 82, 0.7)');
-                }
+                // Block body
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, block.size);
+                gradient.addColorStop(0, block.type.color);
+                gradient.addColorStop(0.8, block.type.shadow);
+                gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
                 
                 ctx.fillStyle = gradient;
-                ctx.fillRect(-block.size/2, -block.size/2, block.size, block.size);
+                ctx.beginPath();
+                ctx.arc(0, 0, block.size, 0, Math.PI * 2);
+                ctx.fill();
                 
-                // Shine effect
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.fillRect(-block.size/2, -block.size/2, block.size * 0.3, block.size * 0.3);
+                // Danger indicator
+                if (!block.isEdible && !block.isPowerup) {
+                    ctx.strokeStyle = '#ff5252';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, block.size + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
                 
-                // Size text
-                ctx.restore();
+                // Size or icon
                 ctx.fillStyle = '#fff';
-                ctx.font = `bold ${Math.max(14, block.size * 0.4)}px Arial`;
+                ctx.font = `bold ${block.size * 0.6}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(Math.floor(block.size), block.x, block.y);
+                
+                if (block.isPowerup) {
+                    ctx.font = `${block.size}px Arial`;
+                    ctx.fillText(block.type.icon, 0, 0);
+                } else {
+                    ctx.fillText(Math.floor(block.size), 0, 0);
+                }
+                
+                ctx.restore();
             });
             
-            // Draw player with growth animation
-            const playerScale = 1 + player.growthAnimation * 0.2;
+            // Draw player
+            const playerScale = 1 + player.growthAnimation * 0.3;
             
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.scale(playerScale, playerScale);
             
-            // Player shadow
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.fillRect(-player.size/2 + 3, -player.size/2 + 3, player.size, player.size);
+            // Shield effect
+            if (powerupActive === 'shield') {
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.5)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, player.size + 10, 0, Math.PI * 2);
+                ctx.stroke();
+            }
             
-            // Player gradient
-            const playerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, player.size/2);
+            // Player shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.arc(3, 3, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Player body
+            const playerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, player.size);
             playerGradient.addColorStop(0, '#00d9ff');
             playerGradient.addColorStop(0.7, '#0099cc');
             playerGradient.addColorStop(1, '#006699');
             
             ctx.fillStyle = playerGradient;
-            ctx.fillRect(-player.size/2, -player.size/2, player.size, player.size);
+            ctx.beginPath();
+            ctx.arc(0, 0, player.size, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Player shine
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(-player.size/2, -player.size/2, player.size * 0.4, player.size * 0.4);
-            
-            // Player outline when growing
-            if (player.growthAnimation > 0.1) {
-                ctx.strokeStyle = `rgba(0, 255, 136, ${player.growthAnimation})`;
+            // Player glow
+            if (combo > 5) {
+                ctx.strokeStyle = `rgba(255, 107, 107, ${0.5 + Math.sin(Date.now() * 0.01) * 0.3})`;
                 ctx.lineWidth = 3;
-                ctx.strokeRect(-player.size/2, -player.size/2, player.size, player.size);
+                ctx.beginPath();
+                ctx.arc(0, 0, player.size + 5, 0, Math.PI * 2);
+                ctx.stroke();
             }
-            
-            ctx.restore();
             
             // Player size
             ctx.fillStyle = '#fff';
-            ctx.font = `bold ${Math.max(16, player.size * 0.5)}px Arial`;
+            ctx.font = `bold ${player.size * 0.7}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(Math.floor(player.size), player.x, player.y);
+            ctx.fillText(Math.floor(player.size), 0, 0);
             
+            ctx.restore();
             ctx.restore();
         }
         
@@ -1005,9 +1236,8 @@
         });
         
         function updateTarget(screenX, screenY) {
-            // Convert screen to world coordinates
-            const worldX = screenX - canvas.width / 2 + player.x;
-            const worldY = screenY - canvas.height / 2 + player.y;
+            const worldX = (screenX - canvas.width / 2) / cameraZoom + player.x;
+            const worldY = (screenY - canvas.height / 2) / cameraZoom + player.y;
             
             player.targetX = worldX;
             player.targetY = worldY;
@@ -1020,30 +1250,20 @@
             level = 1;
             combo = 0;
             comboTimer = 0;
+            powerupActive = '';
+            powerupTimer = 0;
             
             document.getElementById('menuScreen').style.display = 'none';
             document.getElementById('gameUI').style.display = 'block';
+            document.getElementById('gameOverScreen').style.display = 'none';
             
             initGame();
-            
-            // Show tutorial for first time
-            if (!localStorage.getItem('notamyTutorialShown')) {
-                showTutorial();
-                localStorage.setItem('notamyTutorialShown', 'true');
-            }
         }
         
         function goHome() {
-            window.location.href = './';
-        }
-        
-        function showTutorial() {
-            const overlay = document.getElementById('tutorialOverlay');
-            overlay.style.display = 'block';
-            
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 3000);
+            if (confirm('Vuoi tornare alla home?')) {
+                window.location.href = './';
+            }
         }
         
         function gameOver() {
@@ -1054,13 +1274,17 @@
                 localStorage.setItem('notamyBlocksBest', bestScore);
             }
             
-            document.getElementById('finalScore').textContent = score;
-            document.getElementById('bestScore').textContent = bestScore;
+            document.getElementById('finalScore').textContent = score.toLocaleString();
+            document.getElementById('bestScore').textContent = bestScore.toLocaleString();
             document.getElementById('gameOverScreen').style.display = 'flex';
+            
+            // Haptic
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
         }
         
         function restartGame() {
-            document.getElementById('gameOverScreen').style.display = 'none';
             startGame();
         }
         
@@ -1080,13 +1304,6 @@
         
         // Start
         requestAnimationFrame(gameLoop);
-        
-        // Auto-start if from index
-        if (shouldAutostart) {
-            setTimeout(() => {
-                startGame();
-            }, 100);
-        }
     </script>
 </body>
 </html>

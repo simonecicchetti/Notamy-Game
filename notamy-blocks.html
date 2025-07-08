@@ -467,11 +467,6 @@
                     gameState.currentRotation = oldRotation;
                 }
             }
-            
-            // Vibrazione feedback (se supportata)
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(10);
-            }
         }
         
         function getRotatedShape() {

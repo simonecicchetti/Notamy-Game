@@ -952,7 +952,7 @@
         
         // Ensure board integrity
         function ensureBoardIntegrity() {
-            if (!validateBoard() && !animating) {
+            if (!validateBoard() && !animating && !isProcessingMove && gameState === 'playing') {
                 dropCandies();
             }
         }
@@ -968,6 +968,10 @@
         function shuffleBoard() {
             animating = true;
             isProcessingMove = true;
+            
+            // Reset inactivity timer during shuffle
+            lastMoveTime = Date.now();
+            timeDecayRate = 1;
             
             // Show shuffle indicator
             document.getElementById('shuffleIndicator').classList.add('show');
@@ -1050,6 +1054,13 @@
             const wasInactive = timeDecayRate > 2;
             lastMoveTime = Date.now();
             timeDecayRate = 1;
+            
+            // Clear warning states immediately
+            document.getElementById('timeItem').classList.remove('decay', 'warning', 'critical');
+            document.getElementById('inactivityWarning').style.display = 'none';
+            canvas.style.transform = 'translate(-50%, -50%)';
+            document.getElementById('gameCanvas').style.boxShadow = 
+                '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)';
             
             // Bonus time for breaking inactivity streak
             if (wasInactive && gameState === 'playing') {
@@ -1156,7 +1167,13 @@
         canvas.addEventListener('touchcancel', handleEnd, { passive: true });
         
         function handleStart(e) {
-            if (animating || gameState !== 'playing' || isProcessingMove) return;
+            if (gameState !== 'playing') return;
+            
+            // Reset inactivity timer even if animating
+            lastMoveTime = Date.now();
+            timeDecayRate = 1;
+            
+            if (animating || isProcessingMove) return;
             
             e.preventDefault(); // Prevent default touch behavior
             
@@ -1244,6 +1261,9 @@
             if (!isDragging || !touchStartPos || animating || hasMoved || isProcessingMove || touchMode === 'tap') return;
             
             e.preventDefault(); // Prevent scrolling
+            
+            // Reset inactivity timer on any movement attempt
+            lastMoveTime = Date.now();
             
             const pos = getEventPos(e);
             const dx = pos.x - touchStartCoords.x;
@@ -1390,6 +1410,10 @@
         function swapCandies(pos1, pos2) {
             if (isProcessingMove) return;
             
+            // Always update last move time
+            lastMoveTime = Date.now();
+            timeDecayRate = 1;
+            
             // Validate positions
             if (!pos1 || !pos2 || 
                 pos1.row < 0 || pos1.row >= GRID_SIZE || 
@@ -1403,8 +1427,6 @@
             
             animating = true;
             isProcessingMove = true;
-            lastMoveTime = Date.now();
-            timeDecayRate = 1;
             
             const candy1 = board[pos1.row][pos1.col];
             const candy2 = board[pos2.row][pos2.col];
@@ -1476,6 +1498,10 @@
                         chainMultiplier = 0;
                         updateStreak();
                         
+                        // Keep inactivity timer reset even for invalid moves
+                        lastMoveTime = Date.now();
+                        timeDecayRate = 1;
+                        
                         // Vibrate for invalid move
                         if (window.navigator.vibrate) {
                             window.navigator.vibrate([50, 50, 50]);
@@ -1522,6 +1548,10 @@
             let totalScore = 0;
             let totalTimeBonus = 0;
             combo++;
+            
+            // Reset inactivity timer when processing matches
+            lastMoveTime = Date.now();
+            timeDecayRate = 1;
             
             // Mark if we're in a chain (multiple cascades)
             if (chainMultiplier === 0) {
@@ -1634,6 +1664,10 @@
                 timeLeft = Math.min(90, timeLeft + totalTimeBonus); // Increased max to 90 seconds
                 const actualBonus = timeLeft - oldTime;
                 
+                // Reset inactivity timer when getting bonus
+                lastMoveTime = Date.now();
+                timeDecayRate = 1;
+                
                 if (actualBonus > 0) {
                     createTimeBonus(Math.round(actualBonus));
                     // Add recharge animation to time display
@@ -1694,6 +1728,10 @@
         // Activate power-up with enhanced time bonuses
         function activatePowerUp(row, col, type) {
             let bonusTime = 0;
+            
+            // Reset inactivity timer on power-up activation
+            lastMoveTime = Date.now();
+            timeDecayRate = 1;
             
             // Strong vibration for power-up
             if (window.navigator.vibrate) {
@@ -1882,6 +1920,9 @@
                 setTimeout(() => {
                     const newMatches = findAllMatches();
                     if (newMatches.length > 0) {
+                        // Reset inactivity timer during combos
+                        lastMoveTime = Date.now();
+                        timeDecayRate = 1;
                         processMatches(newMatches);
                     } else {
                         combo = 0;
@@ -2062,7 +2103,8 @@
         
         // Check game state
         function checkGameState() {
-            if (timeLeft <= 0) {
+            // Only check for game over if time is actually <= 0
+            if (timeLeft <= 0 && gameState === 'playing') {
                 gameOver();
             }
         }
@@ -2070,6 +2112,24 @@
         // Timer system
         function startTimer() {
             gameTimer = setInterval(() => {
+                // Safety check
+                if (gameState !== 'playing' || timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    if (timeLeft <= 0) gameOver();
+                    return;
+                }
+                
+                // Don't apply decay during animations
+                if (animating || isProcessingMove) {
+                    lastMoveTime = Date.now(); // Keep resetting during animations
+                    timeDecayRate = 1;
+                    document.getElementById('timeItem').classList.remove('decay', 'warning');
+                    document.getElementById('inactivityWarning').style.display = 'none';
+                    canvas.style.transform = 'translate(-50%, -50%)';
+                    document.getElementById('gameCanvas').style.boxShadow = 
+                        '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)';
+                }
+                
                 // Check inactivity
                 const inactiveTime = Date.now() - lastMoveTime;
                 
@@ -2126,6 +2186,11 @@
                 // Decrease time with decay rate (0.1 seconds every 100ms = 1 second per second)
                 timeLeft -= (0.1 * timeDecayRate);
                 
+                // Prevent negative time
+                if (timeLeft < 0) {
+                    timeLeft = 0;
+                }
+                
                 // Update time display
                 if (timeDecayRate >= 4 || timeLeft <= 10) {
                     // Show decimals when time is decaying fast or running low
@@ -2155,8 +2220,17 @@
                     timeItem.style.transform = 'scale(1)';
                 }
                 
-                if (timeLeft <= 0) {
+                if (timeLeft <= 0 && gameState === 'playing' && !animating && !isProcessingMove) {
                     clearInterval(gameTimer);
+                    // Debug: log why game is ending
+                    console.log('Game Over: Time ran out', {
+                        timeLeft, 
+                        gameState, 
+                        animating, 
+                        isProcessingMove,
+                        timeDecayRate,
+                        lastInactiveTime: Date.now() - lastMoveTime
+                    });
                     gameOver();
                 }
             }, 100);
@@ -2199,16 +2273,38 @@
             firstSelectedCandy = null;
             touchMode = 'drag';
             integrityCheckCounter = 0;
+            
+            // Clear any existing timers
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+            if (hintTimer) {
+                clearTimeout(hintTimer);
+                hintTimer = null;
+            }
+            
             document.getElementById('modeIndicator').textContent = 'SWIPE MODE';
+            document.getElementById('inactivityWarning').style.display = 'none';
+            document.getElementById('timeItem').classList.remove('decay', 'warning', 'critical');
+            canvas.style.transform = 'translate(-50%, -50%)';
+            
             initBoard();
             updateUI();
-            resetHintTimer();
-            startTimer();
+            
+            // Give player a moment before starting timer
+            setTimeout(() => {
+                resetHintTimer();
+                startTimer();
+            }, 500);
+            
             gameLoop();
         }
         
         // Game over
         function gameOver() {
+            if (gameState !== 'playing') return; // Prevent duplicate game overs
+            
             gameState = 'gameOver';
             clearTimeout(hintTimer);
             clearInterval(gameTimer);
@@ -2216,6 +2312,7 @@
             canvas.style.transform = 'translate(-50%, -50%)'; // Reset canvas transform
             document.getElementById('gameCanvas').style.boxShadow = 
                 '0 0 60px rgba(0, 180, 166, 0.2), 0 0 120px rgba(0, 180, 166, 0.1)'; // Reset shadow
+            document.getElementById('timeItem').classList.remove('decay', 'warning', 'critical');
             
             if (score > bestScore) {
                 bestScore = score;

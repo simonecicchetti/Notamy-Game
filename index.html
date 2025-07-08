@@ -389,222 +389,249 @@
             }
         }
         
-        /* Mobile optimizations */
+        /* Mobile optimizations - MINIMALIST DESIGN */
         @media (max-width: 768px) {
-            body {
-                /* Removed overflow hidden to allow natural scrolling */
-            }
-
             .container {
-                padding: 20px 12px;
-                padding-top: max(20px, env(safe-area-inset-top));
-                /* Extra padding at bottom for iPhone home indicator */
-                padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
-                /* Changed from fixed height to min-height */
+                padding: 15px 0;
+                padding-top: max(15px, env(safe-area-inset-top));
+                padding-bottom: max(30px, calc(20px + env(safe-area-inset-bottom)));
                 min-height: 100vh;
                 min-height: 100dvh;
-                display: flex;
-                flex-direction: column;
             }
 
             .header {
-                margin-bottom: 22px;
+                margin-bottom: 30px;
+                padding: 0 15px;
+            }
+            
+            .logo-text {
+                font-size: 65px;
+                letter-spacing: 2px;
+                margin-bottom: 5px;
+            }
+            
+            .logo-subtitle {
+                font-size: 12px;
+                letter-spacing: 2px;
+                font-weight: 500;
+            }
+            
+            /* MINIMALIST MOBILE LAYOUT */
+            .games-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                padding: 0;
+            }
+            
+            /* NO CARDS - JUST ROWS */
+            .game-card {
+                background: transparent;
+                border: none;
+                border-radius: 0;
+                padding: 15px 20px;
+                box-shadow: none;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                transition: background-color 0.2s ease;
+            }
+
+            .game-card:last-child {
+                border-bottom: none;
+            }
+
+            .game-card:active {
+                background: rgba(255, 255, 255, 0.05);
+                transform: none;
+                box-shadow: none;
+            }
+            
+            /* BIGGER ICONS, NO BORDERS */
+            .game-icon {
+                width: 65px;
+                height: 65px;
+                margin: 0;
+                border-radius: 18px;
+                padding: 0;
+                background: var(--icon-gradient);
+                box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
                 flex-shrink: 0;
             }
             
-            .logo-text {
-                font-size: 85px;
-                letter-spacing: 3px;
-                margin-bottom: 3px;
-                text-shadow: 0 0 20px rgba(0, 180, 166, 0.5);
-            }
-            
-            .logo-subtitle {
-                font-size: 15px;
-                letter-spacing: 3px;
-                font-weight: 600;
-                text-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
-                opacity: 1;
-            }
-            
-            .games-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-                /* Natural grid layout allows proper scrolling */
-                max-width: 100%;
-                margin-bottom: 20px;
-            }
-            
-            .game-card {
-                padding: 20px;
+            .icon-inner {
+                border: none;
+                background: rgba(0, 0, 0, 0.5);
                 border-radius: 18px;
             }
             
+            /* TEXT ON THE RIGHT */
+            .game-info {
+                flex: 1;
+                text-align: left;
+            }
+            
             .game-title {
-                font-size: 22px;
-            }
-
-            .game-description {
-                font-size: 14px;
-            }
-            
-            .game-icon {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 18px;
-                border-radius: 20px;
-            }
-            
-            .icon-inner {
-                border-radius: 17px;
-            }
-            
-            .candy-grid {
-                width: 40px;
-                height: 40px;
-                gap: 2px;
-            }
-            
-            .tetris-icon-container {
-                width: 48px;
-                height: 48px;
-            }
-            
-            .tetris-block {
-                width: 8px;
-                height: 8px;
-            }
-            
-            .fly-icon-container {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .bird-body {
-                width: 26px;
-                height: 26px;
-            }
-            
-            .bird-wing {
-                width: 18px;
-                height: 13px;
-                left: 4px;
-            }
-            
-            .bird-eye {
-                width: 5px;
-                height: 5px;
-                top: 9px;
-                right: 7px;
-            }
-            
-            /* Bop icon mobile sizes */
-            .bop-icon-container {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .bubble {
-                width: 26px;
-                height: 26px;
-            }
-            
-            .bubble-glow {
-                width: 17px;
-                height: 17px;
-                top: 9px;
-                left: 9px;
-            }
-        }
-        
-        @media (max-width: 375px) {
-            .container {
-                /* Even more padding for smaller screens */
-                padding-bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
-            }
-
-            .logo-text {
-                font-size: 70px;
-            }
-
-            .logo-subtitle {
-                font-size: 14px;
-                font-weight: 600;
-            }
-            
-            .game-card {
-                padding: 18px;
-                border-radius: 16px;
-            }
-
-            .game-icon {
-                width: 75px;
-                height: 75px;
-                border-radius: 18px;
-            }
-            
-            .icon-inner {
-                border-radius: 15px;
-            }
-
-            .game-title {
-                font-size: 20px;
+                font-size: 18px;
+                margin-bottom: 4px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
             }
 
             .game-description {
                 font-size: 13px;
+                color: rgba(255, 255, 255, 0.6);
+                line-height: 1.3;
+            }
+            
+            /* Adjust icon sizes */
+            .candy-grid {
+                width: 36px;
+                height: 36px;
+                gap: 2px;
+            }
+            
+            .tetris-icon-container {
+                width: 42px;
+                height: 42px;
+            }
+            
+            .tetris-block {
+                width: 7px;
+                height: 7px;
+            }
+            
+            .piece-i {
+                top: 5px;
+                left: 5px;
+            }
+            
+            .piece-t {
+                bottom: 5px;
+                right: 5px;
+            }
+            
+            .piece-o {
+                top: 5px;
+                right: 8px;
+            }
+            
+            .fly-icon-container {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .bird-body {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .bird-wing {
+                width: 16px;
+                height: 12px;
+                left: 3px;
+            }
+            
+            .bird-eye {
+                width: 4px;
+                height: 4px;
+                top: 8px;
+                right: 6px;
+            }
+            
+            .bop-icon-container {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .bubble {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .bubble-glow {
+                width: 15px;
+                height: 15px;
+                top: 8px;
+                left: 8px;
+            }
+        }
+        
+        /* Even smaller screens */
+        @media (max-width: 375px) {
+            .container {
+                padding-top: max(10px, env(safe-area-inset-top));
+            }
+
+            .logo-text {
+                font-size: 55px;
+            }
+
+            .logo-subtitle {
+                font-size: 11px;
+                letter-spacing: 1.5px;
+            }
+            
+            .game-card {
+                padding: 12px 15px;
+                gap: 15px;
+            }
+
+            .game-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 16px;
+            }
+            
+            .icon-inner {
+                border-radius: 16px;
+            }
+
+            .game-title {
+                font-size: 17px;
+            }
+
+            .game-description {
+                font-size: 12px;
             }
         }
 
         /* Extra small height screens */
         @media (max-height: 700px) and (max-width: 768px) {
-            .container {
-                /* Ensure scrolling works on small height screens */
-                min-height: auto;
-                padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
-            }
-
             .header {
-                margin-bottom: 18px;
+                margin-bottom: 20px;
             }
 
             .logo-text {
-                font-size: 65px;
+                font-size: 50px;
             }
 
             .logo-subtitle {
-                font-size: 13px;
-                letter-spacing: 2px;
-                font-weight: 600;
-            }
-
-            .games-grid {
-                gap: 12px;
+                font-size: 10px;
             }
 
             .game-card {
-                padding: 16px;
-                border-radius: 15px;
+                padding: 10px 15px;
             }
 
             .game-icon {
-                width: 65px;
-                height: 65px;
-                margin-bottom: 12px;
-                border-radius: 16px;
+                width: 55px;
+                height: 55px;
+                border-radius: 14px;
             }
             
             .icon-inner {
-                border-radius: 13px;
+                border-radius: 14px;
             }
 
             .game-title {
-                font-size: 19px;
-                margin-bottom: 6px;
+                font-size: 16px;
+                margin-bottom: 2px;
             }
 
             .game-description {
-                font-size: 12px;
+                font-size: 11px;
             }
         }
 
@@ -653,10 +680,12 @@
                         </div>
                     </div>
                 </div>
-                <h2 class="game-title">Notamy Crush</h2>
-                <p class="game-description">
-                    Match colorful candies to win
-                </p>
+                <div class="game-info">
+                    <h2 class="game-title">Notamy Crush</h2>
+                    <p class="game-description">
+                        Match colorful candies to win
+                    </p>
+                </div>
             </a>
             
             <!-- Notamy Tetris -->
@@ -688,10 +717,12 @@
                         </div>
                     </div>
                 </div>
-                <h2 class="game-title">Notamy Tetris</h2>
-                <p class="game-description">
-                    Classic block-stacking fun
-                </p>
+                <div class="game-info">
+                    <h2 class="game-title">Notamy Tetris</h2>
+                    <p class="game-description">
+                        Classic block-stacking fun
+                    </p>
+                </div>
             </a>
             
             <!-- Notamy Fly -->
@@ -705,10 +736,12 @@
                         </div>
                     </div>
                 </div>
-                <h2 class="game-title">Notamy Fly</h2>
-                <p class="game-description">
-                    Navigate through neon obstacles
-                </p>
+                <div class="game-info">
+                    <h2 class="game-title">Notamy Fly</h2>
+                    <p class="game-description">
+                        Navigate through neon obstacles
+                    </p>
+                </div>
             </a>
             
             <!-- Notamy Bop -->
@@ -721,10 +754,12 @@
                         </div>
                     </div>
                 </div>
-                <h2 class="game-title">Notamy Bop</h2>
-                <p class="game-description">
-                    Pop colorful bubbles to score
-                </p>
+                <div class="game-info">
+                    <h2 class="game-title">Notamy Bop</h2>
+                    <p class="game-description">
+                        Pop colorful bubbles to score
+                    </p>
+                </div>
             </a>
         </div>
     </div>
@@ -742,13 +777,11 @@
         const cards = document.querySelectorAll('.game-card');
         cards.forEach(card => {
             card.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.98)';
-                this.style.opacity = '0.95';
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
             });
             
             card.addEventListener('touchend', function() {
-                this.style.transform = '';
-                this.style.opacity = '1';
+                this.style.backgroundColor = '';
             });
         });
     </script>

@@ -51,105 +51,7 @@
             color: var(--black-deep);
         }
 
-        /* Neon Grid Background */
-        .neon-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 180, 166, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 180, 166, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            z-index: -2;
-        }
 
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* Floating Neon Shapes */
-        .neon-shape {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.25;
-            animation: float 15s infinite ease-in-out;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .shape1 {
-            width: 400px;
-            height: 400px;
-            background: var(--primary-teal);
-            top: -200px;
-            left: -200px;
-        }
-
-        .shape2 {
-            width: 600px;
-            height: 600px;
-            background: var(--accent-green);
-            bottom: -300px;
-            right: -300px;
-            animation-delay: 5s;
-        }
-
-        .shape3 {
-            width: 300px;
-            height: 300px;
-            background: var(--secondary-red);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(100px, -100px) scale(1.1); }
-            66% { transform: translate(-100px, 100px) scale(0.9); }
-        }
-
-        /* Animated background particles */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-            pointer-events: none;
-        }
-        
-        .bg-particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: float-up 20s linear infinite;
-        }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) translateX(0) scale(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.6;
-                transform: translateY(90vh) translateX(0) scale(1);
-            }
-            90% {
-                opacity: 0.6;
-            }
-            100% {
-                transform: translateY(-10vh) translateX(100px) scale(0.5);
-                opacity: 0;
-            }
-        }
         
         .container {
             position: relative;
@@ -158,6 +60,9 @@
             max-width: 900px;
             padding: 15px;
             padding-top: 20px;
+            background: radial-gradient(ellipse at center, rgba(0, 180, 166, 0.02) 0%, transparent 70%);
+            border-radius: 40px;
+            border: 1px solid rgba(0, 180, 166, 0.05);
         }
         
         /* Header */
@@ -169,19 +74,8 @@
         .logo {
             margin: 0 auto 20px;
             text-align: center;
-            animation: logo-pulse 3s ease-in-out infinite;
         }
-        
-        @keyframes logo-pulse {
-            0%, 100% { 
-                transform: scale(1);
-                filter: drop-shadow(0 0 30px var(--primary-teal)) drop-shadow(0 0 60px rgba(0, 180, 166, 0.3));
-            }
-            50% { 
-                transform: scale(1.02);
-                filter: drop-shadow(0 0 40px var(--primary-teal)) drop-shadow(0 0 80px rgba(0, 180, 166, 0.5));
-            }
-        }
+
         
         .logo-text {
             font-size: 5.5rem;
@@ -190,7 +84,7 @@
             text-transform: none;
             letter-spacing: -2px;
             margin-bottom: 5px;
-            animation: neonFlicker 2s ease-in-out infinite;
+            animation: neonFlicker 3s ease-in-out infinite;
             position: relative;
             text-shadow: 
                 0 0 10px var(--primary-teal),
@@ -205,16 +99,14 @@
                 text-shadow: 
                     0 0 10px var(--primary-teal),
                     0 0 20px var(--primary-teal),
-                    0 0 30px var(--primary-light),
-                    0 0 40px rgba(0, 180, 166, 0.5);
+                    0 0 30px rgba(0, 180, 166, 0.3);
             }
             50% { 
-                opacity: 0.98;
+                opacity: 0.95;
                 text-shadow: 
                     0 0 15px var(--primary-teal),
                     0 0 25px var(--primary-teal),
-                    0 0 35px var(--primary-light),
-                    0 0 50px rgba(0, 180, 166, 0.7);
+                    0 0 35px rgba(0, 180, 166, 0.5);
             }
         }
         
@@ -236,8 +128,8 @@
         }
         
         .game-card {
-            background: rgba(0, 180, 166, 0.02);
-            border: 1px solid rgba(0, 180, 166, 0.15);
+            background: rgba(0, 180, 166, 0.03);
+            border: 1px solid rgba(0, 180, 166, 0.2);
             border-radius: 20px;
             padding: 30px;
             text-align: center;
@@ -535,6 +427,8 @@
                 padding: 15px;
                 padding-top: 20px;
                 max-width: 100%;
+                background: none;
+                border: none;
             }
             
             .header {
@@ -683,34 +577,6 @@
         <div class="loader-ring"></div>
     </div>
 
-    <!-- Neon Grid Background -->
-    <div class="neon-grid"></div>
-
-    <!-- Floating Neon Shapes -->
-    <div class="neon-shape shape1"></div>
-    <div class="neon-shape shape2"></div>
-    <div class="neon-shape shape3"></div>
-
-    <!-- Animated background -->
-    <div class="bg-animation">
-        <script>
-            // Create floating particles with Notamy neon colors
-            const colors = ['#00b4a6', '#00d9ff', '#00e676', '#ff6b6b', '#ff8787'];
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'bg-particle';
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.background = color;
-                particle.style.boxShadow = `0 0 20px ${color}`;
-                particle.style.width = particle.style.height = Math.random() * 6 + 2 + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (20 + Math.random() * 15) + 's';
-                document.querySelector('.bg-animation').appendChild(particle);
-            }
-        </script>
-    </div>
-
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -771,17 +637,6 @@
             setTimeout(() => {
                 document.querySelector('.loader').classList.add('hide');
             }, 1000);
-        });
-
-        // Parallax effect
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const shapes = document.querySelectorAll('.neon-shape');
-            
-            shapes.forEach((shape, index) => {
-                const speed = 0.5 + (index * 0.2);
-                shape.style.transform = `translateY(${scrolled * speed}px)`;
-            });
         });
 
         // Add hover sound effect (visual feedback)

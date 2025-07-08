@@ -46,7 +46,7 @@
             left: 0;
             right: 0;
             z-index: 10;
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             gap: 15px;
@@ -109,6 +109,7 @@
             border-radius: 999px;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            display: none;
         }
         
         #sizeFill {
@@ -994,6 +995,9 @@
         
         // Drawing
         function draw() {
+            // Only draw if game is playing
+            if (gameState !== 'playing') return;
+            
             // Clear with gradient background
             const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             bgGradient.addColorStop(0, '#000000');
@@ -1258,6 +1262,8 @@
         function startGame() {
             gameState = 'playing';
             document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'flex';
+            document.getElementById('sizeBar').style.display = 'block';
             score = 0;
             level = 1;
             speedMultiplier = 1;
@@ -1321,7 +1327,8 @@
             };
         }
         
-        gameLoop();
+        // Start the game loop
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>

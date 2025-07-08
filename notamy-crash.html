@@ -747,6 +747,7 @@
         let lastMoveTime = Date.now();
         let timeDecayRate = 1;
         let gameTimer = null;
+        let integrityCheckCounter = 0;
         
         // Board state
         let board = [];
@@ -828,6 +829,9 @@
                     
                     // Check horizontal swap
                     if (col < GRID_SIZE - 1 && board[row][col + 1]) {
+                        // Extra safety check
+                        if (!board[row][col] || !board[row][col + 1]) continue;
+                        
                         // Simulate swap
                         const temp = board[row][col];
                         board[row][col] = board[row][col + 1];
@@ -848,7 +852,10 @@
                     }
                     
                     // Check vertical swap
-                    if (row < GRID_SIZE - 1 && board[row + 1][col]) {
+                    if (row < GRID_SIZE - 1 && board[row + 1] && board[row + 1][col]) {
+                        // Extra safety check
+                        if (!board[row][col] || !board[row + 1][col]) continue;
+                        
                         // Simulate swap
                         const temp = board[row][col];
                         board[row][col] = board[row + 1][col];
@@ -871,6 +878,26 @@
             }
             
             return null;
+        }
+        
+        // Validate board integrity
+        function validateBoard() {
+            let hasEmptySpaces = false;
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    if (!board[row][col]) {
+                        hasEmptySpaces = true;
+                    }
+                }
+            }
+            return !hasEmptySpaces;
+        }
+        
+        // Ensure board integrity
+        function ensureBoardIntegrity() {
+            if (!validateBoard() && !animating) {
+                dropCandies();
+            }
         }
         
         // Ensure moves are available
@@ -1306,6 +1333,17 @@
         function swapCandies(pos1, pos2) {
             if (isProcessingMove) return;
             
+            // Validate positions
+            if (!pos1 || !pos2 || 
+                pos1.row < 0 || pos1.row >= GRID_SIZE || 
+                pos1.col < 0 || pos1.col >= GRID_SIZE ||
+                pos2.row < 0 || pos2.row >= GRID_SIZE || 
+                pos2.col < 0 || pos2.col >= GRID_SIZE) {
+                animating = false;
+                isProcessingMove = false;
+                return;
+            }
+            
             animating = true;
             isProcessingMove = true;
             lastMoveTime = Date.now();
@@ -1317,6 +1355,7 @@
             if (!candy1 || !candy2) {
                 animating = false;
                 isProcessingMove = false;
+                ensureBoardIntegrity();
                 return;
             }
             
@@ -2041,6 +2080,7 @@
             isProcessingMove = false;
             firstSelectedCandy = null;
             touchMode = 'drag';
+            integrityCheckCounter = 0;
             document.getElementById('modeIndicator').textContent = 'SWIPE MODE';
             initBoard();
             updateUI();
@@ -2157,6 +2197,10 @@
         }
         
         function drawCandy(candy) {
+            if (!candy || !candyTypes[candy.type]) {
+                return;
+            }
+            
             const type = candyTypes[candy.type];
             const centerX = candy.x + CANDY_SIZE / 2;
             const centerY = candy.y + CANDY_SIZE / 2;
@@ -2453,7 +2497,16 @@
             updateParticles();
             draw();
             
+            // Periodic integrity check
             if (gameState === 'playing') {
+                integrityCheckCounter++;
+                if (integrityCheckCounter >= 60) {
+                    integrityCheckCounter = 0;
+                    if (!animating && !isProcessingMove) {
+                        ensureBoardIntegrity();
+                    }
+                }
+                
                 requestAnimationFrame(gameLoop);
             }
         }

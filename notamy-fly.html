@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Notamy Fly - Enhanced</title>
@@ -15,6 +15,17 @@
             -webkit-user-select: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Previeni lo zoom su tutti i dispositivi */
+        html, body {
+            touch-action: pan-x pan-y;
+            -ms-touch-action: pan-x pan-y;
+        }
+
+        input, textarea, select {
+            font-size: 16px !important;
         }
 
         :root {
@@ -38,6 +49,9 @@
             width: 100%;
             height: 100%;
             touch-action: none;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         #gameCanvas {
@@ -449,6 +463,15 @@
     </div>
 
     <script>
+        // Previeni zoom con doppio tap e pizzica
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        });
+
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -459,21 +482,20 @@
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
         
-        // Difficulty settings
+        // Difficulty settings - RESO PIÙ FACILE
         const difficulties = {
-            easy: { pipeSpeed: 2, pipeGap: 220, gravity: 0.5, scoreMultiplier: 1 },
-            normal: { pipeSpeed: 3, pipeGap: 200, gravity: 0.6, scoreMultiplier: 1.5 },
-            hard: { pipeSpeed: 4, pipeGap: 180, gravity: 0.7, scoreMultiplier: 2 },
-            insane: { pipeSpeed: 5, pipeGap: 160, gravity: 0.8, scoreMultiplier: 3 }
+            easy: { pipeSpeed: 1.5, pipeGap: 250, gravity: 0.3, jumpForce: -8, scoreMultiplier: 1 },
+            normal: { pipeSpeed: 2, pipeGap: 220, gravity: 0.4, jumpForce: -8.5, scoreMultiplier: 1.5 },
+            hard: { pipeSpeed: 2.5, pipeGap: 200, gravity: 0.5, jumpForce: -9, scoreMultiplier: 2 },
+            insane: { pipeSpeed: 3, pipeGap: 180, gravity: 0.6, jumpForce: -9.5, scoreMultiplier: 3 }
         };
         
         let currentDifficulty = 'easy';
         let settings = difficulties[currentDifficulty];
         
         // Game constants
-        const JUMP_FORCE = -10;
         const PIPE_WIDTH = 80;
-        const PIPE_SPACING = 300;
+        const PIPE_SPACING = 350; // Aumentato lo spazio tra i tubi
         
         // Colors
         const COLORS = {
@@ -530,7 +552,7 @@
             x: WIDTH * 0.3,
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 20,
+            radius: 25, // Aumentato il raggio per rendere l'uccellino più visibile
             trail: [],
             angle: 0,
             shielded: false,
@@ -538,7 +560,8 @@
             magnetized: false,
             magnetTime: 0,
             invincible: false,
-            invincibleTime: 0
+            invincibleTime: 0,
+            wingAnimation: 0
         };
         
         // Arrays
@@ -587,13 +610,16 @@
         
         // Input handling
         canvas.addEventListener('click', handleInput);
-        canvas.addEventListener('touchstart', handleInput, { passive: true });
+        canvas.addEventListener('touchstart', handleInput, { passive: false });
         document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') handleInput(e);
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleInput(e);
+            }
         });
         
         function handleInput(e) {
-            e.preventDefault();
+            if (e.preventDefault) e.preventDefault();
             
             if (gameState === 'start') {
                 startGame();
@@ -603,7 +629,8 @@
         }
         
         function jump() {
-            bird.velocity = JUMP_FORCE;
+            bird.velocity = settings.jumpForce;
+            bird.wingAnimation = 20; // Animazione delle ali
             playSound(400, 0.1, 'square');
             
             // Create jump particles
@@ -694,6 +721,11 @@
             // Update angle based on velocity
             bird.angle = Math.max(-25, Math.min(90, bird.velocity * 3));
             
+            // Update wing animation
+            if (bird.wingAnimation > 0) {
+                bird.wingAnimation--;
+            }
+            
             // Update trail
             bird.trail.push({ x: bird.x, y: bird.y, opacity: 1 });
             if (bird.trail.length > 15) {
@@ -741,8 +773,9 @@
                 });
             }
             
-            // Check boundaries
-            if (!bird.invincible && (bird.y - bird.radius < 0 || bird.y + bird.radius > HEIGHT)) {
+            // Check boundaries with margin
+            const margin = 20; // Margine di sicurezza
+            if (!bird.invincible && (bird.y - bird.radius < margin || bird.y + bird.radius > HEIGHT - margin)) {
                 if (bird.shielded) {
                     bird.shielded = false;
                     bird.invincible = true;
@@ -795,8 +828,8 @@
                         });
                     }
                     
-                    // Spawn power-up occasionally
-                    if (Math.random() < 0.3) {
+                    // Spawn power-up occasionally - aumentata la probabilità
+                    if (Math.random() < 0.4) {
                         const pipeCenter = (pipe.topHeight + pipe.bottomY) / 2;
                         createPowerup(pipe.x + PIPE_WIDTH + 150, pipeCenter);
                     }
@@ -932,17 +965,18 @@
             if (bird.invincible) return;
             
             pipes.forEach(pipe => {
-                // Check top pipe
-                if (bird.x + bird.radius > pipe.x && 
-                    bird.x - bird.radius < pipe.x + PIPE_WIDTH &&
-                    bird.y - bird.radius < pipe.topHeight) {
+                // Check top pipe con margine di collisione ridotto
+                const collisionMargin = 5;
+                if (bird.x + bird.radius - collisionMargin > pipe.x && 
+                    bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
+                    bird.y - bird.radius + collisionMargin < pipe.topHeight) {
                     handleCollision();
                 }
                 
-                // Check bottom pipe
-                if (bird.x + bird.radius > pipe.x && 
-                    bird.x - bird.radius < pipe.x + PIPE_WIDTH &&
-                    bird.y + bird.radius > pipe.bottomY) {
+                // Check bottom pipe con margine di collisione ridotto
+                if (bird.x + bird.radius - collisionMargin > pipe.x && 
+                    bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
+                    bird.y + bird.radius - collisionMargin > pipe.bottomY) {
                     handleCollision();
                 }
             });
@@ -1152,21 +1186,61 @@
             ctx.fillStyle = glowGradient;
             ctx.fillRect(-bird.radius * 2, -bird.radius * 2, bird.radius * 4, bird.radius * 4);
             
-            // Bird body
-            const bodyGradient = ctx.createRadialGradient(-bird.radius/3, -bird.radius/3, 0, 0, 0, bird.radius);
-            bodyGradient.addColorStop(0, COLORS.birdGlow);
-            bodyGradient.addColorStop(0.7, COLORS.bird);
-            bodyGradient.addColorStop(1, '#0099cc');
+            // Draw bird as a stylized bird shape
+            ctx.fillStyle = COLORS.bird;
             
-            ctx.fillStyle = bodyGradient;
+            // Body
             ctx.beginPath();
-            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, bird.radius * 0.9, bird.radius * 0.7, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // Inner highlight
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            // Head
             ctx.beginPath();
-            ctx.arc(-bird.radius/3, -bird.radius/3, bird.radius/3, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.5, -bird.radius * 0.2, bird.radius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(bird.radius * 0.6, -bird.radius * 0.25, bird.radius * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(bird.radius * 0.62, -bird.radius * 0.25, bird.radius * 0.06, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beak
+            ctx.fillStyle = COLORS.orange;
+            ctx.beginPath();
+            ctx.moveTo(bird.radius * 0.8, -bird.radius * 0.15);
+            ctx.lineTo(bird.radius * 1.1, -bird.radius * 0.1);
+            ctx.lineTo(bird.radius * 0.8, -bird.radius * 0.05);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Wing (animated)
+            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 5;
+            ctx.fillStyle = COLORS.bird;
+            ctx.beginPath();
+            ctx.ellipse(-bird.radius * 0.2, wingOffset, bird.radius * 0.6, bird.radius * 0.3, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(-bird.radius * 0.6, 0);
+            ctx.lineTo(-bird.radius * 1.1, -bird.radius * 0.2);
+            ctx.lineTo(-bird.radius * 1.1, bird.radius * 0.2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Inner highlight on body
+            const highlightGradient = ctx.createRadialGradient(bird.radius * 0.2, -bird.radius * 0.2, 0, bird.radius * 0.2, -bird.radius * 0.2, bird.radius * 0.5);
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            highlightGradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = highlightGradient;
+            ctx.beginPath();
+            ctx.arc(bird.radius * 0.2, -bird.radius * 0.2, bird.radius * 0.5, 0, Math.PI * 2);
             ctx.fill();
             
             ctx.restore();
@@ -1351,7 +1425,7 @@
             // Hide start screen immediately
             document.getElementById('startScreen').style.display = 'none';
             // Set default difficulty to normal
-            currentDifficulty = 'normal';
+            currentDifficulty = 'easy'; // Cambiato a easy per rendere più facile
             settings = difficulties[currentDifficulty];
             // Start game immediately
             setTimeout(() => {

@@ -16,15 +16,101 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+
+        :root {
+            --primary-teal: #00b4a6;
+            --primary-light: #00d9ff;
+            --secondary-red: #ff6b6b;
+            --secondary-light: #ff8787;
+            --accent-green: #00e676;
+            --cyan-neon: #00ffff;
+            --cyan-deep: #00cccc;
+            --cyan-light: #7affff;
+            --purple-accent: #b366ff;
+            --magenta-glow: #ff00ff;
+            --pink-neon: #ff6b6b;
+            --orange-neon: #ffab00;
+            --green-neon: #00e676;
+            --black-deep: #000000;
+            --black-soft: #0a0a0a;
+            --gray-dark: #1a1a1a;
+            --white: #ffffff;
+            --gradient-main: linear-gradient(135deg, #00b4a6, #00d9ff);
+            --gradient-glow: linear-gradient(135deg, #00ffff, #ff00ff);
+        }
         
         body {
-            background: #000000;
+            background: var(--black-deep);
             font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
             touch-action: none;
+        }
+
+        /* Neon Grid Background */
+        .neon-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 180, 166, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 166, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -2;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Floating Neon Shapes */
+        .neon-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.2;
+            animation: float 15s infinite ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-teal);
+            top: -150px;
+            left: -150px;
+        }
+
+        .shape2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-green);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: 5s;
+        }
+
+        .shape3 {
+            width: 250px;
+            height: 250px;
+            background: var(--secondary-red);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-100px, 100px) scale(0.9); }
         }
         
         #gameContainer {
@@ -50,24 +136,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #FFFFFF;
+            color: var(--white);
             font-size: 14px;
             font-weight: 500;
             gap: 8px;
         }
         
         .status-item {
-            background: rgba(26, 26, 26, 0.8);
-            padding: 6px 12px;
+            background: rgba(0, 180, 166, 0.02);
+            padding: 8px 16px;
             border-radius: 999px;
-            border: 1px solid #2A2A2A;
-            backdrop-filter: blur(10px);
-            animation: statusGlow 3s ease-in-out infinite;
+            border: 1px solid rgba(0, 180, 166, 0.15);
+            backdrop-filter: blur(20px);
             position: relative;
             overflow: hidden;
             flex: 1;
             text-align: center;
             min-width: 0;
+            transition: all 0.3s ease;
         }
         
         .status-item::before {
@@ -77,8 +163,14 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+            background: radial-gradient(circle, rgba(0, 180, 166, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-item:hover::before {
+            opacity: 1;
         }
         
         @keyframes rotate {
@@ -86,51 +178,60 @@
             100% { transform: rotate(360deg); }
         }
         
-        @keyframes statusGlow {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
-            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
-        }
-        
         .status-item span {
-            color: #00d9ff;
-            font-weight: 600;
+            color: var(--primary-light);
+            font-weight: 700;
             position: relative;
             z-index: 1;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
         }
         
         #timeItem.warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: var(--orange-neon);
             animation: timeWarning 1s ease-in-out infinite;
-            background: rgba(255, 107, 107, 0.2);
-            border-color: #ff6b6b;
+        }
+
+        #timeItem.warning span {
+            color: var(--orange-neon);
+            text-shadow: 0 0 10px rgba(255, 171, 0, 0.8);
         }
         
         #timeItem.critical {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: var(--secondary-red);
             animation: timeCritical 0.5s ease-in-out infinite;
-            background: rgba(255, 82, 82, 0.3);
-            border-color: #ff5252;
+        }
+
+        #timeItem.critical span {
+            color: var(--secondary-red);
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
         }
         
         #timeItem.decay {
-            box-shadow: 0 0 20px rgba(255, 82, 82, 0.8);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
         }
         
         @keyframes timeWarning {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+            }
+            50% { 
+                transform: scale(1.05); 
+                box-shadow: 0 0 30px rgba(255, 193, 7, 0.5);
+            }
         }
         
         @keyframes timeCritical {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 82, 82, 0.8); }
-            50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(255, 82, 82, 1); }
-        }
-        
-        #timeItem.decay #time {
-            animation: pulse 0.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            }
+            50% { 
+                transform: scale(1.08); 
+                box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+            }
         }
         
         #gameCanvas {
@@ -138,18 +239,24 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 
+                0 0 60px rgba(0, 180, 166, 0.2),
+                0 0 120px rgba(0, 180, 166, 0.1);
+            background: rgba(10, 10, 10, 0.5);
+            backdrop-filter: blur(10px);
         }
         
         .score-popup {
             position: absolute;
-            font-size: 28px;
-            font-weight: 600;
-            color: #00d9ff;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--cyan-light);
             pointer-events: none;
-            animation: scoreFloat 1.2s ease-out forwards;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+            animation: scoreFloat 1.5s ease-out forwards;
+            text-shadow: 
+                0 0 20px rgba(0, 217, 255, 0.8),
+                0 0 40px rgba(0, 217, 255, 0.4);
             z-index: 50;
         }
         
@@ -159,10 +266,10 @@
                 opacity: 1; 
             }
             50% {
-                transform: translateY(-40px) scale(1.3);
+                transform: translateY(-50px) scale(1.2);
             }
             100% { 
-                transform: translateY(-80px) scale(1.5); 
+                transform: translateY(-100px) scale(1); 
                 opacity: 0; 
             }
         }
@@ -172,82 +279,114 @@
             top: 90px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff6b6b, #ff8787);
-            padding: 12px 32px;
+            background: var(--gradient-main);
+            padding: 14px 36px;
             border-radius: 999px;
-            color: #000000;
-            font-weight: 700;
-            font-size: 20px;
+            color: var(--black-deep);
+            font-weight: 900;
+            font-size: 22px;
             opacity: 0;
             transition: opacity 0.3s;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 180, 166, 0.4),
+                0 0 60px rgba(0, 180, 166, 0.3);
             z-index: 15;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         #comboIndicator.show {
             opacity: 1;
-            animation: comboShake 0.5s ease-in-out;
+            animation: comboGlow 0.6s ease-in-out;
         }
         
-        @keyframes comboShake {
-            0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
-            25% { transform: translateX(-50%) scale(1.2) rotate(3deg); }
-            75% { transform: translateX(-50%) scale(1.2) rotate(-3deg); }
+        @keyframes comboGlow {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1) rotate(0deg); 
+                filter: brightness(1);
+            }
+            25% { 
+                transform: translateX(-50%) scale(1.15) rotate(2deg); 
+                filter: brightness(1.2);
+            }
+            75% { 
+                transform: translateX(-50%) scale(1.15) rotate(-2deg); 
+                filter: brightness(1.2);
+            }
         }
         
         #streakIndicator {
             position: absolute;
-            top: 140px;
+            top: 145px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ffc107, #ff9800);
-            padding: 8px 24px;
+            background: linear-gradient(135deg, var(--orange-neon), var(--secondary-red));
+            padding: 10px 28px;
             border-radius: 999px;
-            color: #000000;
+            color: var(--white);
             font-weight: 700;
-            font-size: 16px;
+            font-size: 18px;
             opacity: 0;
             transition: opacity 0.3s;
-            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(255, 171, 0, 0.3),
+                0 0 40px rgba(255, 171, 0, 0.2);
             z-index: 14;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         #streakIndicator.show {
             opacity: 1;
-            animation: streakPulse 0.8s ease-in-out;
+            animation: streakBounce 0.8s ease-in-out;
         }
         
-        @keyframes streakPulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.1); }
+        @keyframes streakBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            25% { transform: translateX(-50%) translateY(-10px); }
+            50% { transform: translateX(-50%) translateY(0); }
+            75% { transform: translateX(-50%) translateY(-5px); }
         }
         
         #shuffleIndicator {
             position: absolute;
-            top: 100px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px 40px;
-            border-radius: 20px;
-            color: #00d9ff;
-            font-weight: 600;
-            font-size: 24px;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 24px 48px;
+            border-radius: 999px;
+            color: var(--primary-teal);
+            font-weight: 800;
+            font-size: 28px;
             opacity: 0;
             z-index: 30;
             pointer-events: none;
-            border: 2px solid #00d9ff;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            border: 2px solid var(--primary-teal);
+            box-shadow: 
+                0 0 60px rgba(0, 180, 166, 0.6),
+                inset 0 0 30px rgba(0, 180, 166, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         
         #shuffleIndicator.show {
-            animation: shufflePulse 1s ease-in-out;
+            animation: shuffleReveal 1.2s ease-in-out;
         }
         
-        @keyframes shufflePulse {
-            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
-            50% { opacity: 1; transform: translateX(-50%) scale(1); }
-            100% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+        @keyframes shuffleReveal {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-180deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.1) rotate(5deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5) rotate(180deg); 
+            }
         }
         
         #inactivityWarning {
@@ -255,28 +394,30 @@
             top: 90px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff5252, #ff1744);
-            padding: 14px 50px;
+            background: linear-gradient(135deg, var(--secondary-red), var(--secondary-light));
+            padding: 16px 60px;
             border-radius: 999px;
-            color: #FFFFFF;
-            font-weight: 800;
-            font-size: 24px;
+            color: var(--white);
+            font-weight: 900;
+            font-size: 26px;
             letter-spacing: 1px;
             z-index: 100;
-            box-shadow: 0 0 50px rgba(255, 82, 82, 0.9), inset 0 0 20px rgba(255, 255, 255, 0.2);
-            animation: warningShake 0.3s ease-in-out infinite;
+            box-shadow: 
+                0 0 60px rgba(255, 107, 107, 0.8),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            animation: urgentPulse 0.3s ease-in-out infinite;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
         }
         
-        @keyframes warningShake {
+        @keyframes urgentPulse {
             0%, 100% { 
-                transform: translateX(-50%) rotate(-3deg) scale(1); 
+                transform: translateX(-50%) scale(1); 
                 filter: brightness(1);
             }
             50% { 
-                transform: translateX(-50%) rotate(3deg) scale(1.08); 
-                filter: brightness(1.2);
+                transform: translateX(-50%) scale(1.05); 
+                filter: brightness(1.3);
             }
         }
         
@@ -286,7 +427,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(20px);
             display: none;
             flex-direction: column;
             justify-content: center;
@@ -296,61 +438,110 @@
         }
         
         .game-over-title {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: 200;
-            color: #ff5252;
-            margin-bottom: 16px;
-            letter-spacing: -1px;
-            text-shadow: 0 0 20px rgba(255, 82, 82, 0.5);
+            color: var(--secondary-red);
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            text-shadow: 
+                0 0 30px rgba(255, 107, 107, 0.6),
+                0 0 60px rgba(255, 107, 107, 0.3);
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
         }
         
         .final-score {
-            font-size: 72px;
+            font-size: 96px;
             font-weight: 100;
-            color: #00d9ff;
-            margin-bottom: 8px;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+            color: var(--primary-teal);
+            margin-bottom: 10px;
+            text-shadow: 
+                0 0 40px rgba(0, 180, 166, 0.8),
+                0 0 80px rgba(0, 180, 166, 0.4);
+            animation: scoreGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes scoreGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 40px rgba(0, 180, 166, 0.8),
+                    0 0 80px rgba(0, 180, 166, 0.4);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 60px rgba(0, 180, 166, 1),
+                    0 0 120px rgba(0, 180, 166, 0.6);
+            }
         }
         
         .best-score {
-            font-size: 20px;
-            color: #999999;
-            margin-bottom: 48px;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 56px;
+            font-weight: 300;
+        }
+
+        .best-score span {
+            color: var(--primary-light);
+            font-weight: 500;
         }
         
         .play-again-button {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            background: var(--gradient-main);
             border: none;
-            color: #000000;
-            padding: 16px 48px;
+            color: var(--black-deep);
+            padding: 18px 56px;
             border-radius: 999px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            letter-spacing: 1px;
+            box-shadow: 
+                0 0 40px rgba(0, 180, 166, 0.5),
+                0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
         }
-        
-        @keyframes powerupGlow {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
-                transform: scale(1);
-            }
-            50% { 
-                box-shadow: 0 0 40px rgba(255, 193, 7, 1);
-                transform: scale(1.05);
-            }
+
+        .play-again-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .play-again-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 0 60px rgba(0, 180, 166, 0.7),
+                0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .play-again-button:hover::before {
+            opacity: 1;
         }
         
         .time-bonus {
             position: absolute;
-            font-size: 24px;
-            font-weight: 600;
-            color: #00e676;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-green);
             pointer-events: none;
-            animation: timeBonusFloat 1s ease-out forwards;
-            text-shadow: 0 0 10px rgba(0, 230, 118, 0.8);
+            animation: timeBonusFloat 1.2s ease-out forwards;
+            text-shadow: 
+                0 0 20px rgba(0, 230, 118, 0.8),
+                0 0 40px rgba(0, 230, 118, 0.4);
             z-index: 50;
         }
         
@@ -360,18 +551,19 @@
                 opacity: 1; 
             }
             100% { 
-                transform: translateX(-50%) translateY(-40px) scale(1.2); 
+                transform: translateX(-50%) translateY(-60px) scale(1.3); 
                 opacity: 0; 
             }
         }
         
         .drag-line {
             position: absolute;
-            background: rgba(0, 212, 255, 0.5);
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
             pointer-events: none;
             z-index: 5;
             border-radius: 3px;
             display: none;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
         }
         
         #modeIndicator {
@@ -379,19 +571,42 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 212, 255, 0.2);
-            padding: 8px 24px;
+            background: rgba(0, 180, 166, 0.1);
+            padding: 10px 28px;
             border-radius: 999px;
-            color: #00d9ff;
+            color: var(--primary-teal);
             font-weight: 600;
             font-size: 14px;
             z-index: 10;
-            border: 1px solid #00d9ff;
+            border: 1px solid rgba(0, 180, 166, 0.3);
             pointer-events: none;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Loading animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Neon Grid Background -->
+    <div class="neon-grid"></div>
+
+    <!-- Floating Neon Shapes -->
+    <div class="neon-shape shape1"></div>
+    <div class="neon-shape shape2"></div>
+    <div class="neon-shape shape3"></div>
+
     <div id="gameContainer">
         <div id="gameHeader">
             <div id="gameInfo">
@@ -405,9 +620,9 @@
         <div class="drag-line" id="dragLine"></div>
         <div id="modeIndicator">SWIPE MODE</div>
         
-        <div id="comboIndicator">COMBO x<span id="comboMultiplier">2</span></div>
-        <div id="streakIndicator">STREAK x<span id="streakMultiplier">2</span></div>
-        <div id="shuffleIndicator">SHUFFLING!</div>
+        <div id="comboIndicator">COMBO ×<span id="comboMultiplier">2</span></div>
+        <div id="streakIndicator">STREAK ×<span id="streakMultiplier">2</span></div>
+        <div id="shuffleIndicator">SHUFFLING</div>
         <div id="inactivityWarning" style="display: none;">MOVE FASTER!</div>
         
         <div id="gameOverScreen">
@@ -427,6 +642,22 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Color constants
+        const COLORS = {
+            primaryTeal: '#00b4a6',
+            primaryLight: '#00d9ff',
+            secondaryRed: '#ff6b6b',
+            secondaryLight: '#ff8787',
+            accentGreen: '#00e676',
+            cyanNeon: '#00ffff',
+            cyanDeep: '#00cccc',
+            cyanLight: '#7affff',
+            purpleAccent: '#b366ff',
+            orangeNeon: '#ffab00',
+            white: '#ffffff',
+            blackDeep: '#000000'
+        };
+        
         // Get screen dimensions
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
@@ -434,12 +665,12 @@
         // Calculate optimal grid size based on screen
         let GRID_SIZE = 6; // Further reduced for even larger candies
         let CANDY_SIZE;
-        let CANDY_SPACING = 4; // Increased spacing for better touch targets
-        let BOARD_PADDING = 20;
+        let CANDY_SPACING = 5; // Increased spacing for better touch targets
+        let BOARD_PADDING = 25;
         
         // Calculate candy size based on screen dimensions
-        const maxBoardWidth = screenWidth - 30; // Leave some margin
-        const maxBoardHeight = screenHeight - 180; // Account for header and margins
+        const maxBoardWidth = screenWidth - 40; // Leave some margin
+        const maxBoardHeight = screenHeight - 200; // Account for header and margins
         const maxCandySize = Math.min(
             (maxBoardWidth - (BOARD_PADDING * 2)) / GRID_SIZE - CANDY_SPACING,
             (maxBoardHeight - (BOARD_PADDING * 2)) / GRID_SIZE - CANDY_SPACING,
@@ -457,21 +688,21 @@
         canvas.width = canvasSize;
         canvas.height = canvasSize;
         
-        // Candy types with enhanced visuals
+        // Candy types with enhanced visuals matching index colors
         const candyTypes = [
-            { color: '#00b4a6', shape: 'circle', gradient: ['#00d9ff', '#00b4a6', '#008a7f'] },
-            { color: '#00d9ff', shape: 'square', gradient: ['#66e7ff', '#00d9ff', '#0099cc'] },
-            { color: '#ff6b6b', shape: 'triangle', gradient: ['#ff9999', '#ff6b6b', '#cc5555'] },
-            { color: '#ffab00', shape: 'diamond', gradient: ['#ffd966', '#ffab00', '#cc8800'] },
-            { color: '#00e676', shape: 'star', gradient: ['#66ff99', '#00e676', '#00b85f'] },
-            { color: '#9c27b0', shape: 'hexagon', gradient: ['#c966d9', '#9c27b0', '#7a1f8d'] }
+            { color: COLORS.primaryTeal, shape: 'circle', gradient: [COLORS.primaryLight, COLORS.primaryTeal, '#007a70'] },
+            { color: COLORS.primaryLight, shape: 'square', gradient: [COLORS.cyanLight, COLORS.primaryLight, '#0099cc'] },
+            { color: COLORS.secondaryRed, shape: 'triangle', gradient: ['#ff9999', COLORS.secondaryRed, '#ff4444'] },
+            { color: COLORS.orangeNeon, shape: 'diamond', gradient: ['#ffd966', COLORS.orangeNeon, '#ff8800'] },
+            { color: COLORS.accentGreen, shape: 'star', gradient: ['#66ffaa', COLORS.accentGreen, '#00c853'] },
+            { color: COLORS.purpleAccent, shape: 'hexagon', gradient: ['#d199ff', COLORS.purpleAccent, '#9933ff'] }
         ];
         
         // Power-up types
         const powerUpTypes = {
             bomb: { color: '#ff5252', shape: 'bomb', gradient: ['#ff8a80', '#ff5252', '#d32f2f'] },
             rocket: { color: '#2196f3', shape: 'rocket', gradient: ['#64b5f6', '#2196f3', '#1976d2'] },
-            rainbow: { color: '#rainbow', shape: 'star', gradient: ['#ff6b6b', '#ffab00', '#00e676', '#00d9ff', '#9c27b0'] }
+            rainbow: { color: '#rainbow', shape: 'star', gradient: [COLORS.secondaryRed, COLORS.orangeNeon, COLORS.accentGreen, COLORS.primaryLight, COLORS.purpleAccent] }
         };
         
         // Game state
@@ -538,7 +769,8 @@
                 powerUp: null,
                 row: row,
                 col: col,
-                selected: false
+                selected: false,
+                glow: 0
             };
         }
         
@@ -832,6 +1064,8 @@
                     if (window.navigator.vibrate) {
                         window.navigator.vibrate([50, 50, 50]);
                     }
+                    document.getElementById('modeIndicator').textContent = 
+                        touchMode === 'tap' ? 'TAP MODE' : 'SWIPE MODE';
                     return;
                 }
                 lastTapTime = currentTime;
@@ -978,10 +1212,6 @@
             touchStartCoords = null;
             isDragging = false;
             hasMoved = false;
-            
-            // Update mode indicator
-            document.getElementById('modeIndicator').textContent = 
-                touchMode === 'tap' ? 'TAP MODE' : 'SWIPE MODE';
         }
         
         function getEventPos(e) {
@@ -1400,7 +1630,7 @@
             popup.style.top = (rect.top + y) + 'px';
             document.body.appendChild(popup);
             
-            setTimeout(() => popup.remove(), 1200);
+            setTimeout(() => popup.remove(), 1500);
         }
         
         // Remove matched candies
@@ -1543,7 +1773,7 @@
         }
         
         function createRainbowParticles(x, y) {
-            const colors = ['#ff6b6b', '#ffab00', '#00e676', '#00d9ff', '#9c27b0'];
+            const colors = [COLORS.secondaryRed, COLORS.orangeNeon, COLORS.accentGreen, COLORS.primaryLight, COLORS.purpleAccent];
             colors.forEach((color, i) => {
                 const angle = (Math.PI * 2 / colors.length) * i;
                 for (let j = 0; j < 3; j++) {
@@ -1620,6 +1850,9 @@
                             candy.rotation -= 15;
                             if (candy.rotation < 0) candy.rotation = 0;
                         }
+                        
+                        // Glow animation
+                        candy.glow = Math.sin(Date.now() * 0.005) * 0.5 + 0.5;
                     }
                 }
             }
@@ -1689,7 +1922,7 @@
             popup.style.top = (rect.top + 120) + 'px';
             document.body.appendChild(popup);
             
-            setTimeout(() => popup.remove(), 1000);
+            setTimeout(() => popup.remove(), 1200);
         }
         
         // Update UI
@@ -1748,24 +1981,28 @@
         
         // Enhanced drawing functions
         function draw() {
-            // Clear canvas
-            ctx.fillStyle = '#0A0A0A';
+            // Clear canvas with subtle gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bgGradient.addColorStop(0, 'rgba(10, 10, 10, 0.95)');
+            bgGradient.addColorStop(1, 'rgba(0, 0, 0, 0.95)');
+            ctx.fillStyle = bgGradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw board background with gradient
+            // Draw board background with softer gradient
             const boardGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            boardGradient.addColorStop(0, 'rgba(26, 26, 26, 0.7)');
-            boardGradient.addColorStop(1, 'rgba(10, 10, 10, 0.7)');
+            boardGradient.addColorStop(0, 'rgba(0, 180, 166, 0.02)');
+            boardGradient.addColorStop(0.5, 'rgba(0, 217, 255, 0.01)');
+            boardGradient.addColorStop(1, 'rgba(0, 180, 166, 0.02)');
             ctx.fillStyle = boardGradient;
             ctx.fillRect(
-                BOARD_PADDING - 5,
-                BOARD_PADDING - 5,
-                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 10,
-                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 10
+                BOARD_PADDING - 10,
+                BOARD_PADDING - 10,
+                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 20,
+                GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + 20
             );
             
-            // Draw grid lines
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            // Draw subtle grid lines
+            ctx.strokeStyle = 'rgba(0, 180, 166, 0.05)';
             ctx.lineWidth = 1;
             for (let i = 0; i <= GRID_SIZE; i++) {
                 const pos = BOARD_PADDING + i * (CANDY_SIZE + CANDY_SPACING) - CANDY_SPACING / 2;
@@ -1839,46 +2076,46 @@
                 ctx.translate(-centerX, -centerY);
             }
             
-            // Apply hint animation
+            // Apply hint animation with softer glow
             if (candy.hint) {
-                ctx.shadowColor = '#00d9ff';
-                ctx.shadowBlur = 25;
-                const hintScale = 1 + Math.sin(Date.now() * 0.005) * 0.15;
+                ctx.shadowColor = COLORS.primaryTeal;
+                ctx.shadowBlur = 25 + Math.sin(Date.now() * 0.005) * 10;
+                const hintScale = 1 + Math.sin(Date.now() * 0.005) * 0.1;
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.scale(hintScale, hintScale);
                 ctx.translate(-centerX, -centerY);
             }
             
-            // Apply selection glow
+            // Apply selection glow with elegant animation
             if (candy.selected) {
-                ctx.shadowColor = '#00d9ff';
-                ctx.shadowBlur = 35;
+                ctx.shadowColor = COLORS.primaryLight;
+                ctx.shadowBlur = 30 + Math.sin(Date.now() * 0.003) * 10;
                 // Add pulsing effect for selected candy
-                const pulse = Math.sin(Date.now() * 0.005) * 0.1 + 1;
+                const pulse = Math.sin(Date.now() * 0.005) * 0.08 + 1;
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.scale(pulse, pulse);
                 ctx.translate(-centerX, -centerY);
             }
             
-            // Highlight adjacent candies in tap mode
+            // Highlight adjacent candies in tap mode with subtle glow
             if (touchMode === 'tap' && firstSelectedCandy && 
                 Math.abs(candy.row - firstSelectedCandy.row) + Math.abs(candy.col - firstSelectedCandy.col) === 1) {
-                ctx.shadowColor = '#00e676';
-                ctx.shadowBlur = 20;
-                const adjacentPulse = Math.sin(Date.now() * 0.008) * 0.05 + 1;
+                ctx.shadowColor = COLORS.accentGreen;
+                ctx.shadowBlur = 15 + Math.sin(Date.now() * 0.008) * 5;
+                const adjacentPulse = Math.sin(Date.now() * 0.008) * 0.03 + 1;
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.scale(adjacentPulse, adjacentPulse);
                 ctx.translate(-centerX, -centerY);
             }
             
-            // Shadow
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            drawShape(type.shape, centerX + 3, centerY + 3, size);
+            // Subtle shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            drawShape(type.shape, centerX + 2, centerY + 2, size);
             
-            // Main candy with gradient
+            // Main candy with enhanced gradient
             const gradient = ctx.createRadialGradient(
                 centerX - size/3, centerY - size/3, 0,
                 centerX, centerY, size
@@ -1890,9 +2127,15 @@
             ctx.fillStyle = gradient;
             drawShape(type.shape, centerX, centerY, size);
             
-            // Highlight
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            drawShape(type.shape, centerX - size/4, centerY - size/4, size/3);
+            // Enhanced highlight
+            const highlightGradient = ctx.createRadialGradient(
+                centerX - size/3, centerY - size/3, 0,
+                centerX - size/3, centerY - size/3, size/2
+            );
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = highlightGradient;
+            drawShape(type.shape, centerX, centerY, size * 0.9);
             
             if (candy.hint) {
                 ctx.restore();
@@ -1919,13 +2162,16 @@
             ctx.save();
             ctx.globalAlpha = candy.alpha;
             
-            // Pulsing glow effect
+            // Pulsing glow effect with neon colors
             const pulse = Math.sin(Date.now() * 0.003) * 0.15 + 1;
             ctx.shadowColor = powerUpInfo.color;
-            ctx.shadowBlur = 25 * pulse;
+            ctx.shadowBlur = 30 * pulse;
             
-            // Background circle
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            // Background circle with gradient
+            const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, size/2);
+            bgGradient.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
+            bgGradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+            ctx.fillStyle = bgGradient;
             ctx.beginPath();
             ctx.arc(centerX, centerY, size/2, 0, Math.PI * 2);
             ctx.fill();
@@ -1933,7 +2179,7 @@
             // Power-up specific drawing
             switch(candy.powerUp) {
                 case 'bomb':
-                    // Draw bomb shape
+                    // Draw bomb shape with gradient
                     const bombGradient = ctx.createRadialGradient(
                         centerX - size/4, centerY - size/4, 0,
                         centerX, centerY, size/2
@@ -1946,24 +2192,28 @@
                     ctx.arc(centerX, centerY, size/2.5, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Fuse
-                    ctx.strokeStyle = '#ffab00';
+                    // Fuse with glow
+                    ctx.strokeStyle = COLORS.orangeNeon;
                     ctx.lineWidth = 3;
+                    ctx.shadowColor = COLORS.orangeNeon;
+                    ctx.shadowBlur = 10;
                     ctx.beginPath();
                     ctx.moveTo(centerX, centerY - size/2.5);
                     ctx.lineTo(centerX, centerY - size/1.5);
                     ctx.stroke();
                     
-                    // Spark
-                    ctx.fillStyle = '#fff';
-                    drawStar(centerX, centerY - size/1.5, 4, 5, 2.5);
+                    // Animated spark
+                    ctx.fillStyle = COLORS.white;
+                    ctx.shadowColor = COLORS.orangeNeon;
+                    ctx.shadowBlur = 20;
+                    drawStar(centerX, centerY - size/1.5, 4, 6 * pulse, 3 * pulse);
                     break;
                     
                 case 'rocket':
-                    // Draw rocket shape
+                    // Draw rocket shape with rotation
                     ctx.save();
                     ctx.translate(centerX, centerY);
-                    ctx.rotate(Math.PI / 4);
+                    ctx.rotate(Math.PI / 4 + Math.sin(Date.now() * 0.002) * 0.1);
                     
                     const rocketGradient = ctx.createLinearGradient(-size/2, 0, size/2, 0);
                     powerUpInfo.gradient.forEach((color, index) => {
@@ -1982,7 +2232,9 @@
                     ctx.closePath();
                     ctx.fill();
                     
-                    // Rocket fins
+                    // Rocket fins with glow
+                    ctx.shadowColor = COLORS.cyanNeon;
+                    ctx.shadowBlur = 15;
                     ctx.beginPath();
                     ctx.moveTo(-size/6, size/2);
                     ctx.lineTo(-size/3, size/2);
@@ -2001,15 +2253,24 @@
                     break;
                     
                 case 'rainbow':
-                    // Draw rainbow star with colors
+                    // Draw rainbow star with rotating colors
                     const time = Date.now() * 0.001;
                     powerUpInfo.gradient.forEach((color, index) => {
                         ctx.save();
                         ctx.translate(centerX, centerY);
                         ctx.rotate(time + (index * Math.PI * 2 / powerUpInfo.gradient.length));
-                        ctx.fillStyle = color;
+                        
+                        // Create gradient for each color segment
+                        const segmentGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size/2);
+                        segmentGradient.addColorStop(0, color);
+                        segmentGradient.addColorStop(0.7, color);
+                        segmentGradient.addColorStop(1, 'transparent');
+                        
+                        ctx.fillStyle = segmentGradient;
                         ctx.globalAlpha = candy.alpha * 0.8;
-                        drawStar(0, 0, 5, size/2, size/4);
+                        ctx.shadowColor = color;
+                        ctx.shadowBlur = 20;
+                        drawStar(0, 0, 5, size/2 * pulse, size/4 * pulse);
                         ctx.restore();
                     });
                     break;
@@ -2027,7 +2288,7 @@
                     break;
                     
                 case 'square':
-                    const radius = size/8;
+                    const radius = size/6;
                     ctx.roundRect(x - size/2, y - size/2, size, size, radius);
                     break;
                     

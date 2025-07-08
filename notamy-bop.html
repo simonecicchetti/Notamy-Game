@@ -710,38 +710,36 @@
             balls = [];
             timer = 90 + (level * 15); // More time per level
             
-            // Always start with one ball
+            // Always start with one ball from the top
             const ballTypes = level > 2 ? ['normal', 'bouncy'] : ['normal'];
             if (level > 5) ballTypes.push('special');
             
             const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
-            const x = canvas.width / 2 + (Math.random() - 0.5) * 100; // Center with slight variation
-            const y = canvas.height - 200; // Start near bottom
+            const x = canvas.width / 2 + (Math.random() - 0.5) * 200; // Center with variation
+            const y = 100; // Start from top
             
-            const ball = createBall(x, y, 'large', type);
-            // Set initial upward velocity so ball bounces to top
-            balls[balls.length - 1].velY = -12; // Initial upward velocity
-            balls[balls.length - 1].velX = (Math.random() - 0.5) * 3; // Slight horizontal movement
+            createBall(x, y, 'large', type);
+            // Ball will fall naturally with gravity
         }
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
             
             // Speed multiplier that increases slightly with level
-            const speedMultiplier = 1 + (level - 1) * 0.1; // 10% increase per level
+            const speedMultiplier = 1 + (level - 1) * 0.08; // 8% increase per level (less aggressive)
             
             const ball = {
                 x: x,
                 y: y,
-                velX: (Math.random() - 0.5) * 2 * speedMultiplier, // Horizontal velocity scales with level
-                velY: 0,
+                velX: 0, // Start with no horizontal velocity
+                velY: 0, // Start falling
                 radius: ballData.radius,
                 size: size,
                 type: type,
                 color: ballData.color,
                 points: ballData.points,
-                gravity: 0.25, // Constant gravity for all balls
-                bounceVelocity: -12 * speedMultiplier, // Bounce velocity scales with level
+                gravity: 0.3, // Slightly higher gravity for better control
+                bounceVelocity: -10 * speedMultiplier, // Gentler bounce
                 rotation: 0,
                 trail: [],
                 glowIntensity: 0
@@ -1041,13 +1039,13 @@
                             const speedMultiplier = 1 + (level - 1) * 0.1;
                             
                             for (let k = 0; k < 2; k++) {
-                                const angle = (k / 2) * Math.PI * 2 + Math.random() * 0.5;
-                                const newX = ball.x + Math.cos(angle) * 40;
-                                const newY = ball.y + Math.sin(angle) * 40;
-                                const newBall = createBall(newX, newY, ballData.nextSize, ball.type);
-                                // Give split balls some initial velocity
-                                balls[balls.length - 1].velX = Math.cos(angle) * 3 * speedMultiplier;
-                                balls[balls.length - 1].velY = -5 * speedMultiplier;
+                                const angle = k === 0 ? -0.5 : 0.5; // Split left and right
+                                const newX = ball.x + (k === 0 ? -30 : 30);
+                                const newY = ball.y;
+                                createBall(newX, newY, ballData.nextSize, ball.type);
+                                // Give split balls gentle velocity
+                                balls[balls.length - 1].velX = angle * 2 * speedMultiplier;
+                                balls[balls.length - 1].velY = -2 * speedMultiplier; // Small upward push
                             }
                         }
                         
@@ -1083,10 +1081,14 @@
                     createParticles(ball.x, ball.y, 8, ball.color, true);
                 }
                 
-                // Bottom bouncing - always bounce to top
+                // Bottom bouncing - controlled bounce
                 if (ball.y + ball.radius >= canvas.height - 150) {
                     ball.y = canvas.height - 150 - ball.radius;
-                    ball.velY = ball.bounceVelocity; // Fixed velocity to reach top
+                    ball.velY = ball.bounceVelocity; // Controlled bounce velocity
+                    // Add slight random horizontal movement on bounce
+                    if (Math.abs(ball.velX) < 0.5) {
+                        ball.velX = (Math.random() - 0.5) * 2;
+                    }
                     createParticles(ball.x, ball.y + ball.radius, 12, ball.color, true);
                     
                     // Visual bounce effect

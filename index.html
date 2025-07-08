@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
@@ -37,9 +37,9 @@
         body {
             background: var(--black-deep);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            overflow-x: hidden;
             min-height: 100vh;
             color: var(--white);
+            margin: 0;
         }
 
         /* Simple static grid */
@@ -60,8 +60,8 @@
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(rgba(0, 180, 166, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 180, 166, 0.02) 1px, transparent 1px);
+                linear-gradient(rgba(0, 180, 166, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 166, 0.04) 1px, transparent 1px);
             background-size: 50px 50px;
         }
         
@@ -71,7 +71,7 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px 15px;
+            padding: 30px 20px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -80,80 +80,88 @@
         /* Static header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         /* Simple static logo */
         .logo-text {
-            font-size: 80px;
-            font-weight: 200;
+            font-size: 90px;
+            font-weight: 300;
             background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--purple-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
         }
         
         .logo-subtitle {
-            font-size: 16px;
-            font-weight: 300;
+            font-size: 18px;
+            font-weight: 600;
             color: var(--primary-light);
             letter-spacing: 3px;
             text-transform: uppercase;
-            opacity: 0.9;
+            opacity: 1;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
         }
 
         /* Simple grid */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            gap: 25px;
             max-width: 600px;
             margin: 0 auto;
         }
         
         /* Ultra simple game cards */
         .game-card {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             border: 2px solid var(--card-border, rgba(0, 180, 166, 0.3));
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
             position: relative;
             cursor: pointer;
             text-decoration: none;
             display: block;
             transition: border-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .game-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--card-border-hover, var(--primary-teal));
+        /* Desktop hover effect */
+        @media (hover: hover) {
+            .game-card:hover {
+                transform: translateY(-8px);
+                border-color: var(--card-border-hover, var(--primary-teal));
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            }
         }
 
         .game-card:active {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
         }
         
         /* Simple game icons */
         .game-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border-radius: 20px;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 22px;
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--icon-gradient, var(--gradient-main));
             padding: 3px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         .icon-inner {
             width: 100%;
             height: 100%;
-            border-radius: 17px;
+            border-radius: 19px;
             background: var(--black-deep);
             border: 1px solid var(--icon-border, rgba(0, 180, 166, 0.3));
             display: flex;
@@ -166,22 +174,22 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            width: 40px;
-            height: 40px;
+            gap: 3px;
+            width: 45px;
+            height: 45px;
         }
         
         .logo-candy {
             width: 100%;
             height: 100%;
-            border-radius: 3px;
+            border-radius: 4px;
         }
         
         /* Static Tetris icon */
         .tetris-icon-container {
             position: relative;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
         }
         
         .tetris-piece {
@@ -191,47 +199,47 @@
         }
 
         .tetris-block {
-            width: 8px;
-            height: 8px;
-            border-radius: 1px;
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
         }
 
         /* I piece */
         .piece-i {
             grid-template-columns: repeat(4, 1fr);
-            top: 6px;
-            left: 6px;
+            top: 7px;
+            left: 7px;
         }
 
         /* T piece */
         .piece-t {
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            bottom: 6px;
-            right: 6px;
+            bottom: 7px;
+            right: 7px;
         }
 
         /* O piece */
         .piece-o {
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            top: 6px;
-            right: 10px;
+            top: 7px;
+            right: 11px;
         }
         
         /* Simple titles */
         .game-title {
-            font-size: 22px;
-            font-weight: 800;
+            font-size: 24px;
+            font-weight: 900;
             color: var(--white);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
         }
         
         .game-description {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
             line-height: 1.4;
         }
         
@@ -262,7 +270,7 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.25s ease;
         }
 
         .loader.hide {
@@ -271,11 +279,24 @@
         }
 
         .loader-ring {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 3px solid rgba(0, 180, 166, 0.2);
             border-top-color: var(--primary-teal);
             border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Disable loader animation on mobile for performance */
+        @media (max-width: 768px) {
+            .loader-ring {
+                animation: none;
+            }
         }
         
         /* Mobile optimizations */
@@ -287,9 +308,9 @@
             }
 
             .container {
-                padding: 15px 10px;
-                padding-top: max(15px, env(safe-area-inset-top));
-                padding-bottom: max(15px, env(safe-area-inset-bottom));
+                padding: 20px 12px;
+                padding-top: max(20px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
                 height: 100vh;
                 height: 100dvh;
                 display: flex;
@@ -297,38 +318,103 @@
             }
 
             .header {
-                margin-bottom: 20px;
+                margin-bottom: 22px;
                 flex-shrink: 0;
             }
             
             .logo-text {
-                font-size: 50px;
-                letter-spacing: 2px;
-                margin-bottom: 0;
+                font-size: 65px;
+                letter-spacing: 3px;
+                margin-bottom: 3px;
+                text-shadow: 0 0 20px rgba(0, 180, 166, 0.5);
             }
             
             .logo-subtitle {
-                font-size: 12px;
-                letter-spacing: 2px;
+                font-size: 15px;
+                letter-spacing: 3px;
+                font-weight: 600;
+                text-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+                opacity: 1;
             }
             
             .games-grid {
                 grid-template-columns: 1fr;
-                gap: 15px;
+                gap: 16px;
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 max-width: 100%;
-                padding-bottom: 20px;
+                padding-bottom: 10px;
             }
             
             .game-card {
-                padding: 15px;
-                border-radius: 15px;
+                padding: 20px;
+                border-radius: 18px;
                 flex-shrink: 0;
             }
             
+            .game-title {
+                font-size: 22px;
+            }
+
+            .game-description {
+                font-size: 14px;
+            }
+            
+            .game-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 18px;
+                border-radius: 20px;
+            }
+            
+            .icon-inner {
+                border-radius: 17px;
+            }
+            
+            .candy-grid {
+                width: 40px;
+                height: 40px;
+                gap: 2px;
+            }
+            
+            .tetris-icon-container {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .tetris-block {
+                width: 8px;
+                height: 8px;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            .logo-text {
+                font-size: 55px;
+            }
+
+            .logo-subtitle {
+                font-size: 14px;
+                font-weight: 600;
+            }
+            
+            .game-card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .game-icon {
+                width: 75px;
+                height: 75px;
+                border-radius: 18px;
+            }
+            
+            .icon-inner {
+                border-radius: 15px;
+            }
+
             .game-title {
                 font-size: 20px;
             }
@@ -336,84 +422,47 @@
             .game-description {
                 font-size: 13px;
             }
-            
-            .game-icon {
-                width: 70px;
-                height: 70px;
-                margin-bottom: 15px;
-            }
-            
-            .candy-grid {
-                width: 36px;
-                height: 36px;
-                gap: 2px;
-            }
-            
-            .tetris-icon-container {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .tetris-block {
-                width: 7px;
-                height: 7px;
-            }
-        }
-        
-        @media (max-width: 375px) {
-            .logo-text {
-                font-size: 45px;
-            }
-            
-            .game-card {
-                padding: 12px;
-            }
-
-            .game-icon {
-                width: 60px;
-                height: 60px;
-            }
-
-            .game-title {
-                font-size: 18px;
-            }
-
-            .game-description {
-                font-size: 12px;
-            }
         }
 
         /* Extra small height screens */
         @media (max-height: 700px) and (max-width: 768px) {
             .header {
-                margin-bottom: 15px;
+                margin-bottom: 18px;
             }
 
             .logo-text {
-                font-size: 40px;
+                font-size: 50px;
             }
 
             .logo-subtitle {
-                font-size: 11px;
+                font-size: 13px;
+                letter-spacing: 2px;
+                font-weight: 600;
             }
 
             .games-grid {
-                gap: 10px;
+                gap: 12px;
             }
 
             .game-card {
-                padding: 12px;
+                padding: 16px;
+                border-radius: 15px;
             }
 
             .game-icon {
-                width: 60px;
-                height: 60px;
-                margin-bottom: 10px;
+                width: 65px;
+                height: 65px;
+                margin-bottom: 12px;
+                border-radius: 16px;
+            }
+            
+            .icon-inner {
+                border-radius: 13px;
             }
 
             .game-title {
-                font-size: 18px;
-                margin-bottom: 5px;
+                font-size: 19px;
+                margin-bottom: 6px;
             }
 
             .game-description {
@@ -461,7 +510,7 @@
                 </div>
                 <h2 class="game-title">Notamy Crush</h2>
                 <p class="game-description">
-                    Match colorful candies
+                    Match colorful candies to win
                 </p>
             </a>
             
@@ -496,7 +545,7 @@
                 </div>
                 <h2 class="game-title">Notamy Tetris</h2>
                 <p class="game-description">
-                    Classic block-stacking action
+                    Classic block-stacking fun
                 </p>
             </a>
         </div>
@@ -508,17 +557,19 @@
             // Remove loader immediately
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hide');
-            }, 300);
+            }, 150);
         });
 
         // Simple touch feedback
         const cards = document.querySelectorAll('.game-card');
         cards.forEach(card => {
             card.addEventListener('touchstart', function() {
-                this.style.opacity = '0.9';
+                this.style.transform = 'scale(0.98)';
+                this.style.opacity = '0.95';
             });
             
             card.addEventListener('touchend', function() {
+                this.style.transform = '';
                 this.style.opacity = '1';
             });
         });

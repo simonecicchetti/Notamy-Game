@@ -51,19 +51,23 @@
             justify-content: space-between;
             align-items: center;
             color: #FFFFFF;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
+            gap: 8px;
         }
         
         .status-item {
             background: rgba(26, 26, 26, 0.8);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 999px;
             border: 1px solid #2A2A2A;
             backdrop-filter: blur(10px);
             animation: statusGlow 3s ease-in-out infinite;
             position: relative;
             overflow: hidden;
+            flex: 1;
+            text-align: center;
+            min-width: 0;
         }
         
         .status-item::before {
@@ -220,6 +224,8 @@
             color: #E0E0E0;
             margin-bottom: 32px;
             opacity: 0.8;
+            text-align: center;
+            padding: 0 20px;
         }
         
         .menu-button {
@@ -298,7 +304,7 @@
         
         #streakIndicator {
             position: absolute;
-            top: 160px;
+            top: 170px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ffc107, #ff9800);
@@ -353,7 +359,7 @@
         
         #inactivityWarning {
             position: absolute;
-            top: 200px;
+            top: 210px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255, 82, 82, 0.9);
@@ -435,27 +441,6 @@
             }
         }
         
-        @keyframes bombExplode {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3); opacity: 0; }
-        }
-        
-        @keyframes rocketFire {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-500px); opacity: 0; }
-        }
-        
-        @keyframes hintPulse {
-            0%, 100% { 
-                transform: scale(1); 
-                box-shadow: 0 0 0 rgba(0, 212, 255, 0);
-            }
-            50% { 
-                transform: scale(1.1); 
-                box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
-            }
-        }
-        
         .time-bonus {
             position: absolute;
             font-size: 24px;
@@ -478,10 +463,13 @@
             }
         }
         
-        @media (max-width: 400px) {
-            #gameCanvas {
-                transform: translate(-50%, -50%) scale(0.9);
-            }
+        .drag-line {
+            position: absolute;
+            background: rgba(0, 212, 255, 0.5);
+            pointer-events: none;
+            z-index: 5;
+            border-radius: 3px;
+            display: none;
         }
     </style>
 </head>
@@ -496,6 +484,7 @@
         </div>
         
         <canvas id="gameCanvas"></canvas>
+        <div class="drag-line" id="dragLine"></div>
         
         <div id="comboIndicator">COMBO x<span id="comboMultiplier">2</span></div>
         <div id="streakIndicator">STREAK x<span id="streakMultiplier">2</span></div>
@@ -539,14 +528,30 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Game constants
-        const GRID_SIZE = 8;
-        const CANDY_SIZE = 50;
-        const CANDY_SPACING = 2;
-        const BOARD_PADDING = 10;
-        const SWAP_DURATION = 300;
-        const DROP_SPEED = 8;
-        const MIN_SWIPE_DISTANCE = 20;
+        // Get screen dimensions
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        
+        // Calculate optimal grid size based on screen
+        let GRID_SIZE = 7; // Reduced from 8 for larger candies
+        let CANDY_SIZE;
+        let CANDY_SPACING = 3; // Increased spacing
+        let BOARD_PADDING = 15;
+        
+        // Calculate candy size based on screen dimensions
+        const maxBoardWidth = screenWidth - 40; // Leave some margin
+        const maxBoardHeight = screenHeight - 200; // Account for header and margins
+        const maxCandySize = Math.min(
+            (maxBoardWidth - (BOARD_PADDING * 2)) / GRID_SIZE - CANDY_SPACING,
+            (maxBoardHeight - (BOARD_PADDING * 2)) / GRID_SIZE - CANDY_SPACING,
+            70 // Maximum candy size
+        );
+        
+        CANDY_SIZE = Math.max(45, Math.min(maxCandySize, 65)); // Between 45-65 pixels
+        
+        const SWAP_DURATION = 250;
+        const DROP_SPEED = 10;
+        const MIN_SWIPE_DISTANCE = 15; // Reduced for better responsiveness
         
         // Calculate canvas size
         const canvasSize = GRID_SIZE * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING * 2;
@@ -588,13 +593,14 @@
         let animating = false;
         let particles = [];
         let hintTimer = null;
-        let isProcessingMove = false; // New flag to prevent multiple moves
+        let isProcessingMove = false;
         
         // Touch/Mouse handling
         let touchStartPos = null;
         let touchStartCoords = null;
         let isDragging = false;
-        let hasMoved = false; // Track if a move has been made during this drag
+        let hasMoved = false;
+        let draggedCandy = null;
         
         // Initialize board
         function initBoard() {
@@ -628,8 +634,9 @@
                 rotation: 0,
                 hint: false,
                 powerUp: null,
-                row: row, // Store grid position
-                col: col
+                row: row,
+                col: col,
+                selected: false
             };
         }
         
@@ -887,9 +894,11 @@
         canvas.addEventListener('mousedown', handleStart);
         canvas.addEventListener('mousemove', handleMove);
         canvas.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('mouseout', handleEnd);
         canvas.addEventListener('touchstart', handleStart, { passive: true });
         canvas.addEventListener('touchmove', handleMove, { passive: true });
         canvas.addEventListener('touchend', handleEnd, { passive: true });
+        canvas.addEventListener('touchcancel', handleEnd, { passive: true });
         
         function handleStart(e) {
             if (animating || gameState !== 'playing' || isProcessingMove) return;
@@ -902,9 +911,16 @@
                 touchStartCoords = pos;
                 selectedCandy = gridPos;
                 isDragging = true;
-                hasMoved = false; // Reset move flag
-                board[gridPos.row][gridPos.col].targetScale = 1.15;
+                hasMoved = false;
+                draggedCandy = board[gridPos.row][gridPos.col];
+                draggedCandy.selected = true;
+                draggedCandy.targetScale = 1.2;
                 resetHintTimer();
+                
+                // Vibrate on touch if available
+                if (window.navigator.vibrate) {
+                    window.navigator.vibrate(10);
+                }
             }
         }
         
@@ -914,6 +930,30 @@
             const pos = getEventPos(e);
             const dx = pos.x - touchStartCoords.x;
             const dy = pos.y - touchStartCoords.y;
+            
+            // Show visual feedback for drag direction
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                const dragLine = document.getElementById('dragLine');
+                dragLine.style.display = 'block';
+                
+                const rect = canvas.getBoundingClientRect();
+                const startX = rect.left + touchStartCoords.x;
+                const startY = rect.top + touchStartCoords.y;
+                
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    // Horizontal line
+                    dragLine.style.width = Math.abs(dx) + 'px';
+                    dragLine.style.height = '4px';
+                    dragLine.style.left = Math.min(startX, startX + dx) + 'px';
+                    dragLine.style.top = (startY - 2) + 'px';
+                } else {
+                    // Vertical line
+                    dragLine.style.width = '4px';
+                    dragLine.style.height = Math.abs(dy) + 'px';
+                    dragLine.style.left = (startX - 2) + 'px';
+                    dragLine.style.top = Math.min(startY, startY + dy) + 'px';
+                }
+            }
             
             // Check if we've moved enough to determine direction
             if (Math.abs(dx) > MIN_SWIPE_DISTANCE || Math.abs(dy) > MIN_SWIPE_DISTANCE) {
@@ -933,7 +973,8 @@
                 if (targetRow >= 0 && targetRow < GRID_SIZE && 
                     targetCol >= 0 && targetCol < GRID_SIZE &&
                     Math.abs(targetRow - touchStartPos.row) + Math.abs(targetCol - touchStartPos.col) === 1) {
-                    hasMoved = true; // Set flag to prevent multiple moves
+                    hasMoved = true;
+                    document.getElementById('dragLine').style.display = 'none';
                     swapCandies(touchStartPos, { row: targetRow, col: targetCol });
                 }
                 
@@ -942,10 +983,19 @@
         }
         
         function handleEnd(e) {
+            document.getElementById('dragLine').style.display = 'none';
+            
+            if (draggedCandy) {
+                draggedCandy.selected = false;
+                draggedCandy.targetScale = 1;
+                draggedCandy = null;
+            }
+            
             if (selectedCandy && board[selectedCandy.row] && board[selectedCandy.row][selectedCandy.col]) {
                 board[selectedCandy.row][selectedCandy.col].targetScale = 1;
                 selectedCandy = null;
             }
+            
             touchStartPos = null;
             touchStartCoords = null;
             isDragging = false;
@@ -954,21 +1004,26 @@
         
         function getEventPos(e) {
             const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
             if (e.touches) {
                 return {
-                    x: e.touches[0].clientX - rect.left,
-                    y: e.touches[0].clientY - rect.top
+                    x: (e.touches[0].clientX - rect.left) * scaleX,
+                    y: (e.touches[0].clientY - rect.top) * scaleY
                 };
             }
             return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
             };
         }
         
         function getGridPos(x, y) {
-            const col = Math.floor((x - BOARD_PADDING) / (CANDY_SIZE + CANDY_SPACING));
-            const row = Math.floor((y - BOARD_PADDING) / (CANDY_SIZE + CANDY_SPACING));
+            // Add hit box expansion for better touch accuracy
+            const hitBoxExpansion = CANDY_SIZE * 0.1;
+            const col = Math.floor((x - BOARD_PADDING + hitBoxExpansion) / (CANDY_SIZE + CANDY_SPACING));
+            const row = Math.floor((y - BOARD_PADDING + hitBoxExpansion) / (CANDY_SIZE + CANDY_SPACING));
             
             if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
                 return { row, col };
@@ -978,7 +1033,7 @@
         
         // Enhanced swap animation
         function swapCandies(pos1, pos2) {
-            if (isProcessingMove) return; // Prevent multiple simultaneous swaps
+            if (isProcessingMove) return;
             
             animating = true;
             isProcessingMove = true;
@@ -992,6 +1047,11 @@
                 animating = false;
                 isProcessingMove = false;
                 return;
+            }
+            
+            // Vibrate on successful move
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(20);
             }
             
             // Set target positions for animation
@@ -1038,6 +1098,11 @@
                         streak = 0;
                         updateStreak();
                         
+                        // Vibrate for invalid move
+                        if (window.navigator.vibrate) {
+                            window.navigator.vibrate([50, 50, 50]);
+                        }
+                        
                         // Swap back animation
                         candy1.targetX = pos1.col * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
                         candy1.targetY = pos1.row * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
@@ -1078,6 +1143,11 @@
         function processMatches(matches) {
             let totalScore = 0;
             combo++;
+            
+            // Vibrate for successful match
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate([30, 10, 30]);
+            }
             
             // Check for power-up creation
             matches.forEach((match, index) => {
@@ -1171,6 +1241,11 @@
         // Activate power-up
         function activatePowerUp(row, col, type) {
             let bonusTime = 0;
+            
+            // Strong vibration for power-up
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate([100, 50, 100]);
+            }
             
             switch(type) {
                 case 'bomb':
@@ -1271,12 +1346,13 @@
         
         // Create score popup
         function createScorePopup(x, y, points) {
+            const rect = canvas.getBoundingClientRect();
             const popup = document.createElement('div');
             popup.className = 'score-popup';
             popup.textContent = `+${points}`;
-            popup.style.left = x + 'px';
-            popup.style.top = y + 'px';
-            canvas.parentElement.appendChild(popup);
+            popup.style.left = (rect.left + x) + 'px';
+            popup.style.top = (rect.top + y) + 'px';
+            document.body.appendChild(popup);
             
             setTimeout(() => popup.remove(), 1200);
         }
@@ -1305,7 +1381,7 @@
                         if (row !== emptyRow) {
                             board[emptyRow][col] = board[row][col];
                             board[emptyRow][col].targetY = emptyRow * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
-                            board[emptyRow][col].row = emptyRow; // Update grid position
+                            board[emptyRow][col].row = emptyRow;
                             board[row][col] = null;
                             hasDropped = true;
                         }
@@ -1316,7 +1392,7 @@
                 // Fill empty spaces with new candies
                 for (let row = emptyRow; row >= 0; row--) {
                     const candy = createCandy(row, col);
-                    candy.y = -CANDY_SIZE; // Start above board
+                    candy.y = -CANDY_SIZE;
                     candy.targetY = row * (CANDY_SIZE + CANDY_SPACING) + BOARD_PADDING;
                     candy.scale = 0;
                     candy.targetScale = 1;
@@ -1360,7 +1436,7 @@
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
                     color: color,
-                    size: 6,
+                    size: 8,
                     life: 40,
                     maxLife: 40,
                     type: 'burst'
@@ -1375,7 +1451,7 @@
                     vx: (Math.random() - 0.5) * 2,
                     vy: -Math.random() * 3,
                     color: '#FFFFFF',
-                    size: 3,
+                    size: 4,
                     life: 30,
                     maxLife: 30,
                     type: 'sparkle'
@@ -1394,7 +1470,7 @@
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
                     color: color,
-                    size: 8 + Math.random() * 4,
+                    size: 10 + Math.random() * 5,
                     life: 50,
                     maxLife: 50,
                     type: 'explosion'
@@ -1412,7 +1488,7 @@
                     vx: direction === 'horizontal' ? 0 : (Math.random() - 0.5) * 4,
                     vy: direction === 'vertical' ? 0 : (Math.random() - 0.5) * 4,
                     color: '#2196f3',
-                    size: 6,
+                    size: 8,
                     life: 30,
                     maxLife: 30,
                     type: 'rocket'
@@ -1431,7 +1507,7 @@
                         vx: Math.cos(angle) * (3 + j),
                         vy: Math.sin(angle) * (3 + j),
                         color: color,
-                        size: 5,
+                        size: 6,
                         life: 40,
                         maxLife: 40,
                         type: 'rainbow'
@@ -1476,13 +1552,13 @@
                         // Position animation
                         if (candy.x !== candy.targetX) {
                             const dx = candy.targetX - candy.x;
-                            candy.x += dx * 0.2;
+                            candy.x += dx * 0.25;
                             if (Math.abs(dx) < 0.5) candy.x = candy.targetX;
                         }
                         
                         if (candy.y !== candy.targetY) {
                             const dy = candy.targetY - candy.y;
-                            candy.y += dy * 0.15;
+                            candy.y += dy * 0.2;
                             if (Math.abs(dy) < 0.5) candy.y = candy.targetY;
                         }
                         
@@ -1551,7 +1627,7 @@
                     const bonusTime = combo >= 6 ? 2 : 1;
                     timeLeft = Math.min(60, timeLeft + bonusTime);
                     createTimeBonus(bonusTime);
-                    combo = 0; // Reset combo after giving bonus
+                    combo = 0;
                 }
                 
                 if (timeLeft <= 0) {
@@ -1562,12 +1638,13 @@
         }
         
         function createTimeBonus(seconds) {
+            const rect = canvas.getBoundingClientRect();
             const popup = document.createElement('div');
             popup.className = 'time-bonus';
             popup.textContent = `+${seconds}s!`;
             popup.style.left = '50%';
-            popup.style.top = '100px';
-            canvas.parentElement.appendChild(popup);
+            popup.style.top = (rect.top + 100) + 'px';
+            document.body.appendChild(popup);
             
             setTimeout(() => popup.remove(), 1000);
         }
@@ -1703,7 +1780,7 @@
             const type = candyTypes[candy.type];
             const centerX = candy.x + CANDY_SIZE / 2;
             const centerY = candy.y + CANDY_SIZE / 2;
-            const size = (CANDY_SIZE * 0.8) * candy.scale;
+            const size = (CANDY_SIZE * 0.85) * candy.scale;
             
             ctx.save();
             ctx.globalAlpha = candy.alpha;
@@ -1718,12 +1795,18 @@
             // Apply hint animation
             if (candy.hint) {
                 ctx.shadowColor = '#00d9ff';
-                ctx.shadowBlur = 20;
-                const hintScale = 1 + Math.sin(Date.now() * 0.005) * 0.1;
+                ctx.shadowBlur = 25;
+                const hintScale = 1 + Math.sin(Date.now() * 0.005) * 0.15;
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.scale(hintScale, hintScale);
                 ctx.translate(-centerX, -centerY);
+            }
+            
+            // Apply selection glow
+            if (candy.selected) {
+                ctx.shadowColor = '#00d9ff';
+                ctx.shadowBlur = 30;
             }
             
             // Shadow
@@ -1756,16 +1839,16 @@
         function drawPowerUp(candy) {
             const centerX = candy.x + CANDY_SIZE / 2;
             const centerY = candy.y + CANDY_SIZE / 2;
-            const size = (CANDY_SIZE * 0.9) * candy.scale;
+            const size = (CANDY_SIZE * 0.95) * candy.scale;
             const powerUpInfo = powerUpTypes[candy.powerUp];
             
             ctx.save();
             ctx.globalAlpha = candy.alpha;
             
             // Pulsing glow effect
-            const pulse = Math.sin(Date.now() * 0.003) * 0.1 + 1;
+            const pulse = Math.sin(Date.now() * 0.003) * 0.15 + 1;
             ctx.shadowColor = powerUpInfo.color;
-            ctx.shadowBlur = 20 * pulse;
+            ctx.shadowBlur = 25 * pulse;
             
             // Background circle
             ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -1799,7 +1882,7 @@
                     
                     // Spark
                     ctx.fillStyle = '#fff';
-                    drawStar(centerX, centerY - size/1.5, 4, 4, 2);
+                    drawStar(centerX, centerY - size/1.5, 4, 5, 2.5);
                     break;
                     
                 case 'rocket':

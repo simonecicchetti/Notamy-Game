@@ -223,7 +223,7 @@
     <div class="top-bar">
         <div class="info-item">
             <div class="info-label">TIME</div>
-            <div class="info-value" id="timeDisplay">60</div>
+            <div class="info-value" id="timeDisplay">5:00</div>
         </div>
         <div class="info-item">
             <div class="info-label">SCORE</div>
@@ -257,12 +257,12 @@
         // Constants
         const BOARD_WIDTH = 10;
         const BOARD_HEIGHT = 20;
-        const INITIAL_TIME = 60;
+        const INITIAL_TIME = 300; // Aumentato a 5 minuti
         const TIME_BONUS = {
-            1: 3,
-            2: 7,
-            3: 12,
-            4: 20
+            1: 5,
+            2: 10,
+            3: 15,
+            4: 25
         };
         
         // Calculate block size based on screen
@@ -386,8 +386,8 @@
                 // Ignore small accidental movements
                 if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
                 
-                // Horizontal movement
-                if (Math.abs(deltaX) > 25 && !isDragging) {
+                // Horizontal movement - con soglia più alta per evitare movimenti accidentali
+                if (Math.abs(deltaX) > 30 && !isDragging) {
                     const direction = deltaX > 0 ? 1 : -1;
                     movePiece(direction, 0);
                     touchStartX = touch.clientX;
@@ -395,14 +395,14 @@
                     // Start continuous movement
                     if (moveRepeatTimer) clearInterval(moveRepeatTimer);
                     moveRepeatTimer = setInterval(() => {
-                        if (Math.abs(touch.clientX - touchStartX) > 20) {
+                        if (gameState.gameActive && Math.abs(touch.clientX - touchStartX) > 25) {
                             movePiece(direction, 0);
                         }
                     }, 150);
                 }
                 
-                // Vertical drag for fast drop
-                if (deltaY > 70 && Math.abs(deltaX) < 40) {
+                // Vertical drag for fast drop - soglia aumentata
+                if (deltaY > 80 && Math.abs(deltaX) < 50 && !isDragging) {
                     isDragging = true;
                     dropPiece();
                 }
@@ -423,8 +423,8 @@
                 const deltaX = Math.abs(touch.clientX - touchStartX);
                 const deltaY = Math.abs(touch.clientY - touchStartY);
                 
-                // Tap to rotate
-                if (touchDuration >= 50 && touchDuration < 200 && deltaX < 10 && deltaY < 10 && !isDragging) {
+                // Tap to rotate - con controlli più rigorosi
+                if (touchDuration >= 50 && touchDuration < 250 && deltaX < 15 && deltaY < 15 && !isDragging) {
                     rotatePiece();
                 }
                 
@@ -455,12 +455,24 @@
             const pieceIndex = getNextPiece();
             gameState.currentPiece = pieceIndex;
             gameState.currentRotation = 0;
-            gameState.currentX = Math.floor((BOARD_WIDTH - PIECES[pieceIndex].shape[0].length) / 2);
+            
+            // Calcola la posizione iniziale
+            const pieceWidth = PIECES[pieceIndex].shape[0].length;
+            gameState.currentX = Math.floor((BOARD_WIDTH - pieceWidth) / 2);
             gameState.currentY = 0;
             
+            // Verifica se c'è spazio per il nuovo pezzo
             if (!isValidPosition(gameState.currentX, gameState.currentY, getRotatedShape())) {
-                gameOver();
-                return false;
+                // Prova a spostare il pezzo più in alto
+                gameState.currentY = -1;
+                if (!isValidPosition(gameState.currentX, gameState.currentY, getRotatedShape())) {
+                    gameState.currentY = -2;
+                    if (!isValidPosition(gameState.currentX, gameState.currentY, getRotatedShape())) {
+                        // Solo ora termina il gioco
+                        gameOver();
+                        return false;
+                    }
+                }
             }
             
             return true;
@@ -468,6 +480,8 @@
         
         // Movement
         function movePiece(dx, dy) {
+            if (!gameState.gameActive || gameState.currentPiece === null) return false;
+            
             const newX = gameState.currentX + dx;
             const newY = gameState.currentY + dy;
             
@@ -480,15 +494,18 @@
         }
         
         function rotatePiece() {
+            if (!gameState.gameActive || gameState.currentPiece === null) return;
+            
             const oldRotation = gameState.currentRotation;
             gameState.currentRotation = (gameState.currentRotation + 1) % 4;
             
             if (!isValidPosition(gameState.currentX, gameState.currentY, getRotatedShape())) {
-                // Try wall kicks
-                const kicks = [
-                    [0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1],
-                    [-2, 0], [2, 0], [0, -2]
-                ];
+                // Try wall kicks - più kicks per il pezzo I
+                const kicks = gameState.currentPiece === 0 ? 
+                    // Kicks speciali per il pezzo I
+                    [[0, 0], [-2, 0], [2, 0], [-1, 0], [1, 0], [0, -1], [-2, -1], [2, -1], [0, -2], [-2, 1], [2, 1]] :
+                    // Kicks normali per gli altri pezzi
+                    [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1], [-2, 0], [2, 0], [0, -2]];
                 
                 let kickWorked = false;
                 for (const [dx, dy] of kicks) {
@@ -531,6 +548,8 @@
         }
         
         function dropPiece() {
+            if (!gameState.gameActive) return;
+            
             if (movePiece(0, 1)) {
                 gameState.score += 1;
                 updateUI();
@@ -538,6 +557,8 @@
         }
         
         function hardDrop() {
+            if (!gameState.gameActive) return;
+            
             while (movePiece(0, 1)) {
                 gameState.score += 2;
             }
@@ -568,13 +589,14 @@
             const shape = getRotatedShape();
             const piece = PIECES[gameState.currentPiece];
             
+            // Blocca il pezzo sulla board
             for (let row = 0; row < shape.length; row++) {
                 for (let col = 0; col < shape[row].length; col++) {
                     if (shape[row][col]) {
                         const boardY = gameState.currentY + row;
                         const boardX = gameState.currentX + col;
                         
-                        if (boardY >= 0) {
+                        if (boardY >= 0 && boardY < BOARD_HEIGHT && boardX >= 0 && boardX < BOARD_WIDTH) {
                             gameState.board[boardY][boardX] = gameState.currentPiece + 1;
                         }
                     }
@@ -588,7 +610,10 @@
                 gameState.combo = 0;
             }
             
-            spawnPiece();
+            // Genera nuovo pezzo solo se il gioco è ancora attivo
+            if (gameState.gameActive) {
+                spawnPiece();
+            }
         }
         
         // Line Clearing
@@ -791,9 +816,12 @@
             document.getElementById('levelDisplay').textContent = gameState.level;
             
             const timeDisplay = document.getElementById('timeDisplay');
-            timeDisplay.textContent = Math.ceil(gameState.timeLeft);
+            const timeInSeconds = Math.ceil(gameState.timeLeft);
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             
-            if (gameState.timeLeft < 10) {
+            if (gameState.timeLeft < 30) {
                 timeDisplay.classList.add('time-critical');
             } else {
                 timeDisplay.classList.remove('time-critical');
@@ -811,12 +839,13 @@
             // Update timer
             gameState.timeLeft -= deltaTime / 1000;
             if (gameState.timeLeft <= 0) {
+                gameState.timeLeft = 0;
                 gameOver();
                 return;
             }
             
-            // Auto drop
-            const dropSpeed = Math.max(100, 1000 - (gameState.level - 1) * 100);
+        // Auto drop
+            const dropSpeed = Math.max(200, 1000 - (gameState.level - 1) * 80); // Velocità più gestibile
             gameState.dropTimer += deltaTime;
             
             if (gameState.dropTimer >= dropSpeed) {
@@ -861,9 +890,14 @@
         }
         
         function gameOver() {
+            if (!gameState.gameActive) return; // Evita game over multipli
+            
             gameState.gameActive = false;
             document.getElementById('finalScore').textContent = gameState.score;
             document.getElementById('gameOverScreen').style.display = 'flex';
+            
+            // Debug info
+            console.log('Game Over - Time left:', gameState.timeLeft, 'Score:', gameState.score, 'Level:', gameState.level);
         }
         
         function restartGame() {

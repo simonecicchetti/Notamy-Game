@@ -32,6 +32,7 @@
             --gradient-main: linear-gradient(135deg, #00b4a6, #00d9ff);
             --gradient-nature: linear-gradient(135deg, #00e676, #00b4a6);
             --gradient-ice: linear-gradient(135deg, #00d9ff, #00ffff);
+            --gradient-fly: linear-gradient(135deg, #b366ff, #00d9ff);
         }
         
         body {
@@ -111,7 +112,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
-            max-width: 600px;
+            max-width: 900px;
             margin: 0 auto;
         }
         
@@ -167,6 +168,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
         
         /* Static Crush icon */
@@ -227,6 +230,47 @@
             right: 11px;
         }
         
+        /* Fly bird icon */
+        .fly-icon-container {
+            position: relative;
+            width: 50px;
+            height: 50px;
+        }
+        
+        .bird-body {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: var(--cyan-neon);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+        
+        .bird-wing {
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: var(--purple-accent);
+            border-radius: 50% 0 50% 0;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%) rotate(-20deg);
+            box-shadow: 0 0 10px rgba(179, 102, 255, 0.6);
+        }
+        
+        .bird-eye {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--white);
+            border-radius: 50%;
+            top: 10px;
+            right: 8px;
+        }
+        
         /* Simple titles */
         .game-title {
             font-size: 24px;
@@ -256,6 +300,13 @@
             --card-border-hover: var(--primary-teal);
             --icon-gradient: var(--gradient-ice);
             --icon-border: rgba(0, 217, 255, 0.3);
+        }
+        
+        .fly-card {
+            --card-border: rgba(179, 102, 255, 0.3);
+            --card-border-hover: var(--purple-accent);
+            --icon-gradient: var(--gradient-fly);
+            --icon-border: rgba(179, 102, 255, 0.3);
         }
 
         /* Ultra simple loader */
@@ -343,9 +394,11 @@
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 max-width: 100%;
-                padding-bottom: 10px;
+                padding-bottom: 20px;
             }
             
             .game-card {
@@ -387,6 +440,29 @@
             .tetris-block {
                 width: 8px;
                 height: 8px;
+            }
+            
+            .fly-icon-container {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .bird-body {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .bird-wing {
+                width: 18px;
+                height: 13px;
+                left: 4px;
+            }
+            
+            .bird-eye {
+                width: 5px;
+                height: 5px;
+                top: 9px;
+                right: 7px;
             }
         }
         
@@ -546,6 +622,23 @@
                 <h2 class="game-title">Notamy Tetris</h2>
                 <p class="game-description">
                     Classic block-stacking fun
+                </p>
+            </a>
+            
+            <!-- Notamy Fly -->
+            <a href="notamy-fly.html?autostart=true" class="game-card fly-card">
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="fly-icon-container">
+                            <div class="bird-body"></div>
+                            <div class="bird-wing"></div>
+                            <div class="bird-eye"></div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Fly</h2>
+                <p class="game-description">
+                    Navigate through neon obstacles
                 </p>
             </a>
         </div>

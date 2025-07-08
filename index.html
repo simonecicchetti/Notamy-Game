@@ -44,6 +44,7 @@
             margin: 0;
         }
 
+        /* Simple static grid */
         .background-container {
             position: fixed;
             top: 0;
@@ -78,11 +79,13 @@
             flex-direction: column;
         }
         
+        /* Static header */
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
         
+        /* Simple static logo */
         .logo-text {
             font-size: 120px;
             font-weight: 300;
@@ -105,6 +108,7 @@
             text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
         }
 
+        /* Simple grid */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -114,6 +118,7 @@
             width: 100%;
         }
         
+        /* Ultra simple game cards */
         .game-card {
             background: rgba(0, 0, 0, 0.8);
             border: 2px solid var(--card-border, rgba(0, 180, 166, 0.3));
@@ -128,6 +133,7 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
+        /* Desktop hover effect */
         @media (hover: hover) {
             .game-card:hover {
                 transform: translateY(-8px);
@@ -141,6 +147,7 @@
             box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
         }
         
+        /* Simple game icons */
         .game-icon {
             width: 90px;
             height: 90px;
@@ -167,6 +174,7 @@
             overflow: hidden;
         }
         
+        /* Static Crush icon */
         .candy-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -182,6 +190,7 @@
             border-radius: 4px;
         }
         
+        /* Static Tetris icon */
         .tetris-icon-container {
             position: relative;
             width: 55px;
@@ -200,12 +209,14 @@
             border-radius: 2px;
         }
 
+        /* I piece */
         .piece-i {
             grid-template-columns: repeat(4, 1fr);
             top: 7px;
             left: 7px;
         }
 
+        /* T piece */
         .piece-t {
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr);
@@ -213,6 +224,7 @@
             right: 7px;
         }
 
+        /* O piece */
         .piece-o {
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(2, 1fr);
@@ -220,6 +232,7 @@
             right: 11px;
         }
         
+        /* Fly bird icon */
         .fly-icon-container {
             position: relative;
             width: 50px;
@@ -260,6 +273,7 @@
             right: 8px;
         }
         
+        /* Bop bubble icon */
         .bop-icon-container {
             position: relative;
             width: 50px;
@@ -289,6 +303,7 @@
             opacity: 0.3;
         }
         
+        /* Simple titles */
         .game-title {
             font-size: 24px;
             font-weight: 900;
@@ -304,6 +319,7 @@
             line-height: 1.4;
         }
         
+        /* Card specific colors */
         .crush-card {
             --card-border: rgba(0, 230, 118, 0.3);
             --card-border-hover: var(--green-neon);
@@ -332,6 +348,7 @@
             --icon-border: rgba(255, 107, 107, 0.3);
         }
 
+        /* Ultra simple loader */
         .loader {
             position: fixed;
             top: 0;
@@ -365,20 +382,25 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Disable loader animation on mobile for performance */
         @media (max-width: 768px) {
             .loader-ring {
                 animation: none;
             }
         }
         
+        /* Mobile optimizations */
         @media (max-width: 768px) {
             body {
+                /* Removed overflow hidden to allow natural scrolling */
             }
 
             .container {
                 padding: 20px 12px;
                 padding-top: max(20px, env(safe-area-inset-top));
+                /* Extra padding at bottom for iPhone home indicator */
                 padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
+                /* Changed from fixed height to min-height */
                 min-height: 100vh;
                 min-height: 100dvh;
                 display: flex;
@@ -408,6 +430,7 @@
             .games-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
+                /* Natural grid layout allows proper scrolling */
                 max-width: 100%;
                 margin-bottom: 20px;
             }
@@ -475,6 +498,7 @@
                 right: 7px;
             }
             
+            /* Bop icon mobile sizes */
             .bop-icon-container {
                 width: 45px;
                 height: 45px;
@@ -486,8 +510,8 @@
             }
             
             .bubble-glow {
-                width: 18px;
-                height: 18px;
+                width: 17px;
+                height: 17px;
                 top: 9px;
                 left: 9px;
             }
@@ -495,6 +519,7 @@
         
         @media (max-width: 375px) {
             .container {
+                /* Even more padding for smaller screens */
                 padding-bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
             }
 
@@ -531,8 +556,10 @@
             }
         }
 
+        /* Extra small height screens */
         @media (max-height: 700px) and (max-width: 768px) {
             .container {
+                /* Ensure scrolling works on small height screens */
                 min-height: auto;
                 padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
             }
@@ -581,6 +608,7 @@
             }
         }
 
+        /* Ensure proper scrolling on iOS */
         @supports (-webkit-touch-callout: none) {
             body {
                 -webkit-overflow-scrolling: touch;
@@ -589,21 +617,26 @@
     </style>
 </head>
 <body>
+    <!-- Background -->
     <div class="background-container">
         <div class="neon-grid"></div>
     </div>
 
+    <!-- Loader -->
     <div class="loader" id="loader">
         <div class="loader-ring"></div>
     </div>
 
     <div class="container">
+        <!-- Header -->
         <div class="header">
             <h1 class="logo-text">NOTAMY</h1>
             <div class="logo-subtitle">MINI GAMES COLLECTION</div>
         </div>
         
+        <!-- Games Grid -->
         <div class="games-grid">
+            <!-- Notamy Crush -->
             <a href="notamy-crash.html?autostart=true" class="game-card crush-card">
                 <div class="game-icon">
                     <div class="icon-inner">
@@ -626,22 +659,26 @@
                 </p>
             </a>
             
+            <!-- Notamy Tetris -->
             <a href="notamy-blocks.html?autostart=true" class="game-card tetris-card">
                 <div class="game-icon">
                     <div class="icon-inner">
                         <div class="tetris-icon-container">
+                            <!-- I piece -->
                             <div class="tetris-piece piece-i">
                                 <div class="tetris-block" style="background: #00d9ff;"></div>
                                 <div class="tetris-block" style="background: #00d9ff;"></div>
                                 <div class="tetris-block" style="background: #00d9ff;"></div>
                                 <div class="tetris-block" style="background: #00d9ff;"></div>
                             </div>
+                            <!-- T piece -->
                             <div class="tetris-piece piece-t">
                                 <div style="grid-column: 2;" class="tetris-block" style="background: #b366ff;"></div>
                                 <div class="tetris-block" style="background: #b366ff;"></div>
                                 <div class="tetris-block" style="background: #b366ff;"></div>
                                 <div class="tetris-block" style="background: #b366ff;"></div>
                             </div>
+                            <!-- O piece -->
                             <div class="tetris-piece piece-o">
                                 <div class="tetris-block" style="background: #ffab00;"></div>
                                 <div class="tetris-block" style="background: #ffab00;"></div>
@@ -657,6 +694,7 @@
                 </p>
             </a>
             
+            <!-- Notamy Fly -->
             <a href="notamy-fly.html?autostart=true" class="game-card fly-card">
                 <div class="game-icon">
                     <div class="icon-inner">
@@ -673,6 +711,7 @@
                 </p>
             </a>
             
+            <!-- Notamy Bop -->
             <a href="notamy-bop.html?autostart=true" class="game-card bop-card">
                 <div class="game-icon">
                     <div class="icon-inner">
@@ -691,12 +730,15 @@
     </div>
 
     <script>
+        // Ultra minimal JavaScript - no animations
         window.addEventListener('load', () => {
+            // Remove loader immediately
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hide');
             }, 150);
         });
 
+        // Simple touch feedback
         const cards = document.querySelectorAll('.game-card');
         cards.forEach(card => {
             card.addEventListener('touchstart', function() {

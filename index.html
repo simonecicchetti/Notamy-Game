@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Notamy Bubble Pop - Easy Mode</title>
+    <title>Notamy Bop - Easy Mode</title>
     <style>
         * {
             margin: 0;
@@ -135,33 +135,36 @@
         
         .n-bar-left {
             position: absolute;
-            width: 9px;
+            width: 8px;
             height: 60px;
-            left: 0;
+            left: 4px;
+            top: 0;
             background: #00b4a6;
-            border-radius: 3px;
+            border-radius: 4px;
             animation: pulse 2s ease-in-out infinite;
         }
         
         .n-bar-right {
             position: absolute;
-            width: 9px;
+            width: 8px;
             height: 60px;
-            right: 0;
+            right: 4px;
+            top: 0;
             background: #00d9ff;
-            border-radius: 3px;
+            border-radius: 4px;
             animation: pulse 2s ease-in-out infinite 0.5s;
         }
         
         .n-bar-diagonal {
             position: absolute;
-            width: 67px;
-            height: 9px;
-            top: 25px;
-            left: -3px;
+            width: 75px;
+            height: 8px;
+            top: 0px;
+            right: 4px;
             background: #ff6b6b;
-            border-radius: 3px;
-            transform: rotate(-35deg);
+            border-radius: 4px;
+            transform: rotate(-48deg);
+            transform-origin: top right;
             animation: pulse 2s ease-in-out infinite 1s;
         }
         
@@ -249,7 +252,7 @@
             animation: pulse 1s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes pulseIndicator {
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.1); opacity: 1; }
         }
@@ -465,7 +468,7 @@
                     </div>
                 </div>
             </div>
-            <div class="menu-title">Bubble Pop</div>
+            <div class="menu-title">Notamy Bop</div>
             <div class="menu-subtitle">Notamy Mini Game</div>
             <button class="menu-button" ontouchstart="startGame()" onclick="startGame()">PLAY</button>
             <div class="menu-instructions">

@@ -782,7 +782,6 @@
                 gravity: 0.25,
                 bounceVelocity: -9 * speedMultiplier,
                 rotation: 0,
-                trail: [],
                 glowIntensity: 0
             };
             
@@ -1090,8 +1089,7 @@
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
-                ball.trail.push({x: ball.x, y: ball.y, radius: ball.radius});
-                if (ball.trail.length > 8) ball.trail.shift();
+                // Trail removed for cleaner gameplay
                 
                 ball.x += ball.velX;
                 ball.y += ball.velY;
@@ -1443,15 +1441,7 @@
         
         function drawBalls() {
             for (let ball of balls) {
-                for (let i = 0; i < ball.trail.length; i++) {
-                    const trail = ball.trail[i];
-                    const alpha = (i / ball.trail.length) * 0.4;
-                    const scale = 0.8 + (i / ball.trail.length) * 0.2;
-                    ctx.fillStyle = ball.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
-                    ctx.beginPath();
-                    ctx.arc(trail.x, trail.y, trail.radius * scale, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+                // Trail effect removed for cleaner look
                 
                 if (ball.glowIntensity > 0) {
                     const glowGradient = ctx.createRadialGradient(

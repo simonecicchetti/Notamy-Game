@@ -413,4 +413,302 @@
             }
             
             .game-card {
-                padding: 20
+                padding: 20px;
+                border-radius: 18px;
+            }
+            
+            .game-title {
+                font-size: 22px;
+            }
+
+            .game-description {
+                font-size: 14px;
+            }
+            
+            .game-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 18px;
+                border-radius: 20px;
+            }
+            
+            .icon-inner {
+                border-radius: 17px;
+            }
+            
+            .candy-grid {
+                width: 40px;
+                height: 40px;
+                gap: 2px;
+            }
+            
+            .tetris-icon-container {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .tetris-block {
+                width: 8px;
+                height: 8px;
+            }
+            
+            .fly-icon-container {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .bird-body {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .bird-wing {
+                width: 18px;
+                height: 13px;
+                left: 4px;
+            }
+            
+            .bird-eye {
+                width: 5px;
+                height: 5px;
+                top: 9px;
+                right: 7px;
+            }
+            
+            .bop-icon-container {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .bubble {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .bubble-glow {
+                width: 18px;
+                height: 18px;
+                top: 9px;
+                left: 9px;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            .container {
+                padding-bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
+            }
+
+            .logo-text {
+                font-size: 70px;
+            }
+
+            .logo-subtitle {
+                font-size: 14px;
+                font-weight: 600;
+            }
+            
+            .game-card {
+                padding: 18px;
+                border-radius: 16px;
+            }
+
+            .game-icon {
+                width: 75px;
+                height: 75px;
+                border-radius: 18px;
+            }
+            
+            .icon-inner {
+                border-radius: 15px;
+            }
+
+            .game-title {
+                font-size: 20px;
+            }
+
+            .game-description {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-height: 700px) and (max-width: 768px) {
+            .container {
+                min-height: auto;
+                padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
+            }
+
+            .header {
+                margin-bottom: 18px;
+            }
+
+            .logo-text {
+                font-size: 65px;
+            }
+
+            .logo-subtitle {
+                font-size: 13px;
+                letter-spacing: 2px;
+                font-weight: 600;
+            }
+
+            .games-grid {
+                gap: 12px;
+            }
+
+            .game-card {
+                padding: 16px;
+                border-radius: 15px;
+            }
+
+            .game-icon {
+                width: 65px;
+                height: 65px;
+                margin-bottom: 12px;
+                border-radius: 16px;
+            }
+            
+            .icon-inner {
+                border-radius: 13px;
+            }
+
+            .game-title {
+                font-size: 19px;
+                margin-bottom: 6px;
+            }
+
+            .game-description {
+                font-size: 12px;
+            }
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="neon-grid"></div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="loader-ring"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="logo-text">NOTAMY</h1>
+            <div class="logo-subtitle">MINI GAMES COLLECTION</div>
+        </div>
+        
+        <div class="games-grid">
+            <a href="notamy-crash.html?autostart=true" class="game-card crush-card">
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="candy-grid">
+                            <div class="logo-candy" style="background: #00e676;"></div>
+                            <div class="logo-candy" style="background: #00d9ff;"></div>
+                            <div class="logo-candy" style="background: #ff6b6b;"></div>
+                            <div class="logo-candy" style="background: #ffab00;"></div>
+                            <div class="logo-candy" style="background: #00b4a6;"></div>
+                            <div class="logo-candy" style="background: #b366ff;"></div>
+                            <div class="logo-candy" style="background: #ff6b6b;"></div>
+                            <div class="logo-candy" style="background: #00d9ff;"></div>
+                            <div class="logo-candy" style="background: #00e676;"></div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Crush</h2>
+                <p class="game-description">
+                    Match colorful candies to win
+                </p>
+            </a>
+            
+            <a href="notamy-blocks.html?autostart=true" class="game-card tetris-card">
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="tetris-icon-container">
+                            <div class="tetris-piece piece-i">
+                                <div class="tetris-block" style="background: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff;"></div>
+                            </div>
+                            <div class="tetris-piece piece-t">
+                                <div style="grid-column: 2;" class="tetris-block" style="background: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff;"></div>
+                            </div>
+                            <div class="tetris-piece piece-o">
+                                <div class="tetris-block" style="background: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Tetris</h2>
+                <p class="game-description">
+                    Classic block-stacking fun
+                </p>
+            </a>
+            
+            <a href="notamy-fly.html?autostart=true" class="game-card fly-card">
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="fly-icon-container">
+                            <div class="bird-body"></div>
+                            <div class="bird-wing"></div>
+                            <div class="bird-eye"></div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Fly</h2>
+                <p class="game-description">
+                    Navigate through neon obstacles
+                </p>
+            </a>
+            
+            <a href="notamy-bop.html?autostart=true" class="game-card bop-card">
+                <div class="game-icon">
+                    <div class="icon-inner">
+                        <div class="bop-icon-container">
+                            <div class="bubble"></div>
+                            <div class="bubble-glow"></div>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="game-title">Notamy Bop</h2>
+                <p class="game-description">
+                    Pop colorful bubbles to score
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hide');
+            }, 150);
+        });
+
+        const cards = document.querySelectorAll('.game-card');
+        cards.forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+                this.style.opacity = '0.95';
+            });
+            
+            card.addEventListener('touchend', function() {
+                this.style.transform = '';
+                this.style.opacity = '1';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -503,26 +503,50 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Game dimensions
-        let WIDTH = window.innerWidth;
-        let HEIGHT = window.innerHeight;
+        // Game dimensions - FISSIAMO LE DIMENSIONI PER EVITARE PROBLEMI DI ZOOM
+        let WIDTH = Math.min(window.innerWidth, 800);
+        let HEIGHT = Math.min(window.innerHeight, 600);
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
         
-        // Difficulty settings - RESO PIÙ FACILE
+        // Difficulty settings - RESO ANCORA PIÙ FACILE
         const difficulties = {
-            easy: { pipeSpeed: 1.5, pipeGap: 280, gravity: 0.15, jumpForce: -6, scoreMultiplier: 1 },
-            normal: { pipeSpeed: 2, pipeGap: 250, gravity: 0.25, jumpForce: -7, scoreMultiplier: 1.5 },
-            hard: { pipeSpeed: 2.5, pipeGap: 220, gravity: 0.35, jumpForce: -8, scoreMultiplier: 2 },
-            insane: { pipeSpeed: 3, pipeGap: 200, gravity: 0.45, jumpForce: -9, scoreMultiplier: 3 }
+            easy: { 
+                pipeSpeed: 1.2, 
+                pipeGap: 320,  // Spazio ancora più grande tra i tubi
+                gravity: 0.12,  // Gravità più leggera
+                jumpForce: -5,  // Salto più controllato
+                scoreMultiplier: 1 
+            },
+            normal: { 
+                pipeSpeed: 1.8, 
+                pipeGap: 280, 
+                gravity: 0.20, 
+                jumpForce: -6, 
+                scoreMultiplier: 1.5 
+            },
+            hard: { 
+                pipeSpeed: 2.2, 
+                pipeGap: 240, 
+                gravity: 0.30, 
+                jumpForce: -7, 
+                scoreMultiplier: 2 
+            },
+            insane: { 
+                pipeSpeed: 2.8, 
+                pipeGap: 210, 
+                gravity: 0.40, 
+                jumpForce: -8, 
+                scoreMultiplier: 3 
+            }
         };
         
         let currentDifficulty = 'easy';
         let settings = difficulties[currentDifficulty];
         
         // Game constants
-        const PIPE_WIDTH = 80;
-        const PIPE_SPACING = 350; // Aumentato lo spazio tra i tubi
+        const PIPE_WIDTH = 60;  // Tubi più sottili
+        const PIPE_SPACING = 450; // Molto più spazio tra i tubi
         
         // Colors
         const COLORS = {
@@ -574,12 +598,12 @@
         let maxCombo = 0;
         let powerupsCollected = 0;
         
-        // Bird object
+        // Bird object - POSIZIONE PIÙ CENTRALE
         const bird = {
-            x: WIDTH * 0.3,
+            x: WIDTH * 0.25,  // Più a sinistra per dare più tempo di reazione
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 35, // Aumentato il raggio per rendere l'uccellino più visibile
+            radius: 20,  // Uccellino più piccolo per passare meglio
             trail: [],
             angle: 0,
             shielded: false,
@@ -602,7 +626,7 @@
         function initBackgroundElements() {
             // Background particles
             backgroundParticles = [];
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 30; i++) {
                 backgroundParticles.push({
                     x: Math.random() * WIDTH,
                     y: Math.random() * HEIGHT,
@@ -614,7 +638,7 @@
             
             // Stars for parallax
             stars = [];
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 50; i++) {
                 stars.push({
                     x: Math.random() * WIDTH,
                     y: Math.random() * HEIGHT,
@@ -657,17 +681,17 @@
         
         function jump() {
             bird.velocity = settings.jumpForce;
-            bird.wingAnimation = 20; // Animazione delle ali
+            bird.wingAnimation = 20;
             playSound(400, 0.1, 'square');
             
             // Create jump particles
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 5; i++) {
                 particles.push({
                     x: bird.x,
                     y: bird.y,
                     vx: (Math.random() - 0.5) * 4,
                     vy: Math.random() * 2 + 2,
-                    size: Math.random() * 6 + 2,
+                    size: Math.random() * 4 + 2,
                     color: bird.shielded ? COLORS.shield : COLORS.bird,
                     life: 30,
                     type: 'jump'
@@ -702,27 +726,28 @@
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
+            bird.x = WIDTH * 0.25;  // Reset posizione
             bird.y = HEIGHT / 2;
-            bird.velocity = -3; // Inizia con una piccola spinta verso l'alto
+            bird.velocity = 0;  // Nessuna spinta iniziale
             bird.trail = [];
             bird.shielded = false;
             bird.shieldTime = 0;
             bird.magnetized = false;
             bird.magnetTime = 0;
-            bird.invincible = true; // Inizia invincibile
-            bird.invincibleTime = 120; // 2 secondi di invincibilità iniziale
+            bird.invincible = true;
+            bird.invincibleTime = 180; // 3 secondi di invincibilità iniziale
             pipes = [];
             particles = [];
             powerups = [];
             
-            // Create first pipe più lontano
+            // Create first pipe molto più tardi
             setTimeout(() => {
                 createPipe();
-            }, 500);
+            }, 2000);  // 2 secondi di delay per il primo tubo
         }
         
         function createPipe() {
-            const minHeight = 100;
+            const minHeight = 80;
             const maxHeight = HEIGHT - settings.pipeGap - minHeight;
             const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
             
@@ -743,7 +768,7 @@
                 x: x,
                 y: y,
                 type: type,
-                radius: 15,
+                radius: 20,  // Power-up più grandi
                 collected: false,
                 rotation: 0
             });
@@ -753,6 +778,11 @@
             // Apply gravity
             bird.velocity += settings.gravity;
             bird.y += bird.velocity;
+            
+            // Limita la velocità massima di caduta
+            if (bird.velocity > 8) {
+                bird.velocity = 8;
+            }
             
             // Update angle based on velocity
             bird.angle = Math.max(-25, Math.min(90, bird.velocity * 3));
@@ -764,7 +794,7 @@
             
             // Update trail
             bird.trail.push({ x: bird.x, y: bird.y, opacity: 1 });
-            if (bird.trail.length > 15) {
+            if (bird.trail.length > 10) {
                 bird.trail.shift();
             }
             
@@ -796,21 +826,21 @@
             }
             
             // Create movement particles
-            if (frameCount % 3 === 0) {
+            if (frameCount % 5 === 0) {
                 particles.push({
                     x: bird.x - 10,
                     y: bird.y,
                     vx: -2 - Math.random() * 2,
                     vy: (Math.random() - 0.5) * 2,
-                    size: Math.random() * 4 + 2,
+                    size: Math.random() * 3 + 1,
                     color: bird.shielded ? COLORS.shield : COLORS.particle,
                     life: 20,
                     type: 'trail'
                 });
             }
             
-            // Check boundaries with margin
-            const margin = 20; // Margine di sicurezza
+            // Check boundaries with bigger margin
+            const margin = 40;
             if (!bird.invincible && (bird.y - bird.radius < margin || bird.y + bird.radius > HEIGHT - margin)) {
                 if (bird.shielded) {
                     bird.shielded = false;
@@ -838,7 +868,7 @@
                     document.getElementById('score').textContent = score;
                     
                     // Combo effects
-                    if (combo >= 5) {
+                    if (combo >= 3) {  // Combo più facile da ottenere
                         document.getElementById('score').classList.add('combo');
                         setTimeout(() => {
                             document.getElementById('score').classList.remove('combo');
@@ -851,23 +881,23 @@
                     }
                     
                     // Score particles
-                    for (let i = 0; i < 15; i++) {
+                    for (let i = 0; i < 10; i++) {
                         particles.push({
                             x: bird.x,
                             y: bird.y,
                             vx: (Math.random() - 0.5) * 6,
                             vy: (Math.random() - 0.5) * 6,
-                            size: Math.random() * 8 + 4,
-                            color: combo >= 5 ? COLORS.powerup : COLORS.pipeGlow,
+                            size: Math.random() * 6 + 2,
+                            color: combo >= 3 ? COLORS.powerup : COLORS.pipeGlow,
                             life: 40,
                             type: 'score'
                         });
                     }
                     
-                    // Spawn power-up occasionally - aumentata la probabilità
-                    if (Math.random() < 0.4) {
+                    // Spawn power-up più spesso
+                    if (Math.random() < 0.5) {  // 50% di probabilità
                         const pipeCenter = (pipe.topHeight + pipe.bottomY) / 2;
-                        createPowerup(pipe.x + PIPE_WIDTH + 150, pipeCenter);
+                        createPowerup(pipe.x + PIPE_WIDTH + 200, pipeCenter);
                     }
                     
                     // Vibrate on score
@@ -877,7 +907,7 @@
                 }
                 
                 // Create pipe edge particles
-                if (frameCount % 10 === 0) {
+                if (frameCount % 15 === 0) {
                     // Top pipe particles
                     pipe.particles.push({
                         x: pipe.x + PIPE_WIDTH,
@@ -915,25 +945,25 @@
                 powerup.x -= settings.pipeSpeed;
                 powerup.rotation += 0.05;
                 
-                // Magnet effect
+                // Magnet effect più forte
                 if (bird.magnetized && !powerup.collected) {
                     const dx = bird.x - powerup.x;
                     const dy = bird.y - powerup.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < 150) {
-                        powerup.x += dx * 0.05;
-                        powerup.y += dy * 0.05;
+                    if (dist < 200) {  // Raggio magnetico più grande
+                        powerup.x += dx * 0.08;
+                        powerup.y += dy * 0.08;
                     }
                 }
                 
-                // Check collection
+                // Check collection con hitbox più generosa
                 if (!powerup.collected) {
                     const dx = bird.x - powerup.x;
                     const dy = bird.y - powerup.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < bird.radius + powerup.radius) {
+                    if (dist < bird.radius + powerup.radius + 10) {  // +10 pixel di margine
                         powerup.collected = true;
                         powerupsCollected++;
                         
@@ -941,12 +971,12 @@
                         switch (powerup.type) {
                             case 'shield':
                                 bird.shielded = true;
-                                bird.shieldTime = 300;
+                                bird.shieldTime = 400;  // Durata più lunga
                                 playSound(300, 0.2);
                                 break;
                             case 'magnet':
                                 bird.magnetized = true;
-                                bird.magnetTime = 400;
+                                bird.magnetTime = 500;  // Durata più lunga
                                 playSound(350, 0.2);
                                 break;
                             case 'points':
@@ -986,7 +1016,7 @@
             
             if (bird.shielded || bird.magnetized) {
                 indicator.classList.add('active');
-                const totalTime = bird.shielded ? 300 : 400;
+                const totalTime = bird.shielded ? 400 : 500;
                 const currentTime = bird.shielded ? bird.shieldTime : bird.magnetTime;
                 fill.style.width = `${(currentTime / totalTime) * 100}%`;
                 fill.style.background = bird.shielded ? 
@@ -1001,15 +1031,17 @@
             if (bird.invincible) return;
             
             pipes.forEach(pipe => {
-                // Check top pipe con margine di collisione ridotto
-                const collisionMargin = 5;
+                // Hitbox più piccola per rendere il gioco più facile
+                const collisionMargin = 10;  // Margine ancora più grande
+                
+                // Check top pipe
                 if (bird.x + bird.radius - collisionMargin > pipe.x && 
                     bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
                     bird.y - bird.radius + collisionMargin < pipe.topHeight) {
                     handleCollision();
                 }
                 
-                // Check bottom pipe con margine di collisione ridotto
+                // Check bottom pipe
                 if (bird.x + bird.radius - collisionMargin > pipe.x && 
                     bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
                     bird.y + bird.radius - collisionMargin > pipe.bottomY) {
@@ -1022,7 +1054,7 @@
             if (bird.shielded) {
                 bird.shielded = false;
                 bird.invincible = true;
-                bird.invincibleTime = 60;
+                bird.invincibleTime = 90;  // Più tempo di invincibilità
                 combo = 0;
                 document.getElementById('comboIndicator').classList.remove('active');
                 playSound(200, 0.2, 'triangle');
@@ -1189,13 +1221,13 @@
             
             // Shield effect
             if (bird.shielded) {
-                const shieldGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 1.5);
+                const shieldGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2);
                 shieldGradient.addColorStop(0, 'transparent');
                 shieldGradient.addColorStop(0.7, 'rgba(255, 107, 107, 0.2)');
                 shieldGradient.addColorStop(1, 'rgba(255, 107, 107, 0.4)');
                 ctx.fillStyle = shieldGradient;
                 ctx.beginPath();
-                ctx.arc(0, 0, bird.radius * 1.5, 0, Math.PI * 2);
+                ctx.arc(0, 0, bird.radius * 2, 0, Math.PI * 2);
                 ctx.fill();
             }
             
@@ -1205,30 +1237,36 @@
                 ctx.lineWidth = 2;
                 for (let i = 1; i < 4; i++) {
                     ctx.beginPath();
-                    ctx.arc(0, 0, bird.radius + i * 10, 0, Math.PI * 2);
+                    ctx.arc(0, 0, bird.radius + i * 15, 0, Math.PI * 2);
                     ctx.stroke();
                 }
             }
             
-            // Invincibility effect (più visibile)
+            // Invincibility effect molto più visibile
             if (bird.invincible) {
-                // Effetto scudo lampeggiante
-                if (frameCount % 10 < 5) {
-                    ctx.globalAlpha = 0.5;
-                }
+                // Effetto pulsante
+                const pulseScale = 1 + Math.sin(frameCount * 0.1) * 0.1;
                 
-                // Cerchio di protezione
-                const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2);
-                invincibleGradient.addColorStop(0, 'transparent');
-                invincibleGradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.1)');
-                invincibleGradient.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
-                ctx.fillStyle = invincibleGradient;
+                // Cerchio di protezione animato
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.lineDashOffset = frameCount * 0.5;
                 ctx.beginPath();
-                ctx.arc(0, 0, bird.radius * 2, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.arc(0, 0, bird.radius * 1.8 * pulseScale, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
                 
-                // Ripristina alpha
-                ctx.globalAlpha = 1;
+                // Glowing effect
+                if (frameCount % 20 < 10) {
+                    const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2.5);
+                    invincibleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                    invincibleGradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = invincibleGradient;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, bird.radius * 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
             
             // Bird glow
@@ -1238,74 +1276,43 @@
             ctx.fillStyle = glowGradient;
             ctx.fillRect(-bird.radius * 2, -bird.radius * 2, bird.radius * 4, bird.radius * 4);
             
-            // Draw bird as a stylized bird shape
+            // Draw bird corpo semplificato
             ctx.fillStyle = COLORS.bird;
             ctx.strokeStyle = COLORS.birdGlow;
             ctx.lineWidth = 2;
             
-            // Body (più grande)
+            // Body
             ctx.beginPath();
-            ctx.ellipse(0, 0, bird.radius * 1.1, bird.radius * 0.9, 0, 0, Math.PI * 2);
+            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
             
-            // Head (più grande)
-            ctx.beginPath();
-            ctx.arc(bird.radius * 0.6, -bird.radius * 0.3, bird.radius * 0.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            
-            // Eye bianco grande
+            // Eye
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.7, -bird.radius * 0.35, bird.radius * 0.2, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.4, -bird.radius * 0.3, bird.radius * 0.3, 0, Math.PI * 2);
             ctx.fill();
             
-            // Pupilla
+            // Pupil
             ctx.fillStyle = '#000000';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.75, -bird.radius * 0.35, bird.radius * 0.1, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.5, -bird.radius * 0.3, bird.radius * 0.15, 0, Math.PI * 2);
             ctx.fill();
             
-            // Beak più grande e visibile
+            // Beak
             ctx.fillStyle = '#ff6600';
-            ctx.strokeStyle = '#ff3300';
-            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(bird.radius * 0.9, -bird.radius * 0.25);
-            ctx.lineTo(bird.radius * 1.3, -bird.radius * 0.15);
-            ctx.lineTo(bird.radius * 0.9, -bird.radius * 0.05);
+            ctx.moveTo(bird.radius * 0.8, -bird.radius * 0.1);
+            ctx.lineTo(bird.radius * 1.3, 0);
+            ctx.lineTo(bird.radius * 0.8, bird.radius * 0.1);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
             
-            // Wing (animated) più grande
-            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 8;
+            // Wing (animated)
+            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 5;
             ctx.fillStyle = '#0099cc';
-            ctx.strokeStyle = COLORS.birdGlow;
-            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.ellipse(-bird.radius * 0.3, wingOffset, bird.radius * 0.8, bird.radius * 0.4, -0.3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-            
-            // Tail più visibile
-            ctx.fillStyle = COLORS.bird;
-            ctx.beginPath();
-            ctx.moveTo(-bird.radius * 0.7, 0);
-            ctx.lineTo(-bird.radius * 1.3, -bird.radius * 0.3);
-            ctx.lineTo(-bird.radius * 1.3, bird.radius * 0.3);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            
-            // Inner highlight on body
-            const highlightGradient = ctx.createRadialGradient(bird.radius * 0.2, -bird.radius * 0.2, 0, bird.radius * 0.2, -bird.radius * 0.2, bird.radius * 0.5);
-            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-            highlightGradient.addColorStop(1, 'transparent');
-            ctx.fillStyle = highlightGradient;
-            ctx.beginPath();
-            ctx.arc(bird.radius * 0.2, -bird.radius * 0.2, bird.radius * 0.5, 0, Math.PI * 2);
+            ctx.ellipse(-bird.radius * 0.3, wingOffset, bird.radius * 0.6, bird.radius * 0.4, -0.3, 0, Math.PI * 2);
             ctx.fill();
             
             ctx.restore();
@@ -1336,7 +1343,7 @@
                 ctx.fillStyle = pipeGradient;
                 ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
                 
-                // Top pipe edge
+                // Top pipe edge with rounded corners
                 ctx.fillStyle = COLORS.pipeGlow;
                 ctx.fillRect(pipe.x - 5, pipe.topHeight - 10, PIPE_WIDTH + 10, 10);
                 
@@ -1344,7 +1351,7 @@
                 ctx.fillStyle = pipeGradient;
                 ctx.fillRect(pipe.x, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY);
                 
-                // Bottom pipe edge
+                // Bottom pipe edge with rounded corners
                 ctx.fillStyle = COLORS.pipeGlow;
                 ctx.fillRect(pipe.x - 5, pipe.bottomY, PIPE_WIDTH + 10, 10);
                 
@@ -1363,8 +1370,8 @@
                 ctx.translate(powerup.x, powerup.y);
                 ctx.rotate(powerup.rotation);
                 
-                // Power-up glow
-                const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, powerup.radius * 2);
+                // Power-up glow più visibile
+                const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, powerup.radius * 3);
                 let color1, color2;
                 
                 switch (powerup.type) {
@@ -1382,10 +1389,11 @@
                         break;
                 }
                 
-                glowGradient.addColorStop(0, color1 + '40');
+                glowGradient.addColorStop(0, color1 + '60');
+                glowGradient.addColorStop(0.5, color1 + '30');
                 glowGradient.addColorStop(1, 'transparent');
                 ctx.fillStyle = glowGradient;
-                ctx.fillRect(-powerup.radius * 2, -powerup.radius * 2, powerup.radius * 4, powerup.radius * 4);
+                ctx.fillRect(-powerup.radius * 3, -powerup.radius * 3, powerup.radius * 6, powerup.radius * 6);
                 
                 // Power-up body
                 const bodyGradient = ctx.createRadialGradient(-powerup.radius/3, -powerup.radius/3, 0, 0, 0, powerup.radius);
@@ -1397,9 +1405,16 @@
                 ctx.arc(0, 0, powerup.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Icon
+                // Outer ring
+                ctx.strokeStyle = color1;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, powerup.radius + 3, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Icon più grande
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.font = '16px Arial';
+                ctx.font = 'bold 20px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
@@ -1465,16 +1480,16 @@
             requestAnimationFrame(gameLoop);
         }
         
-        // Handle resize
+        // Handle resize con limiti
         window.addEventListener('resize', () => {
-            WIDTH = window.innerWidth;
-            HEIGHT = window.innerHeight;
+            WIDTH = Math.min(window.innerWidth, 800);
+            HEIGHT = Math.min(window.innerHeight, 600);
             canvas.width = WIDTH;
             canvas.height = HEIGHT;
             
             // Adjust bird position
-            if (bird.x > WIDTH * 0.3) {
-                bird.x = WIDTH * 0.3;
+            if (bird.x > WIDTH * 0.25) {
+                bird.x = WIDTH * 0.25;
             }
         });
         
@@ -1489,46 +1504,14 @@
         if (autostart) {
             // Hide start screen immediately
             document.getElementById('startScreen').style.display = 'none';
-            // Set default difficulty to normal
-            currentDifficulty = 'easy'; // Cambiato a easy per rendere più facile
+            // Set default difficulty to easy
+            currentDifficulty = 'easy';
             settings = difficulties[currentDifficulty];
-            // Start game immediately
+            // Start game after a short delay
             setTimeout(() => {
-                // Show ready message
-                const readyMessage = document.getElementById('readyMessage');
-                readyMessage.classList.add('active');
-                setTimeout(() => {
-                    readyMessage.classList.remove('active');
-                }, 2000);
-                
-                gameState = 'playing';
-                score = 0;
-                combo = 0;
-                maxCombo = 0;
-                powerupsCollected = 0;
-                bird.y = HEIGHT / 2;
-                bird.velocity = -3; // Inizia con una piccola spinta verso l'alto
-                bird.trail = [];
-                bird.shielded = false;
-                bird.shieldTime = 0;
-                bird.magnetized = false;
-                bird.magnetTime = 0;
-                bird.invincible = true; // Inizia invincibile
-                bird.invincibleTime = 120; // 2 secondi di invincibilità iniziale
-                pipes = [];
-                particles = [];
-                powerups = [];
-                
-                // Crea il primo tubo dopo un delay
-                setTimeout(() => {
-                    createPipe();
-                }, 1000);
-                
-                // Auto-jump dopo un breve delay per dare tempo al giocatore di prepararsi
-                setTimeout(() => {
-                    jump();
-                }, 500);
-            }, 100);
+                startGame();
+                // No auto-jump to let player start when ready
+            }, 500);
         }
         
         // Start game loop

@@ -406,6 +406,36 @@
             opacity: 1;
         }
 
+        /* Debug mode toggle */
+        .debug-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--white);
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+
+        .debug-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .debug-toggle.active {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
         /* Mobile optimizations */
         @media (max-width: 768px) {
             .game-title {
@@ -455,6 +485,7 @@
     </div>
     
     <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</div>
+    <div class="debug-toggle" id="debugToggle" onclick="toggleDebug()">🐛</div>
     
     <div id="startScreen">
         <h1 class="game-title">Notamy Fly</h1>
@@ -508,6 +539,15 @@
         let HEIGHT = Math.min(window.innerHeight, 600);
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
+        
+        // Debug mode
+        let debugMode = false;
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const toggle = document.getElementById('debugToggle');
+            toggle.classList.toggle('active', debugMode);
+        }
         
         // Difficulty settings - RESO ANCORA PIÙ FACILE
         const difficulties = {
@@ -730,6 +770,7 @@
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
+            frameCount = 0;  // Reset frame counter
             
             // RESET COMPLETO DELL'UCCELLO
             bird.x = WIDTH * 0.25;  // Reset posizione
@@ -742,7 +783,7 @@
             bird.magnetized = false;
             bird.magnetTime = 0;
             bird.invincible = true;
-            bird.invincibleTime = 180; // 3 secondi di invincibilità iniziale
+            bird.invincibleTime = 300; // 5 secondi di invincibilità iniziale
             bird.wingAnimation = 0;
             
             // VERIFICA POSIZIONE
@@ -755,7 +796,7 @@
             // Create first pipe molto più tardi
             setTimeout(() => {
                 createPipe();
-            }, 2000);  // 2 secondi di delay per il primo tubo
+            }, 3000);  // 3 secondi di delay per il primo tubo
         }
         
         function createPipe() {
@@ -834,6 +875,7 @@
                 bird.invincibleTime--;
                 if (bird.invincibleTime === 0) {
                     bird.invincible = false;
+                    console.log('Invincibility ended at frame:', frameCount);
                 }
             }
             
@@ -1054,23 +1096,57 @@
             if (bird.invincible) return;
             
             pipes.forEach(pipe => {
-                // Hitbox più piccola per rendere il gioco più facile - ADATTATA ALL'UCCELLO PIÙ PICCOLO
-                const collisionMargin = 5;  // Margine ridotto per l'uccello più piccolo
+                // COLLISION DETECTION PRECISA
+                // L'uccello tocca il tubo solo se il suo cerchio interseca davvero il rettangolo del tubo
                 
-                // Check top pipe
-                if (bird.x + bird.radius - collisionMargin > pipe.x && 
-                    bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
-                    bird.y - bird.radius + collisionMargin < pipe.topHeight) {
-                    handleCollision();
-                }
+                // Calcola i bordi del cerchio dell'uccello
+                const birdLeft = bird.x - bird.radius;
+                const birdRight = bird.x + bird.radius;
+                const birdTop = bird.y - bird.radius;
+                const birdBottom = bird.y + bird.radius;
                 
-                // Check bottom pipe
-                if (bird.x + bird.radius - collisionMargin > pipe.x && 
-                    bird.x - bird.radius + collisionMargin < pipe.x + PIPE_WIDTH &&
-                    bird.y + bird.radius - collisionMargin > pipe.bottomY) {
-                    handleCollision();
+                // Bordi del tubo
+                const pipeLeft = pipe.x;
+                const pipeRight = pipe.x + PIPE_WIDTH;
+                
+                // Check se l'uccello è nella zona X del tubo
+                if (birdRight > pipeLeft && birdLeft < pipeRight) {
+                    // Check collisione con tubo superiore
+                    if (birdTop < pipe.topHeight) {
+                        // Verifica precisa: il cerchio tocca davvero il rettangolo?
+                        if (isCircleRectCollision(bird.x, bird.y, bird.radius, 
+                                                  pipeLeft, 0, PIPE_WIDTH, pipe.topHeight)) {
+                            handleCollision();
+                            return;
+                        }
+                    }
+                    
+                    // Check collisione con tubo inferiore
+                    if (birdBottom > pipe.bottomY) {
+                        // Verifica precisa: il cerchio tocca davvero il rettangolo?
+                        if (isCircleRectCollision(bird.x, bird.y, bird.radius,
+                                                  pipeLeft, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY)) {
+                            handleCollision();
+                            return;
+                        }
+                    }
                 }
             });
+        }
+        
+        // Funzione helper per collision detection cerchio-rettangolo precisa
+        function isCircleRectCollision(circleX, circleY, circleRadius, rectX, rectY, rectWidth, rectHeight) {
+            // Trova il punto più vicino del rettangolo al centro del cerchio
+            const closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
+            const closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
+            
+            // Calcola la distanza tra il centro del cerchio e questo punto più vicino
+            const distanceX = circleX - closestX;
+            const distanceY = circleY - closestY;
+            
+            // Se la distanza è minore del raggio, c'è collisione
+            const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+            return distanceSquared < (circleRadius * circleRadius);
         }
         
         function handleCollision() {
@@ -1369,6 +1445,17 @@
             ctx.arc(bird.x, bird.y, bird.radius + 1, 0, Math.PI * 2);
             ctx.stroke();
             ctx.restore();
+            
+            // DEBUG MODE: mostra hitbox
+            if (debugMode) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
         }
         
         function drawPipes() {
@@ -1414,6 +1501,16 @@
                     ctx.fillStyle = `rgba(0, 230, 118, ${opacity * 0.5})`;
                     ctx.fillRect(p.x, p.y - 2, 20, 4);
                 });
+                
+                // DEBUG MODE: mostra hitbox dei tubi
+                if (debugMode) {
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
+                    ctx.strokeRect(pipe.x, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY);
+                    ctx.restore();
+                }
             });
         }
         
@@ -1537,17 +1634,8 @@
             drawParticles();  // Poi le particelle (effetti)
             
             // SEMPRE DISEGNA L'UCCELLO PER ULTIMO
-            if (gameState !== 'start') {  // Disegna l'uccello sempre tranne nella schermata iniziale
+            if (gameState === 'playing' || gameState === 'gameOver') {  // Disegna l'uccello anche durante game over per vedere l'esplosione
                 drawBird();       // Infine l'uccello (primo piano) - SEMPRE SOPRA TUTTO
-            }
-            
-            // DEBUG: Disegna un indicatore rosso sulla posizione dell'uccello
-            if (gameState === 'playing') {
-                ctx.save();
-                ctx.fillStyle = 'red';
-                ctx.globalAlpha = 0.5;
-                ctx.fillRect(bird.x - 2, bird.y - 2, 4, 4);
-                ctx.restore();
             }
             
             requestAnimationFrame(gameLoop);

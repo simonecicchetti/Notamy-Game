@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Notamy Mini Games</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>Notamy Mini Games - Ultimate Collection</title>
     <style>
         * {
             margin: 0;
@@ -20,118 +22,190 @@
         :root {
             --primary-teal: #00b4a6;
             --primary-light: #00d9ff;
-            --secondary-red: #ff6b6b;
-            --secondary-light: #ff8787;
-            --accent-green: #00e676;
             --cyan-neon: #00ffff;
             --cyan-deep: #00cccc;
             --cyan-light: #7affff;
             --purple-accent: #b366ff;
-            --magenta-glow: #ff00ff;
             --pink-neon: #ff6b6b;
             --orange-neon: #ffab00;
             --green-neon: #00e676;
+            --yellow-neon: #ffeb3b;
+            --red-glow: #ff5252;
+            --blue-electric: #448aff;
+            --indigo-deep: #3f51b5;
             --black-deep: #000000;
             --black-soft: #0a0a0a;
             --gray-dark: #1a1a1a;
+            --gray-medium: #2a2a2a;
             --white: #ffffff;
             --gradient-main: linear-gradient(135deg, #00b4a6, #00d9ff);
-            --gradient-glow: linear-gradient(135deg, #00ffff, #ff00ff);
+            --gradient-fire: linear-gradient(135deg, #ff6b6b, #ffab00);
+            --gradient-ice: linear-gradient(135deg, #00d9ff, #00ffff);
+            --gradient-nature: linear-gradient(135deg, #00e676, #00b4a6);
+            --gradient-cosmic: linear-gradient(135deg, #b366ff, #448aff);
+            --gradient-sunset: linear-gradient(135deg, #ff6b6b, #ff5252);
         }
         
         body {
             background: var(--black-deep);
-            font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             overflow-x: hidden;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            color: var(--black-deep);
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            color: var(--white);
         }
 
-
+        /* BACKGROUND EFFECTS */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+        }
+        
+        /* Neon Grid Background */
+        .neon-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 180, 166, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 166, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
         
         .container {
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 900px;
-            padding: 15px;
-            padding-top: 20px;
-            background: radial-gradient(ellipse at center, rgba(0, 180, 166, 0.02) 0%, transparent 70%);
-            border-radius: 40px;
-            border: 1px solid rgba(0, 180, 166, 0.05);
+            max-width: 1200px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
-        /* Header */
+        /* Enhanced Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 60px;
+            position: relative;
         }
         
         .logo {
-            margin: 0 auto 20px;
+            margin: 0 auto 30px;
             text-align: center;
-        }
-
-        
-        .logo-text {
-            font-size: 5.5rem;
-            font-weight: 200;
-            color: var(--primary-teal);
-            text-transform: none;
-            letter-spacing: -2px;
-            margin-bottom: 5px;
-            animation: neonFlicker 3s ease-in-out infinite;
             position: relative;
-            text-shadow: 
-                0 0 10px var(--primary-teal),
-                0 0 20px var(--primary-teal),
-                0 0 30px var(--cyan-light),
-                0 0 40px rgba(0, 180, 166, 0.5);
         }
 
-        @keyframes neonFlicker {
+        /* ULTIMATE NOTAMY LOGO STYLING */
+        .logo-text {
+            font-size: 120px;
+            font-weight: 200;
+            background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--purple-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: logo-float 3s ease-in-out infinite;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 
+                0 0 80px rgba(0, 180, 166, 0.5),
+                0 0 120px rgba(0, 217, 255, 0.3),
+                0 0 160px rgba(179, 102, 255, 0.2);
+        }
+
+        /* Glowing effect behind text */
+        .logo-text::before {
+            content: 'NOTAMY';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: -1;
+            font-size: 120px;
+            font-weight: 200;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--purple-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(20px);
+            opacity: 0.5;
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logo-float {
             0%, 100% { 
-                opacity: 1;
-                text-shadow: 
-                    0 0 10px var(--primary-teal),
-                    0 0 20px var(--primary-teal),
-                    0 0 30px rgba(0, 180, 166, 0.3);
+                transform: translateY(0) scale(1);
             }
             50% { 
-                opacity: 0.95;
-                text-shadow: 
-                    0 0 15px var(--primary-teal),
-                    0 0 25px var(--primary-teal),
-                    0 0 35px rgba(0, 180, 166, 0.5);
+                transform: translateY(-10px) scale(1.02);
+            }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { 
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: scale(1.1);
             }
         }
         
         .logo-subtitle {
-            font-size: 0.9rem;
-            font-weight: 400;
+            font-size: 24px;
+            font-weight: 300;
             color: var(--primary-light);
+            margin-bottom: 10px;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
-            opacity: 0.8;
+            opacity: 0.9;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.8);
+            animation: subtitle-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes subtitle-pulse {
+            0%, 100% { 
+                opacity: 0.9;
+                letter-spacing: 6px;
+            }
+            50% { 
+                opacity: 1;
+                letter-spacing: 8px;
+            }
         }
         
-        /* Games grid */
+        /* Games grid with enhanced styling */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            width: 100%;
+            max-width: 900px;
         }
         
+        /* Enhanced Game Cards */
         .game-card {
-            background: rgba(0, 180, 166, 0.03);
-            border: 1px solid rgba(0, 180, 166, 0.2);
-            border-radius: 20px;
-            padding: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--card-border, rgba(0, 180, 166, 0.3));
+            border-radius: 30px;
+            padding: 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -141,8 +215,12 @@
             display: block;
             backdrop-filter: blur(20px);
             transform: translateY(0);
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                0 0 80px var(--card-glow, rgba(0, 180, 166, 0.2)),
+                inset 0 0 60px rgba(0, 0, 0, 0.5);
         }
-        
+
         .game-card::before {
             content: '';
             position: absolute;
@@ -150,85 +228,92 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, var(--glow-color, rgba(0, 180, 166, 0.15)) 0%, transparent 70%);
-            animation: rotate 15s linear infinite;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                var(--card-accent, var(--primary-teal)),
+                transparent,
+                var(--card-secondary, var(--primary-light)),
+                transparent
+            );
+            animation: card-rotate 10s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes card-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .game-card::after {
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, var(--shimmer-color, rgba(0, 180, 166, 0.1)), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--card-shimmer, rgba(255, 255, 255, 0.1)), 
+                transparent
+            );
+            transition: left 0.6s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: var(--card-border-hover, var(--primary-teal));
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                0 0 120px var(--card-glow-hover, rgba(0, 180, 166, 0.6)),
+                inset 0 0 60px var(--card-inner-glow, rgba(0, 180, 166, 0.1));
         }
 
         .game-card:hover::after {
-            transform: translateX(100%);
+            left: 100%;
         }
         
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: var(--border-color, var(--primary-teal));
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                0 0 60px var(--shadow-color, rgba(0, 180, 166, 0.4)),
-                inset 0 0 30px var(--inner-glow, rgba(0, 180, 166, 0.1));
-        }
-        
-        .game-card:hover::before {
-            opacity: 1;
-        }
-        
+        /* Enhanced Game Icons */
         .game-icon {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 20px;
-            border-radius: 25px;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             z-index: 1;
-            background: var(--gradient-main);
+            background: var(--icon-gradient, var(--gradient-main));
             padding: 3px;
             box-shadow: 
-                0 0 30px var(--icon-shadow, rgba(0, 180, 166, 0.5)),
-                0 0 60px var(--icon-shadow, rgba(0, 180, 166, 0.3));
-            animation: icon-float 3s ease-in-out infinite;
+                0 0 60px var(--icon-shadow, rgba(0, 180, 166, 0.6)),
+                0 0 120px var(--icon-shadow, rgba(0, 180, 166, 0.3)),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: icon-breathe 3s ease-in-out infinite;
         }
         
-        @keyframes icon-float {
+        @keyframes icon-breathe {
             0%, 100% { 
-                transform: translateY(0) rotate(0deg);
+                transform: scale(1) rotate(0deg);
                 box-shadow: 
-                    0 0 30px var(--icon-shadow, rgba(0, 180, 166, 0.5)),
-                    0 0 60px var(--icon-shadow, rgba(0, 180, 166, 0.3));
+                    0 0 60px var(--icon-shadow, rgba(0, 180, 166, 0.6)),
+                    0 0 120px var(--icon-shadow, rgba(0, 180, 166, 0.3));
             }
             50% { 
-                transform: translateY(-5px) rotate(5deg);
+                transform: scale(1.05) rotate(5deg);
                 box-shadow: 
-                    0 0 40px var(--icon-shadow, rgba(0, 180, 166, 0.7)),
-                    0 0 80px var(--icon-shadow, rgba(0, 180, 166, 0.5));
+                    0 0 80px var(--icon-shadow, rgba(0, 180, 166, 0.8)),
+                    0 0 160px var(--icon-shadow, rgba(0, 180, 166, 0.5));
             }
         }
         
         .icon-inner {
             width: 100%;
             height: 100%;
-            border-radius: 22px;
+            border-radius: 27px;
             background: var(--black-deep);
-            border: 1px solid rgba(0, 180, 166, 0.3);
+            border: 2px solid var(--icon-border, rgba(0, 180, 166, 0.5));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -236,304 +321,268 @@
             overflow: hidden;
         }
         
-        /* Crush game icon */
+        /* Crush game icon with enhanced effects */
         .candy-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 3px;
-            width: 50px;
-            height: 50px;
+            gap: 4px;
+            width: 60px;
+            height: 60px;
         }
         
         .logo-candy {
             width: 100%;
             height: 100%;
-            border-radius: 4px;
-            animation: candyPop 3s ease-in-out infinite;
+            border-radius: 6px;
+            animation: candyFloat 3s ease-in-out infinite;
             box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.3),
-                0 0 10px currentColor;
+                0 3px 10px rgba(0, 0, 0, 0.4),
+                0 0 20px currentColor,
+                inset 0 0 10px rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-candy::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: rotate(45deg);
+            animation: candy-shine 2s linear infinite;
+        }
+
+        @keyframes candy-shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
-        @keyframes candyPop {
+        @keyframes candyFloat {
             0%, 100% { 
-                transform: scale(1) rotate(0deg);
+                transform: scale(1) rotate(0deg) translateY(0);
                 filter: brightness(1);
             }
             25% { 
-                transform: scale(1.1) rotate(5deg);
+                transform: scale(1.1) rotate(5deg) translateY(-2px);
                 filter: brightness(1.2);
             }
             50% { 
-                transform: scale(0.9) rotate(-5deg);
+                transform: scale(0.95) rotate(-5deg) translateY(1px);
                 filter: brightness(0.9);
             }
             75% { 
-                transform: scale(1.05) rotate(3deg);
+                transform: scale(1.05) rotate(3deg) translateY(-1px);
                 filter: brightness(1.1);
             }
         }
         
-        /* Blocks game icon */
-        .blocks-icon-container {
+        /* Tetris game icon with enhanced effects */
+        .tetris-icon-container {
             position: relative;
-            width: 60px;
-            height: 60px;
-            transform: rotate(-10deg);
+            width: 70px;
+            height: 70px;
         }
         
-        .falling-block {
+        .tetris-piece {
             position: absolute;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--black-deep);
-            font-weight: 900;
-            font-size: 10px;
+            display: grid;
+            gap: 1px;
+        }
+
+        .tetris-block {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
             box-shadow: 
-                0 3px 10px rgba(0, 0, 0, 0.3),
-                0 0 15px currentColor;
-            animation: blockFall 2s ease-in-out infinite;
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                0 0 15px currentColor,
+                inset 0 0 8px rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tetris-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* I piece */
+        .piece-i {
+            grid-template-columns: repeat(4, 1fr);
+            top: 10px;
+            left: 10px;
+            animation: piece-float 4s ease-in-out infinite;
+        }
+
+        /* T piece */
+        .piece-t {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            bottom: 10px;
+            right: 10px;
+            animation: piece-rotate 6s ease-in-out infinite;
+        }
+
+        /* O piece */
+        .piece-o {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            top: 10px;
+            right: 15px;
+            animation: piece-bounce 3s ease-in-out infinite;
+        }
+
+        @keyframes piece-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes piece-rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        @keyframes piece-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
         }
         
-        @keyframes blockFall {
-            0% {
-                transform: translateY(-20px) rotate(0deg) scale(0);
-                opacity: 0;
-            }
-            20% {
-                transform: translateY(0) rotate(180deg) scale(1);
-                opacity: 1;
-            }
-            80% {
-                transform: translateY(0) rotate(360deg) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0) rotate(360deg) scale(1.2);
-                opacity: 0;
-            }
-        }
-        
+        /* Enhanced Game Titles */
         .game-title {
-            font-size: 28px;
+            font-size: 36px;
             font-weight: 900;
             color: var(--white);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             position: relative;
             z-index: 1;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            text-shadow: 
+                0 0 30px var(--title-glow, rgba(0, 180, 166, 0.8)),
+                0 2px 20px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .game-card:hover .game-title {
-            color: var(--title-hover, var(--primary-teal));
+            transform: scale(1.05);
             text-shadow: 
-                0 0 20px var(--title-glow, var(--primary-teal)),
+                0 0 40px var(--title-glow-hover, var(--primary-teal)),
+                0 0 80px var(--title-glow-hover, var(--primary-teal)),
                 0 2px 20px rgba(0, 0, 0, 0.5);
         }
         
         .game-description {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.5;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
             position: relative;
             z-index: 1;
             transition: all 0.3s ease;
+            letter-spacing: 0.5px;
         }
 
         .game-card:hover .game-description {
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        .game-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--primary-teal);
             color: var(--white);
-            padding: 6px 16px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            animation: badge-pulse 2s ease-in-out infinite;
-            box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 180, 166, 0.4));
+            transform: scale(1.02);
         }
         
-        @keyframes badge-pulse {
+        /* Play button effect */
+        .play-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 0 30px rgba(0, 180, 166, 0.6),
+                0 0 60px rgba(0, 180, 166, 0.3);
+            animation: play-pulse 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .play-indicator::after {
+            content: '▶';
+            color: var(--black-deep);
+            font-size: 20px;
+            margin-left: 3px;
+        }
+
+        @keyframes play-pulse {
             0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 180, 166, 0.4));
+                box-shadow: 
+                    0 0 30px rgba(0, 180, 166, 0.6),
+                    0 0 60px rgba(0, 180, 166, 0.3);
             }
             50% { 
-                transform: scale(1.05);
-                box-shadow: 0 6px 20px var(--badge-shadow, rgba(0, 180, 166, 0.6));
+                transform: scale(1.1);
+                box-shadow: 
+                    0 0 40px rgba(0, 180, 166, 0.8),
+                    0 0 80px rgba(0, 180, 166, 0.5);
             }
+        }
+
+        .game-card:hover .play-indicator {
+            transform: scale(1.2) rotate(90deg);
         }
         
         /* Notamy Crush specific styling */
         .crush-card {
-            --border-color: var(--accent-green);
-            --shadow-color: rgba(0, 230, 118, 0.4);
-            --glow-color: rgba(0, 230, 118, 0.15);
-            --icon-shadow: rgba(0, 230, 118, 0.5);
-            --badge-shadow: rgba(0, 230, 118, 0.5);
-            --inner-glow: rgba(0, 230, 118, 0.05);
-            --shimmer-color: rgba(0, 230, 118, 0.1);
-            --title-hover: var(--accent-green);
+            --card-border: rgba(0, 230, 118, 0.3);
+            --card-border-hover: var(--green-neon);
+            --card-glow: rgba(0, 230, 118, 0.2);
+            --card-glow-hover: rgba(0, 230, 118, 0.6);
+            --card-accent: var(--green-neon);
+            --card-secondary: var(--primary-light);
+            --card-shimmer: rgba(0, 230, 118, 0.1);
+            --card-inner-glow: rgba(0, 230, 118, 0.1);
+            --icon-gradient: var(--gradient-nature);
+            --icon-shadow: rgba(0, 230, 118, 0.6);
+            --icon-border: rgba(0, 230, 118, 0.5);
             --title-glow: rgba(0, 230, 118, 0.8);
+            --title-glow-hover: var(--green-neon);
         }
 
-        .crush-card .game-icon {
-            background: linear-gradient(135deg, var(--accent-green), var(--primary-light));
-        }
-
-        .crush-card .icon-inner {
-            border-color: rgba(0, 230, 118, 0.3);
-        }
-
-        .crush-card .game-badge {
-            --badge-bg: var(--accent-green);
+        .crush-card .play-indicator {
+            background: var(--gradient-nature);
         }
         
         /* Notamy Tetris specific styling */
-        .blocks-card {
-            --border-color: var(--primary-teal);
-            --shadow-color: rgba(0, 180, 166, 0.4);
-            --glow-color: rgba(0, 180, 166, 0.15);
-            --icon-shadow: rgba(0, 180, 166, 0.5);
-            --badge-shadow: rgba(0, 180, 166, 0.5);
-            --inner-glow: rgba(0, 180, 166, 0.05);
-            --shimmer-color: rgba(0, 180, 166, 0.1);
-            --title-hover: var(--primary-teal);
-            --title-glow: rgba(0, 180, 166, 0.8);
+        .tetris-card {
+            --card-border: rgba(0, 180, 166, 0.3);
+            --card-border-hover: var(--primary-teal);
+            --card-glow: rgba(0, 180, 166, 0.2);
+            --card-glow-hover: rgba(0, 180, 166, 0.6);
+            --card-accent: var(--primary-teal);
+            --card-secondary: var(--cyan-neon);
+            --card-shimmer: rgba(0, 180, 166, 0.1);
+            --card-inner-glow: rgba(0, 180, 166, 0.1);
+            --icon-gradient: var(--gradient-ice);
+            --icon-shadow: rgba(0, 217, 255, 0.6);
+            --icon-border: rgba(0, 217, 255, 0.5);
+            --title-glow: rgba(0, 217, 255, 0.8);
+            --title-glow-hover: var(--cyan-neon);
         }
 
-        .blocks-card .game-icon {
-            background: var(--gradient-main);
+        .tetris-card .play-indicator {
+            background: var(--gradient-ice);
         }
 
-        .blocks-card .game-badge {
-            --badge-bg: var(--primary-teal);
-        }
-        
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                padding-top: 20px;
-                max-width: 100%;
-                background: none;
-                border: none;
-            }
-            
-            .header {
-                margin-bottom: 25px;
-            }
-            
-            .logo {
-                margin-bottom: 20px;
-            }
-            
-            .logo-text {
-                font-size: 4.5rem;
-                letter-spacing: -1.5px;
-            }
-            
-            .logo-subtitle {
-                font-size: 0.8rem;
-                letter-spacing: 2px;
-            }
-            
-            .games-grid {
-                gap: 20px;
-                grid-template-columns: 1fr;
-                max-width: 350px;
-                margin: 0 auto;
-            }
-            
-            .game-card {
-                padding: 25px;
-                border-radius: 20px;
-            }
-            
-            .game-title {
-                font-size: 24px;
-            }
-            
-            .game-icon {
-                width: 80px;
-                height: 80px;
-            }
-            
-            .candy-grid {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .blocks-icon-container {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .falling-block {
-                font-size: 8px;
-            }
-            
-            .game-badge {
-                padding: 5px 14px;
-                font-size: 11px;
-            }
-        }
-        
-        /* Extra small screens */
-        @media (max-width: 375px) {
-            .logo-text {
-                font-size: 3.5rem;
-            }
-            
-            .games-grid {
-                max-width: 300px;
-            }
-            
-            .game-card {
-                padding: 20px;
-            }
-        }
-        
-        /* Loading animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .container > * {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        
-        .header {
-            animation-delay: 0.1s;
-        }
-        
-        .game-card:nth-child(1) {
-            animation-delay: 0.3s;
-        }
-        
-        .game-card:nth-child(2) {
-            animation-delay: 0.5s;
-        }
-
-        /* Loader */
+        /* Enhanced Loader */
         .loader {
             position: fixed;
             top: 0;
@@ -545,7 +594,7 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
         }
 
         .loader.hide {
@@ -553,96 +602,271 @@
             pointer-events: none;
         }
 
-        .loader-ring {
-            width: 100px;
-            height: 100px;
-            border: 3px solid transparent;
-            border-top-color: var(--primary-teal);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            box-shadow: 
-                0 0 20px var(--primary-teal),
-                inset 0 0 20px rgba(0, 180, 166, 0.2);
+        .loader-content {
+            text-align: center;
         }
 
-        @keyframes spin {
+        .loader-ring {
+            width: 120px;
+            height: 120px;
+            border: 3px solid transparent;
+            border-top-color: var(--primary-teal);
+            border-right-color: var(--primary-light);
+            border-radius: 50%;
+            animation: loader-spin 1s linear infinite;
+            box-shadow: 
+                0 0 60px var(--primary-teal),
+                0 0 120px var(--primary-light),
+                inset 0 0 60px rgba(0, 180, 166, 0.2);
+            margin: 0 auto 20px;
+        }
+
+        .loader-text {
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--primary-light);
+            letter-spacing: 2px;
+            animation: loader-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loader-spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes loader-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Screen flash effect */
+        .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .screen-flash.active {
+            animation: flash-anim 0.6s ease-out;
+        }
+
+        @keyframes flash-anim {
+            0% { opacity: 0; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0; }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                margin-bottom: 40px;
+            }
+            
+            .logo-text {
+                font-size: 80px;
+                letter-spacing: 4px;
+            }
+
+            .logo-text::before {
+                font-size: 80px;
+                letter-spacing: 4px;
+            }
+            
+            .logo-subtitle {
+                font-size: 18px;
+                letter-spacing: 4px;
+            }
+
+            .edition-badge {
+                font-size: 12px;
+                padding: 6px 20px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                max-width: 400px;
+            }
+            
+            .game-card {
+                padding: 30px;
+            }
+            
+            .game-title {
+                font-size: 28px;
+            }
+            
+            .game-icon {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 375px) {
+            .logo-text {
+                font-size: 60px;
+            }
+
+            .logo-text::before {
+                font-size: 60px;
+            }
+            
+            .games-grid {
+                max-width: 320px;
+            }
+        }
+        
+        /* Loading animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .container > * {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        
+        .header {
+            animation-delay: 0.2s;
+        }
+        
+        .game-card:nth-child(1) {
+            animation-delay: 0.4s;
+        }
+        
+        .game-card:nth-child(2) {
+            animation-delay: 0.6s;
         }
     </style>
 </head>
 <body>
-    <!-- Loader -->
-    <div class="loader">
-        <div class="loader-ring"></div>
+    <!-- Background Container -->
+    <div class="background-container">
+        <div class="neon-grid"></div>
     </div>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-ring"></div>
+            <div class="loader-text">LOADING</div>
+        </div>
+    </div>
+
+    <!-- Screen Flash -->
+    <div class="screen-flash" id="screenFlash"></div>
 
     <div class="container">
         <!-- Header -->
         <div class="header">
             <div class="logo">
-                <div class="logo-text">Notamy</div>
-                <div class="logo-subtitle">MINI GAMES</div>
+                <h1 class="logo-text">NOTAMY</h1>
+                <div class="logo-subtitle">MINI GAMES COLLECTION</div>
             </div>
         </div>
         
         <!-- Games Grid -->
         <div class="games-grid">
             <!-- Notamy Crush -->
-            <a href="notamy-crash.html" class="game-card crush-card">
+            <a href="notamy-crash.html?autostart=true" class="game-card crush-card">
                 <div class="game-icon">
                     <div class="icon-inner">
                         <div class="candy-grid">
-                            <div class="logo-candy" style="background: #00b4a6; color: #00b4a6; animation-delay: 0s;"></div>
-                            <div class="logo-candy" style="background: #00d9ff; color: #00d9ff; animation-delay: 0.2s;"></div>
-                            <div class="logo-candy" style="background: #00e676; color: #00e676; animation-delay: 0.4s;"></div>
-                            <div class="logo-candy" style="background: #ff6b6b; color: #ff6b6b; animation-delay: 0.6s;"></div>
-                            <div class="logo-candy" style="background: #00b4a6; color: #00b4a6; animation-delay: 0.8s;"></div>
-                            <div class="logo-candy" style="background: #ff8787; color: #ff8787; animation-delay: 1s;"></div>
-                            <div class="logo-candy" style="background: #00e676; color: #00e676; animation-delay: 1.2s;"></div>
-                            <div class="logo-candy" style="background: #00d9ff; color: #00d9ff; animation-delay: 1.4s;"></div>
-                            <div class="logo-candy" style="background: #ff6b6b; color: #ff6b6b; animation-delay: 1.6s;"></div>
+                            <div class="logo-candy" style="background: #00e676; animation-delay: 0s;"></div>
+                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.2s;"></div>
+                            <div class="logo-candy" style="background: #ff6b6b; animation-delay: 0.4s;"></div>
+                            <div class="logo-candy" style="background: #ffab00; animation-delay: 0.6s;"></div>
+                            <div class="logo-candy" style="background: #00b4a6; animation-delay: 0.8s;"></div>
+                            <div class="logo-candy" style="background: #b366ff; animation-delay: 1s;"></div>
+                            <div class="logo-candy" style="background: #ff6b6b; animation-delay: 1.2s;"></div>
+                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 1.4s;"></div>
+                            <div class="logo-candy" style="background: #00e676; animation-delay: 1.6s;"></div>
                         </div>
                     </div>
                 </div>
                 <h2 class="game-title">Notamy Crush</h2>
                 <p class="game-description">
-                    Swap and match colorful candies
+                    Match colorful candies in this addictive puzzle adventure
                 </p>
+                <div class="play-indicator"></div>
             </a>
             
             <!-- Notamy Tetris -->
-            <a href="notamy-blocks.html?autostart=true" class="game-card blocks-card">
+            <a href="notamy-blocks.html?autostart=true" class="game-card tetris-card">
                 <div class="game-icon">
                     <div class="icon-inner">
-                        <div class="blocks-icon-container">
-                            <div class="falling-block" style="width: 25px; height: 25px; background: #00b4a6; color: #00b4a6; left: 0; top: 0; animation-delay: 0s;">2</div>
-                            <div class="falling-block" style="width: 20px; height: 20px; background: #00d9ff; color: #00d9ff; right: 5px; top: 10px; animation-delay: 0.5s;">4</div>
-                            <div class="falling-block" style="width: 30px; height: 30px; background: #00e676; color: #00e676; left: 15px; bottom: 0; animation-delay: 1s;">8</div>
-                            <div class="falling-block" style="width: 18px; height: 18px; background: #ff6b6b; color: #ff6b6b; right: 0; bottom: 15px; animation-delay: 1.5s;">16</div>
+                        <div class="tetris-icon-container">
+                            <!-- I piece -->
+                            <div class="tetris-piece piece-i">
+                                <div class="tetris-block" style="background: #00d9ff; color: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff; color: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff; color: #00d9ff;"></div>
+                                <div class="tetris-block" style="background: #00d9ff; color: #00d9ff;"></div>
+                            </div>
+                            <!-- T piece -->
+                            <div class="tetris-piece piece-t">
+                                <div style="grid-column: 2;" class="tetris-block" style="background: #b366ff; color: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff; color: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff; color: #b366ff;"></div>
+                                <div class="tetris-block" style="background: #b366ff; color: #b366ff;"></div>
+                            </div>
+                            <!-- O piece -->
+                            <div class="tetris-piece piece-o">
+                                <div class="tetris-block" style="background: #ffab00; color: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00; color: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00; color: #ffab00;"></div>
+                                <div class="tetris-block" style="background: #ffab00; color: #ffab00;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <h2 class="game-title">Notamy Tetris</h2>
                 <p class="game-description">
-                    Combine blocks
+                    Classic block-stacking action with modern twists
                 </p>
+                <div class="play-indicator"></div>
             </a>
         </div>
     </div>
 
     <script>
-        // Remove loader
+        // Initialize
+        // Remove loader with flash effect
         window.addEventListener('load', () => {
             setTimeout(() => {
-                document.querySelector('.loader').classList.add('hide');
-            }, 1000);
+                const loader = document.getElementById('loader');
+                const flash = document.getElementById('screenFlash');
+                
+                loader.classList.add('hide');
+                flash.classList.add('active');
+                
+                setTimeout(() => {
+                    flash.classList.remove('active');
+                }, 600);
+            }, 1500);
         });
 
-        // Add hover sound effect (visual feedback)
+        // Add hover effects
         document.querySelectorAll('.game-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
-                // Create a pulse effect
+                // Create pulse effect
                 const pulse = document.createElement('div');
                 pulse.style.position = 'absolute';
                 pulse.style.top = '50%';
@@ -650,17 +874,42 @@
                 pulse.style.width = '100%';
                 pulse.style.height = '100%';
                 pulse.style.transform = 'translate(-50%, -50%)';
-                pulse.style.border = '1px solid var(--border-color)';
-                pulse.style.borderRadius = '20px';
+                pulse.style.border = '2px solid var(--card-border-hover)';
+                pulse.style.borderRadius = '30px';
                 pulse.style.animation = 'pulseOut 0.6s ease-out';
                 pulse.style.pointerEvents = 'none';
+                pulse.style.zIndex = '10';
                 this.appendChild(pulse);
                 
                 setTimeout(() => pulse.remove(), 600);
             });
+
+            // Add click effect
+            card.addEventListener('click', function(e) {
+                // Create ripple effect
+                const ripple = document.createElement('div');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.position = 'absolute';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.background = 'radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'rippleOut 0.8s ease-out';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.zIndex = '20';
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 800);
+            });
         });
 
-        // Add pulse animation
+        // Add animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes pulseOut {
@@ -669,12 +918,39 @@
                     opacity: 1;
                 }
                 100% {
-                    transform: translate(-50%, -50%) scale(1.2);
+                    transform: translate(-50%, -50%) scale(1.1);
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes rippleOut {
+                0% {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(4);
                     opacity: 0;
                 }
             }
         `;
         document.head.appendChild(style);
+
+        // Add dynamic title glow
+        const logoText = document.querySelector('.logo-text');
+        let hue = 0;
+        
+        setInterval(() => {
+            hue = (hue + 1) % 360;
+            const color1 = `hsl(${hue}, 100%, 50%)`;
+            const color2 = `hsl(${(hue + 60) % 360}, 100%, 50%)`;
+            const color3 = `hsl(${(hue + 120) % 360}, 100%, 50%)`;
+            
+            logoText.style.background = `linear-gradient(45deg, ${color1}, ${color2}, ${color3})`;
+            logoText.style.webkitBackgroundClip = 'text';
+            logoText.style.webkitTextFillColor = 'transparent';
+            logoText.style.backgroundClip = 'text';
+        }, 50);
     </script>
 </body>
 </html>

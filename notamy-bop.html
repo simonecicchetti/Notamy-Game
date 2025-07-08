@@ -246,18 +246,32 @@
             z-index: 5;
             pointer-events: all;
             display: none;
+            background: transparent; /* Ensure it's there but transparent */
         }
         
         #touchIndicator {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.4), transparent);
-            border: 2px solid rgba(0, 212, 255, 0.6);
-            position: absolute;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.6), rgba(0, 212, 255, 0.2));
+            border: 3px solid rgba(0, 212, 255, 0.8);
+            position: fixed;
             display: none;
             pointer-events: none;
             animation: pulse 1s infinite;
+            z-index: 100;
+        }
+        
+        /* Debug info */
+        #debugInfo {
+            position: absolute;
+            top: 220px;
+            left: 10px;
+            color: #00d9ff;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 100;
+            display: none;
         }
         
         @keyframes pulse {
@@ -512,6 +526,9 @@
         <!-- Touch hint -->
         <div class="touch-hint" id="touchHint">Tocca e tieni premuto ← →</div>
         
+        <!-- Debug info -->
+        <div id="debugInfo"></div>
+        
         <!-- Power-ups display -->
         <div id="powerUps">
             <div class="power-up-slot" id="powerSlot1"></div>
@@ -670,57 +687,59 @@
         
         const touchArea = document.getElementById('touchArea');
         
-        // Touch event handlers
-        touchArea.addEventListener('touchstart', (e) => {
+        // Remove the old touchArea listeners since we're using canvas directly now
+        // The touch indicator is handled by CSS fixed positioning
+        
+        // Alternative touch control for better mobile support
+        canvas.addEventListener('touchstart', handleTouch, { passive: false });
+        canvas.addEventListener('touchmove', handleTouch, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        
+        function handleTouch(e) {
             e.preventDefault();
-            if (gameState === 'playing') {
+            if (gameState === 'playing' && e.touches.length > 0) {
                 const touch = e.touches[0];
-                touchX = touch.clientX;
+                const rect = canvas.getBoundingClientRect();
+                touchX = touch.clientX - rect.left;
                 touchActive = true;
                 
+                // Update player position immediately
+                player.x = touchX - player.width / 2;
+                player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+                
+                // Show/update touch indicator
                 const indicator = document.getElementById('touchIndicator');
                 indicator.style.display = 'block';
-                indicator.style.left = touchX - 40 + 'px';
-                indicator.style.top = touch.clientY - 40 + 'px';
+                indicator.style.left = (touch.clientX - 40) + 'px';
+                indicator.style.top = (touch.clientY - 40) + 'px';
             }
-        });
+        }
         
-        touchArea.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (touchActive && gameState === 'playing') {
-                const touch = e.touches[0];
-                touchX = touch.clientX;
-                
-                const indicator = document.getElementById('touchIndicator');
-                indicator.style.left = touchX - 40 + 'px';
-                indicator.style.top = touch.clientY - 40 + 'px';
-            }
-        });
-        
-        touchArea.addEventListener('touchend', (e) => {
+        function handleTouchEnd(e) {
             e.preventDefault();
             touchActive = false;
-            touchX = null;
             document.getElementById('touchIndicator').style.display = 'none';
-        });
+            // Keep last touchX for smooth movement
+        }
         
-        // Mouse controls for testing
-        touchArea.addEventListener('mousedown', (e) => {
+        // Mouse controls for desktop testing
+        canvas.addEventListener('mousedown', (e) => {
             if (gameState === 'playing') {
-                touchX = e.clientX;
+                const rect = canvas.getBoundingClientRect();
+                touchX = e.clientX - rect.left;
                 touchActive = true;
             }
         });
         
-        touchArea.addEventListener('mousemove', (e) => {
+        canvas.addEventListener('mousemove', (e) => {
             if (touchActive && gameState === 'playing') {
-                touchX = e.clientX;
+                const rect = canvas.getBoundingClientRect();
+                touchX = e.clientX - rect.left;
             }
         });
         
-        touchArea.addEventListener('mouseup', () => {
+        canvas.addEventListener('mouseup', () => {
             touchActive = false;
-            touchX = null;
         });
         
         function startGame() {
@@ -728,14 +747,21 @@
             document.getElementById('menuScreen').style.display = 'none';
             document.getElementById('touchArea').style.display = 'block';
             resetGame();
-            initLevel();
             
-            // Show touch hint briefly on first play
+            // IMPORTANT: Start first level after reset
+            setTimeout(() => {
+                initLevel();
+            }, 100);
+            
+            // Show touch hint
             const touchHint = document.getElementById('touchHint');
             touchHint.style.opacity = '1';
             setTimeout(() => {
                 touchHint.style.opacity = '0';
             }, 3000);
+            
+            // Enable debug for troubleshooting (remove in production)
+            document.getElementById('debugInfo').style.display = 'block';
         }
         
         function restartGame() {
@@ -842,7 +868,7 @@
                 const patternIndex = Math.min(level - 1, patterns.length - 1);
                 patterns[patternIndex]();
                 
-            }, 1000);
+            }, 500); // Reduced from 1000ms to 500ms
         }
         
         function createBall(x, y, size, type = 'normal') {
@@ -870,8 +896,9 @@
         }
         
         function shootBullet() {
-            if (player.shootCooldown > 0 || levelTransitioning || gameState !== 'playing') return;
+            if (levelTransitioning || gameState !== 'playing') return;
             
+            // Set cooldown for next shot
             const cooldown = player.rapidFire ? 6 : player.autoShootInterval;
             player.shootCooldown = cooldown;
             
@@ -1053,19 +1080,22 @@
         }
         
         function updatePlayer() {
-            if (touchX !== null && touchActive && !levelTransitioning) {
-                const targetX = touchX - player.width / 2;
-                const diff = targetX - player.x;
-                player.x += diff * 0.5;
+            // MOVEMENT - Direct position update for mobile
+            if (touchX !== null && gameState === 'playing' && !levelTransitioning) {
+                // Direct positioning - more responsive on mobile
+                player.x = touchX - player.width / 2;
             }
             
+            // Clamp player position
             player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
             
-            // Auto-shoot sempre attivo
-            if (player.shootCooldown > 0) {
-                player.shootCooldown--;
-            } else if (!levelTransitioning && gameState === 'playing') {
-                shootBullet();
+            // AUTO-SHOOT - Always shoot when cooldown is 0
+            if (gameState === 'playing' && !levelTransitioning) {
+                if (player.shootCooldown > 0) {
+                    player.shootCooldown--;
+                } else {
+                    shootBullet();
+                }
             }
             
             // Update power-ups
@@ -1791,6 +1821,20 @@
                 updateVisualEffects();
                 updateCombo();
                 updateTimer();
+                
+                // Debug info
+                const debug = document.getElementById('debugInfo');
+                if (debug && debug.style.display === 'block') {
+                    debug.innerHTML = `
+                        TouchX: ${touchX ? Math.round(touchX) : 'null'}<br>
+                        Active: ${touchActive}<br>
+                        PlayerX: ${Math.round(player.x)}<br>
+                        Cooldown: ${player.shootCooldown}<br>
+                        Bullets: ${bullets.length}<br>
+                        Balls: ${balls.length}<br>
+                        State: ${gameState}
+                    `;
+                }
             }
             
             drawParticles();

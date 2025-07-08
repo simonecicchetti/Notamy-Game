@@ -142,113 +142,6 @@
             box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
         }
         
-        #menuScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #000000, #0A0A0A);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 20;
-            padding: 20px;
-        }
-        
-        .menu-logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 32px;
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            padding: 3px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: float 3s ease-in-out infinite;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-            50% { transform: translateY(-10px) scale(1.05) rotate(5deg); }
-        }
-        
-        .logo-inner {
-            width: 114px;
-            height: 114px;
-            border-radius: 30px;
-            background: #000000;
-            border: 1px solid #1A1A1A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .candy-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 2px;
-            width: 60px;
-            height: 60px;
-        }
-        
-        .logo-candy {
-            width: 100%;
-            height: 100%;
-            border-radius: 4px;
-            animation: logoCandy 2s ease-in-out infinite;
-        }
-        
-        @keyframes logoCandy {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.8); }
-        }
-        
-        .menu-title {
-            font-size: 42px;
-            font-weight: 200;
-            color: #FFFFFF;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-        }
-        
-        .menu-subtitle {
-            font-size: 18px;
-            font-weight: 300;
-            color: #E0E0E0;
-            margin-bottom: 32px;
-            opacity: 0.8;
-            text-align: center;
-            padding: 0 20px;
-        }
-        
-        .menu-button {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            border: none;
-            color: #000000;
-            padding: 20px 60px;
-            margin: 10px;
-            border-radius: 999px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(0, 180, 166, 0.3);
-            transform: scale(1);
-        }
-        
-        .menu-button:active {
-            transform: scale(0.95);
-        }
-        
         .score-popup {
             position: absolute;
             font-size: 28px;
@@ -507,28 +400,6 @@
         <div id="streakIndicator">STREAK x<span id="streakMultiplier">2</span></div>
         <div id="shuffleIndicator">SHUFFLING!</div>
         <div id="inactivityWarning" style="display: none;">MOVE FASTER!</div>
-        
-        <div id="menuScreen">
-            <div class="menu-logo">
-                <div class="logo-inner">
-                    <div class="candy-grid">
-                        <div class="logo-candy" style="background: #00b4a6; animation-delay: 0s;"></div>
-                        <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.1s;"></div>
-                        <div class="logo-candy" style="background: #ff6b6b; animation-delay: 0.2s;"></div>
-                        <div class="logo-candy" style="background: #ffab00; animation-delay: 0.3s;"></div>
-                        <div class="logo-candy" style="background: #00e676; animation-delay: 0.4s;"></div>
-                        <div class="logo-candy" style="background: #9c27b0; animation-delay: 0.5s;"></div>
-                        <div class="logo-candy" style="background: #ff5252; animation-delay: 0.6s;"></div>
-                        <div class="logo-candy" style="background: #00b4a6; animation-delay: 0.7s;"></div>
-                        <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.8s;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="menu-title">Notamy Crush</div>
-            <div class="menu-subtitle">60 seconds! Move fast or time speeds up!</div>
-            <div class="menu-subtitle" style="font-size: 14px; margin-top: -20px; opacity: 0.6;">Double tap to switch between swipe and tap modes</div>
-            <button class="menu-button" onclick="startGame()">PLAY</button>
-        </div>
         
         <div id="gameOverScreen">
             <div class="game-over-title">Game Over</div>
@@ -1787,7 +1658,6 @@
         // Start game
         function startGame() {
             gameState = 'playing';
-            document.getElementById('menuScreen').style.display = 'none';
             score = 0;
             timeLeft = 60;
             level = 1;
@@ -2201,6 +2071,11 @@
                 return this;
             };
         }
+        
+        // Auto-start the game when page loads
+        window.addEventListener('load', () => {
+            startGame();
+        });
     </script>
 </body>
 </html>

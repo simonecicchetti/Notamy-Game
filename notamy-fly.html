@@ -550,8 +550,8 @@
         
         // Colors
         const COLORS = {
-            bird: '#00d9ff',
-            birdGlow: '#00ffff',
+            bird: '#ffff00',  // GIALLO BRILLANTE per massima visibilità
+            birdGlow: '#ffffff',  // BIANCO per il glow
             pipe: '#00b4a6',
             pipeGlow: '#00e676',
             particle: '#b366ff',
@@ -602,12 +602,12 @@
         let maxCombo = 0;
         let powerupsCollected = 0;
         
-        // Bird object - UCCELLO PIÙ PICCOLO
+        // Bird object - DIMENSIONE OTTIMIZZATA
         const bird = {
             x: WIDTH * 0.25,  // Più a sinistra per dare più tempo di reazione
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 12,  // RIDOTTO DA 20 A 12 - Uccellino molto più piccolo
+            radius: 16,  // DIMENSIONE MEDIA - non troppo piccolo per visibilità
             trail: [],
             angle: 0,
             shielded: false,
@@ -730,16 +730,24 @@
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
+            
+            // RESET COMPLETO DELL'UCCELLO
             bird.x = WIDTH * 0.25;  // Reset posizione
             bird.y = HEIGHT / 2;
             bird.velocity = 0;  // Nessuna spinta iniziale
             bird.trail = [];
+            bird.angle = 0;  // Reset angolo
             bird.shielded = false;
             bird.shieldTime = 0;
             bird.magnetized = false;
             bird.magnetTime = 0;
             bird.invincible = true;
             bird.invincibleTime = 180; // 3 secondi di invincibilità iniziale
+            bird.wingAnimation = 0;
+            
+            // VERIFICA POSIZIONE
+            console.log('Game started! Bird position:', bird.x, bird.y);
+            
             pipes = [];
             particles = [];
             powerups = [];
@@ -1219,7 +1227,20 @@
         }
         
         function drawBird() {
+            // VERIFICA POSIZIONE PRIMA DI DISEGNARE
+            if (isNaN(bird.x) || isNaN(bird.y)) {
+                console.error('Bird position invalid:', bird.x, bird.y);
+                bird.x = WIDTH * 0.25;
+                bird.y = HEIGHT / 2;
+            }
+            
             ctx.save();
+            
+            // CONTORNO NERO PER MASSIMA VISIBILITÀ
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius + 4, 0, Math.PI * 2);
+            ctx.fill();
             
             // Draw trail
             bird.trail.forEach((point, i) => {
@@ -1284,17 +1305,24 @@
                 }
             }
             
-            // Bird glow - adattato all'uccello più piccolo
-            const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 2.5);
-            glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)');
+            // Bird glow - MOLTO PIÙ FORTE
+            const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 3);
+            glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+            glowGradient.addColorStop(0.5, 'rgba(0, 255, 255, 0.4)');
             glowGradient.addColorStop(1, 'transparent');
             ctx.fillStyle = glowGradient;
-            ctx.fillRect(-bird.radius * 2.5, -bird.radius * 2.5, bird.radius * 5, bird.radius * 5);
+            ctx.fillRect(-bird.radius * 3, -bird.radius * 3, bird.radius * 6, bird.radius * 6);
             
-            // Draw bird corpo semplificato e più piccolo
+            // CONTORNO BIANCO PRIMA DEL CORPO
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.radius + 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw bird corpo
             ctx.fillStyle = COLORS.bird;
             ctx.strokeStyle = COLORS.birdGlow;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;  // Bordo più spesso
             
             // Body
             ctx.beginPath();
@@ -1323,7 +1351,7 @@
             ctx.closePath();
             ctx.fill();
             
-            // Wing (animated) - più piccola
+            // Wing (animated)
             const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 3;
             ctx.fillStyle = '#0099cc';
             ctx.beginPath();
@@ -1332,18 +1360,15 @@
             
             ctx.restore();
             
-            // ASSICURIAMOCI CHE L'UCCELLO SIA SEMPRE BEN VISIBILE
-            // Aggiungiamo un contorno luminoso extra se necessario
-            if (frameCount % 60 < 30) {  // Effetto pulsante ogni secondo
-                ctx.save();
-                ctx.globalAlpha = 0.3;
-                ctx.strokeStyle = COLORS.birdGlow;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(bird.x, bird.y, bird.radius + 2, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            }
+            // CONTORNO FINALE SEMPRE VISIBILE
+            ctx.save();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.8;
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius + 1, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
         }
         
         function drawPipes() {
@@ -1488,6 +1513,12 @@
         function gameLoop() {
             frameCount++;
             
+            // VERIFICA CHE IL CANVAS SIA VALIDO
+            if (!ctx || canvas.width === 0 || canvas.height === 0) {
+                console.error('Canvas invalid!');
+                return;
+            }
+            
             drawBackground();
             
             if (gameState === 'playing') {
@@ -1504,7 +1535,20 @@
             drawPipes();      // Prima i tubi (sfondo)
             drawPowerups();   // Poi i power-up (mezzo)
             drawParticles();  // Poi le particelle (effetti)
-            drawBird();       // Infine l'uccello (primo piano) - SEMPRE SOPRA TUTTO
+            
+            // SEMPRE DISEGNA L'UCCELLO PER ULTIMO
+            if (gameState !== 'start') {  // Disegna l'uccello sempre tranne nella schermata iniziale
+                drawBird();       // Infine l'uccello (primo piano) - SEMPRE SOPRA TUTTO
+            }
+            
+            // DEBUG: Disegna un indicatore rosso sulla posizione dell'uccello
+            if (gameState === 'playing') {
+                ctx.save();
+                ctx.fillStyle = 'red';
+                ctx.globalAlpha = 0.5;
+                ctx.fillRect(bird.x - 2, bird.y - 2, 4, 4);
+                ctx.restore();
+            }
             
             requestAnimationFrame(gameLoop);
         }
@@ -1531,6 +1575,11 @@
         // Initialize
         initBackgroundElements();
         document.getElementById('bestScore').textContent = bestScore;
+        
+        // DEBUG: Log initial state
+        console.log('Canvas dimensions:', WIDTH, 'x', HEIGHT);
+        console.log('Bird initial position:', bird.x, bird.y);
+        console.log('Bird radius:', bird.radius);
         
         // Check for autostart parameter
         const urlParams = new URLSearchParams(window.location.search);

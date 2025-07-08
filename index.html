@@ -522,9 +522,9 @@
         // Game state
         let gameState = 'menu';
         let score = 0;
-        let lives = 5; // Increased from 3
+        let lives = 5;
         let level = 1;
-        let timer = 90; // Increased from 60
+        let timer = 90;
         let combo = 0;
         let comboTimer = 0;
         let bestScore = parseInt(localStorage.getItem('notamyBubblePopBestEasy') || '0');
@@ -540,9 +540,9 @@
             y: 0,
             width: 60,
             height: 80,
-            speed: 10, // Slightly reduced from 12
+            speed: 8, // Reduced from 10
             shootCooldown: 0,
-            autoShootInterval: 30, // Increased from 20 (slower shooting)
+            autoShootInterval: 35, // Increased from 30 (slower shooting)
             powerUps: [],
             shield: false,
             multiShot: false,
@@ -556,36 +556,36 @@
         let powerUps = [];
         let scorePopups = [];
         
-        // Ball types - More variety with slower speeds
+        // Ball types - Even slower speeds
         const ballTypes = {
             normal: {
                 sizes: {
-                    large: {radius: 45, nextSize: 'medium', color: theme.colors.primary, points: 15}, // Increased points
-                    medium: {radius: 30, nextSize: 'small', color: theme.colors.primaryLight, points: 30}, // Increased points
-                    small: {radius: 18, nextSize: null, color: theme.colors.accent, points: 75} // Increased points
+                    large: {radius: 45, nextSize: 'medium', color: theme.colors.primary, points: 15},
+                    medium: {radius: 30, nextSize: 'small', color: theme.colors.primaryLight, points: 30},
+                    small: {radius: 18, nextSize: null, color: theme.colors.accent, points: 75}
                 }
             },
             bouncy: {
                 sizes: {
-                    large: {radius: 40, nextSize: 'medium', color: theme.colors.secondary, points: 20, bounceHeight: 1.2}, // Reduced bounce
-                    medium: {radius: 25, nextSize: 'small', color: theme.colors.secondaryLight, points: 40, bounceHeight: 1.2},
-                    small: {radius: 15, nextSize: null, color: '#ffab00', points: 80, bounceHeight: 1.2}
+                    large: {radius: 40, nextSize: 'medium', color: theme.colors.secondary, points: 20, bounceHeight: 1.1}, // Reduced bounce
+                    medium: {radius: 25, nextSize: 'small', color: theme.colors.secondaryLight, points: 40, bounceHeight: 1.1},
+                    small: {radius: 15, nextSize: null, color: '#ffab00', points: 80, bounceHeight: 1.1}
                 }
             },
             heavy: {
                 sizes: {
-                    large: {radius: 50, nextSize: 'medium', color: '#9c27b0', points: 25, gravity: 0.3}, // Reduced gravity
-                    medium: {radius: 32, nextSize: 'small', color: '#ba68c8', points: 50, gravity: 0.3},
-                    small: {radius: 20, nextSize: null, color: '#ce93d8', points: 100, gravity: 0.3}
+                    large: {radius: 50, nextSize: 'medium', color: '#9c27b0', points: 25, gravity: 0.25}, // Further reduced gravity
+                    medium: {radius: 32, nextSize: 'small', color: '#ba68c8', points: 50, gravity: 0.25},
+                    small: {radius: 20, nextSize: null, color: '#ce93d8', points: 100, gravity: 0.25}
                 }
             }
         };
         
         // Power-up types with longer durations
         const powerUpTypes = {
-            shield: { icon: '🛡️', color: '#00e676', duration: 450 }, // Increased
-            multishot: { icon: '🎯', color: '#00d9ff', duration: 500 }, // Increased
-            rapidfire: { icon: '⚡', color: '#ffab00', duration: 450 }, // Increased
+            shield: { icon: '🛡️', color: '#00e676', duration: 450 },
+            multishot: { icon: '🎯', color: '#00d9ff', duration: 500 },
+            rapidfire: { icon: '⚡', color: '#ffab00', duration: 450 },
             bomb: { icon: '💣', color: '#ff5252', instant: true },
             extralife: { icon: '❤️', color: '#ff6b6b', instant: true },
             slowmo: { icon: '⏰', color: '#9c27b0', duration: 350 }
@@ -659,9 +659,9 @@
         
         function resetGame() {
             score = 0;
-            lives = 5; // Increased from 3
+            lives = 5;
             level = 1;
-            timer = 90; // Increased from 60
+            timer = 90;
             combo = 0;
             comboTimer = 0;
             screenShake = 0;
@@ -684,11 +684,11 @@
         
         function initLevel() {
             balls = [];
-            timer = 90 + (level * 15); // More time for higher levels
+            timer = 90 + (level * 15);
             
             // Progressive difficulty but easier
-            const ballCount = Math.min(1 + Math.floor(level / 3), 4); // Fewer balls
-            const ballTypes = level > 5 ? ['normal', 'bouncy', 'heavy'] : ['normal', 'bouncy']; // Later introduction of heavy balls
+            const ballCount = Math.min(1 + Math.floor(level / 3), 4);
+            const ballTypes = level > 5 ? ['normal', 'bouncy', 'heavy'] : ['normal', 'bouncy'];
             
             for (let i = 0; i < ballCount; i++) {
                 const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
@@ -700,23 +700,24 @@
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
-            const maxBounceHeight = canvas.height - y - ballData.radius - 150;
+            // CAMBIAMENTO PRINCIPALE: Rimbalzo sempre alto
+            const fixedBounceHeight = canvas.height * 0.65; // Rimbalza sempre al 65% dell'altezza dello schermo
             
             balls.push({
                 x: x,
                 y: y,
-                velX: (Math.random() - 0.5) * 2.5, // Reduced from 4
+                velX: (Math.random() - 0.5) * 2, // Further reduced from 2.5
                 velY: 0,
                 radius: ballData.radius,
                 size: size,
                 type: type,
                 color: ballData.color,
                 points: ballData.points,
-                gravity: ballData.gravity || 0.25, // Reduced from 0.35
+                gravity: ballData.gravity || 0.18, // Reduced from 0.25
                 bounceHeight: ballData.bounceHeight || 1,
                 rotation: 0,
                 trail: [],
-                maxBounceHeight: maxBounceHeight,
+                fixedBounceHeight: fixedBounceHeight, // Nuovo: altezza fissa di rimbalzo
                 glowPhase: Math.random() * Math.PI * 2
             });
         }
@@ -724,7 +725,7 @@
         function shootBullet() {
             if (player.shootCooldown > 0) return;
             
-            const cooldown = player.rapidFire ? 8 : player.autoShootInterval; // Slightly slower rapid fire
+            const cooldown = player.rapidFire ? 10 : player.autoShootInterval; // Slightly slower rapid fire
             player.shootCooldown = cooldown;
             
             if (player.multiShot) {
@@ -733,8 +734,8 @@
                     bullets.push({
                         x: player.x + player.width / 2 - 3,
                         y: player.y,
-                        velX: i * 2,
-                        velY: -18, // Slightly slower
+                        velX: i * 1.5, // Reduced from 2
+                        velY: -15, // Reduced from -18
                         width: 6,
                         height: 20,
                         damage: 1,
@@ -749,7 +750,7 @@
                     x: player.x + player.width / 2 - 3,
                     y: player.y,
                     velX: 0,
-                    velY: -18, // Slightly slower
+                    velY: -15, // Reduced from -18
                     width: 6,
                     height: 20,
                     damage: 1,
@@ -761,7 +762,7 @@
         }
         
         function createPowerUp(x, y) {
-            if (Math.random() < 0.4) { // Increased chance from 25% to 40%
+            if (Math.random() < 0.4) {
                 const types = Object.keys(powerUpTypes);
                 const type = types[Math.floor(Math.random() * types.length)];
                 
@@ -769,7 +770,7 @@
                     x: x,
                     y: y,
                     type: type,
-                    velY: 2, // Slower falling
+                    velY: 1.5, // Reduced from 2
                     size: 30,
                     bounce: 0,
                     collected: false,
@@ -782,7 +783,7 @@
             const power = powerUpTypes[powerUp.type];
             
             // Enhanced visual feedback
-            createParticles(powerUp.x, powerUp.y, 30, power.color); // More particles
+            createParticles(powerUp.x, powerUp.y, 30, power.color);
             addScorePopup(powerUp.x, powerUp.y, power.icon);
             
             if (power.instant) {
@@ -798,7 +799,7 @@
                         screenShake = 10;
                         break;
                     case 'extralife':
-                        lives = Math.min(lives + 1, 7); // Max 7 lives
+                        lives = Math.min(lives + 1, 7);
                         break;
                 }
             } else {
@@ -860,11 +861,11 @@
                 particles.push({
                     x: x,
                     y: y,
-                    velX: Math.cos(angle) * (2 + Math.random() * 4), // Enhanced particle speed
+                    velX: Math.cos(angle) * (2 + Math.random() * 4),
                     velY: Math.sin(angle) * (2 + Math.random() * 4),
-                    life: 40, // Longer life
+                    life: 40,
                     color: color,
-                    size: Math.random() * 6 + 2, // Larger particles
+                    size: Math.random() * 6 + 2,
                     glow: Math.random() * Math.PI * 2
                 });
             }
@@ -890,7 +891,7 @@
             if (touchX !== null && touchActive) {
                 const targetX = touchX - player.width / 2;
                 const diff = targetX - player.x;
-                player.x += diff * 0.35; // Slightly more responsive
+                player.x += diff * 0.3; // Reduced from 0.35
             }
             
             // Screen bounds
@@ -935,7 +936,7 @@
                 
                 // Enhanced trail
                 bullet.trail.push({x: bullet.x + bullet.width/2, y: bullet.y + bullet.height});
-                if (bullet.trail.length > 8) bullet.trail.shift(); // Longer trail
+                if (bullet.trail.length > 8) bullet.trail.shift();
                 
                 bullet.x += bullet.velX;
                 bullet.y += bullet.velY;
@@ -953,8 +954,8 @@
                     if (checkCircleRectCollision(ball, bullet)) {
                         // Score with combo
                         combo++;
-                        comboTimer = 90; // Longer combo window
-                        const points = ball.points * (1 + Math.floor(combo / 4)); // Easier combo buildup
+                        comboTimer = 90;
+                        const points = ball.points * (1 + Math.floor(combo / 4));
                         score += points;
                         
                         // Enhanced visual feedback
@@ -963,7 +964,7 @@
                         createPowerUp(ball.x, ball.y);
                         
                         // Update combo display
-                        if (combo >= 4) { // Lower combo requirement
+                        if (combo >= 4) {
                             const comboDiv = document.getElementById('comboIndicator');
                             document.getElementById('comboMultiplier').textContent = Math.floor(combo / 4) + 1;
                             comboDiv.classList.add('show');
@@ -990,20 +991,20 @@
         
         function updateBalls() {
             const slowmo = player.powerUps.some(p => p.type === 'slowmo');
-            const speedMult = slowmo ? 0.3 : 0.8; // Even slower in normal mode
+            const speedMult = slowmo ? 0.25 : 0.6; // Even slower speed
             
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
                 // Enhanced trail
                 ball.trail.push({x: ball.x, y: ball.y});
-                if (ball.trail.length > 8) ball.trail.shift(); // Longer trail
+                if (ball.trail.length > 8) ball.trail.shift();
                 
                 // Movement
                 ball.x += ball.velX * speedMult;
                 ball.y += ball.velY * speedMult;
                 ball.velY += ball.gravity * speedMult;
-                ball.rotation += 0.03; // Slower rotation
+                ball.rotation += 0.02; // Even slower rotation
                 ball.glowPhase += 0.1;
                 
                 // Wall collisions
@@ -1013,12 +1014,12 @@
                     createParticles(ball.x, ball.y, 8, ball.color);
                 }
                 
-                // Floor collision
+                // Floor collision - CAMBIAMENTO PRINCIPALE
                 if (ball.y + ball.radius >= canvas.height - 150) {
                     ball.y = canvas.height - 150 - ball.radius;
-                    const targetHeight = ball.maxBounceHeight * ball.bounceHeight;
-                    const velocityNeeded = Math.sqrt(2 * ball.gravity * targetHeight);
-                    ball.velY = -velocityNeeded;
+                    // Calcola la velocità necessaria per raggiungere l'altezza fissa
+                    const velocityNeeded = Math.sqrt(2 * ball.gravity * ball.fixedBounceHeight);
+                    ball.velY = -velocityNeeded * ball.bounceHeight;
                     createParticles(ball.x, ball.y, 12, ball.color);
                 }
                 
@@ -1032,7 +1033,7 @@
                 if (!player.shield && checkCircleRectCollision(ball, player)) {
                     lives--;
                     createParticles(player.x + player.width/2, player.y + player.height/2, 40, theme.colors.error);
-                    screenShake = 15; // Screen shake effect
+                    screenShake = 15;
                     
                     // Knockback effect
                     player.x = canvas.width / 2 - player.width / 2;
@@ -1044,7 +1045,7 @@
                         player.shield = true;
                         player.powerUps.push({
                             type: 'shield',
-                            duration: 120 // Longer invincibility
+                            duration: 120
                         });
                         updatePowerUpDisplay();
                     }
@@ -1055,7 +1056,7 @@
             if (balls.length === 0 && gameState === 'playing') {
                 level++;
                 // Bonus points
-                score += timer * 15; // Better bonus
+                score += timer * 15;
                 addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + (timer * 15));
                 setTimeout(() => initLevel(), 1500);
             }
@@ -1066,7 +1067,7 @@
                 const powerUp = powerUps[i];
                 
                 powerUp.y += powerUp.velY;
-                powerUp.bounce += 0.08; // Slower bounce animation
+                powerUp.bounce += 0.06; // Slower bounce animation
                 powerUp.glow += 0.15;
                 
                 // Remove if off screen
@@ -1079,7 +1080,7 @@
                 if (checkCircleRectCollision({
                     x: powerUp.x,
                     y: powerUp.y,
-                    radius: powerUp.size * 1.2 // Larger collection area
+                    radius: powerUp.size * 1.2
                 }, player)) {
                     collectPowerUp(powerUp);
                     powerUps.splice(i, 1);
@@ -1092,9 +1093,9 @@
                 const particle = particles[i];
                 particle.x += particle.velX;
                 particle.y += particle.velY;
-                particle.velX *= 0.97; // Slower deceleration
+                particle.velX *= 0.97;
                 particle.velY *= 0.97;
-                particle.velY += 0.15; // Lighter gravity
+                particle.velY += 0.1; // Lighter gravity
                 particle.life--;
                 particle.glow += 0.2;
                 
@@ -1121,7 +1122,7 @@
                     if (lives <= 0) {
                         gameOver();
                     } else {
-                        timer = 90; // Reset to 90
+                        timer = 90;
                     }
                 }
             }
@@ -1400,7 +1401,7 @@
         function drawPowerUps() {
             for (let powerUp of powerUps) {
                 const power = powerUpTypes[powerUp.type];
-                const bounce = Math.sin(powerUp.bounce) * 8; // More bounce
+                const bounce = Math.sin(powerUp.bounce) * 8;
                 const glowIntensity = 0.6 + Math.sin(powerUp.glow) * 0.4;
                 
                 // Enhanced glow effect

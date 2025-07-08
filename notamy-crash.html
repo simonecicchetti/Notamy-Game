@@ -708,7 +708,7 @@
         // Game state
         let gameState = 'menu';
         let score = 0;
-        let timeLeft = 90; // Reduced from 120 to 90 seconds
+        let timeLeft = 60; // Reduced to 60 seconds for more challenge
         let level = 1;
         let combo = 0;
         let streak = 0;
@@ -1392,11 +1392,11 @@
                 // Calculate time bonus based on match size
                 let matchTimeBonus = 0;
                 if (match.length === 3) {
-                    matchTimeBonus = 1.5; // Basic match gives 1.5 seconds
+                    matchTimeBonus = 0.5; // Basic match gives 0.5 seconds
                 } else if (match.length === 4) {
-                    matchTimeBonus = 3; // 4-match gives 3 seconds  
+                    matchTimeBonus = 1; // 4-match gives 1 second  
                 } else if (match.length >= 5) {
-                    matchTimeBonus = 5; // 5+ match gives 5 seconds
+                    matchTimeBonus = 2; // 5+ match gives 2 seconds
                 }
                 
                 // Apply combo multiplier (each combo level adds 50% more time)

@@ -39,169 +39,47 @@
             background: #000;
         }
         
-        #gameUI {
+        #header {
             position: absolute;
-            top: env(safe-area-inset-top, 10px);
+            top: env(safe-area-inset-top, 20px);
             left: 0;
             right: 0;
             z-index: 10;
-            display: none;
-            padding: 10px;
-        }
-        
-        .ui-top {
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
         }
         
-        .home-button {
+        .score {
             background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #333;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
-        }
-        
-        .home-button:active {
-            transform: scale(0.9);
-            border-color: #00d9ff;
-        }
-        
-        .score-display {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 8px 16px;
-            border-radius: 20px;
             border: 2px solid #00d9ff;
-            font-size: 16px;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #fff;
-            text-shadow: 0 0 10px #00d9ff;
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .score-display .score-value {
             color: #00ff88;
-            font-size: 20px;
-        }
-        
-        .combo-indicator {
-            background: linear-gradient(135deg, #ff6b6b, #ffab00);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 900;
-            display: none;
-            animation: comboGlow 0.5s ease-in-out infinite;
-        }
-        
-        @keyframes comboGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .level-badge {
-            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.5);
-        }
-        
-        #progressBar {
-            position: relative;
-            width: 100%;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #333;
-            border-radius: 10px;
-            overflow: hidden;
+            text-shadow: 0 0 10px #00ff88;
             backdrop-filter: blur(10px);
         }
         
-        #progressFill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00d9ff);
-            width: 0%;
-            transition: width 0.3s ease-out;
-            box-shadow: 0 0 20px currentColor;
-        }
-        
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-        
-        #powerupIndicator {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ffab00, #ff5252);
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 900;
-            color: #fff;
-            display: none;
-            animation: powerupPulse 0.5s ease-in-out infinite;
-            box-shadow: 0 4px 20px rgba(255, 171, 0, 0.6);
-        }
-        
-        @keyframes powerupPulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.1); }
-        }
-        
-        #comboDisplay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 40px currentColor;
-            display: none;
-            z-index: 100;
-            animation: comboPopup 0.5s ease-out;
-            pointer-events: none;
-            text-align: center;
-        }
-        
-        @keyframes comboPopup {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+        .size-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffab00;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffab00;
+            text-shadow: 0 0 10px #ffab00;
+            backdrop-filter: blur(10px);
         }
         
         #gameCanvas {
-            width: 100%;
-            height: 100%;
             position: absolute;
-            top: 0;
-            left: 0;
-            image-rendering: crisp-edges;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         
         #menuScreen {
@@ -219,46 +97,14 @@
             padding: 20px;
         }
         
-        .logo-animation {
-            width: 120px;
-            height: 120px;
-            position: relative;
-            margin-bottom: 30px;
-        }
-        
-        .logo-block {
-            position: absolute;
-            background: linear-gradient(135deg, #00d9ff, #00ff88);
-            border-radius: 15%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: 900;
-            font-size: 18px;
-            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.5);
-        }
-        
-        @keyframes float1 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            33% { transform: translate(15px, -15px) rotate(10deg) scale(1.1); }
-            66% { transform: translate(-15px, 8px) rotate(-10deg) scale(0.9); }
-        }
-        
-        @keyframes float2 {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            33% { transform: translate(-15px, 15px) rotate(-15deg) scale(0.9); }
-            66% { transform: translate(15px, -8px) rotate(15deg) scale(1.1); }
-        }
-        
         .title {
-            font-size: 48px;
+            font-size: 64px;
             font-weight: 900;
             background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
             text-shadow: 0 0 40px rgba(0, 217, 255, 0.5);
         }
         
@@ -266,22 +112,21 @@
             background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
             color: #000;
-            padding: 16px 60px;
-            border-radius: 40px;
-            font-size: 24px;
+            padding: 20px 80px;
+            border-radius: 50px;
+            font-size: 28px;
             font-weight: 900;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin: 20px 0;
-            animation: buttonPulse 2s ease-in-out infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
         
-        @keyframes buttonPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 12px 40px rgba(0, 255, 136, 0.7); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .play-button:active {
@@ -291,9 +136,10 @@
         .instructions {
             text-align: center;
             color: #aaa;
-            font-size: 16px;
-            line-height: 1.5;
-            max-width: 300px;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 350px;
+            margin-top: 30px;
         }
         
         .instructions em {
@@ -323,154 +169,76 @@
             color: #ff5252;
             margin-bottom: 20px;
             text-shadow: 0 0 40px rgba(255, 82, 82, 0.8);
-            animation: gameOverShake 0.5s ease-in-out;
-        }
-        
-        @keyframes gameOverShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
         }
         
         .final-score {
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 900;
             background: linear-gradient(45deg, #00ff88, #00d9ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
-        }
-        
-        .best-score {
-            font-size: 20px;
-            color: #aaa;
-            margin-bottom: 30px;
-        }
-        
-        .best-score .best-value {
-            color: #ffab00;
-            font-weight: 700;
+            margin-bottom: 20px;
         }
         
         .restart-button {
             background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
             color: #000;
-            padding: 14px 50px;
-            border-radius: 40px;
-            font-size: 20px;
+            padding: 16px 60px;
+            border-radius: 50px;
+            font-size: 24px;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
             text-transform: uppercase;
-            animation: buttonPulse 2s ease-in-out infinite;
+            animation: pulse 2s ease-in-out infinite;
         }
         
-        .particle {
+        .powerup-text {
             position: absolute;
-            pointer-events: none;
-            border-radius: 50%;
-        }
-        
-        .floating-text {
-            position: absolute;
-            font-size: 24px;
+            font-size: 32px;
             font-weight: 900;
             pointer-events: none;
             animation: floatUp 1s ease-out forwards;
-            text-shadow: 0 0 10px currentColor;
+            text-shadow: 0 0 20px currentColor;
         }
         
         @keyframes floatUp {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -150%) scale(1.5); opacity: 1; }
-            100% { transform: translate(-50%, -250%) scale(1); opacity: 0; }
-        }
-        
-        .screen-flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
-            pointer-events: none;
-            opacity: 0;
-            z-index: 90;
-        }
-        
-        @keyframes screenFlash {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
+            50% { transform: translate(-50%, -100%) scale(1.5); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <!-- Screen Flash Effect -->
-        <div class="screen-flash" id="screenFlash"></div>
-        
-        <!-- Game UI -->
-        <div id="gameUI">
-            <div class="ui-top">
-                <button class="home-button" onclick="goHome()">🏠</button>
-                <div class="score-display">
-                    <span class="score-value" id="score">0</span>
-                    <span class="combo-indicator" id="comboIndicator">2x</span>
-                </div>
-                <div class="level-badge">LV <span id="level">1</span></div>
-            </div>
-            <div id="progressBar">
-                <div id="progressFill"></div>
-                <div class="progress-text"><span id="currentSize">10</span> / <span id="targetSize">50</span></div>
-            </div>
+        <div id="header">
+            <div class="score">SCORE: <span id="score">0</span></div>
+            <div class="size-display">SIZE: <span id="playerSize">10</span></div>
         </div>
         
-        <!-- Power-up Indicator -->
-        <div id="powerupIndicator"></div>
-        
-        <!-- Combo Display -->
-        <div id="comboDisplay"></div>
-        
-        <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
         
-        <!-- Menu Screen -->
         <div id="menuScreen">
-            <div class="logo-animation">
-                <div class="logo-block" style="width: 40px; height: 40px; top: 20px; left: 20px; animation: float1 3s ease-in-out infinite;">10</div>
-                <div class="logo-block" style="width: 60px; height: 60px; top: 40px; right: 10px; animation: float2 3s ease-in-out infinite; animation-delay: 0.5s;">30</div>
-                <div class="logo-block" style="width: 35px; height: 35px; bottom: 20px; left: 35px; animation: float1 3s ease-in-out infinite; animation-delay: 1s;">15</div>
-            </div>
-            
             <div class="title">BLOCKS</div>
-            
             <button class="play-button" onclick="startGame()">GIOCA</button>
-            
             <div class="instructions">
-                Mangia i blocchi <em>più piccoli</em><br>
+                Mangia i blocchi <em>più piccoli</em> per crescere<br>
                 Evita quelli <em>più grandi</em>!<br>
-                Combo e power-up per <em>dominare</em>!
+                Tocca per muoverti
             </div>
         </div>
         
-        <!-- Game Over Screen -->
         <div id="gameOverScreen">
             <div class="game-over-title">GAME OVER</div>
             <div class="final-score" id="finalScore">0</div>
-            <div class="best-score">Record: <span class="best-value" id="bestScore">0</span></div>
             <button class="restart-button" onclick="restartGame()">RIGIOCA</button>
         </div>
     </div>
 
     <script>
-        // Check autostart parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const shouldAutostart = urlParams.get('autostart') === 'true';
-        
-        // Prevent all scrolling and zooming
+        // Prevent scrolling
         document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
         document.addEventListener('gesturestart', (e) => e.preventDefault());
         
@@ -478,293 +246,266 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { alpha: false });
         
-        // Responsive canvas
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        // Game configuration
+        const GRID_SIZE = 10; // 10x10 grid
+        const CELL_SIZE = Math.min(
+            Math.floor((window.innerWidth - 40) / GRID_SIZE),
+            Math.floor((window.innerHeight - 200) / GRID_SIZE)
+        );
+        const BOARD_SIZE = CELL_SIZE * GRID_SIZE;
         
-        // Game variables
+        // Set canvas size
+        canvas.width = BOARD_SIZE;
+        canvas.height = BOARD_SIZE;
+        
+        // Game state
         let gameState = 'menu';
         let score = 0;
-        let level = 1;
-        let combo = 0;
-        let comboTimer = 0;
-        let bestScore = parseInt(localStorage.getItem('notamyBlocksBest') || '0');
-        let cameraZoom = 1;
-        let targetZoom = 1;
-        let screenShake = 0;
-        let powerupActive = '';
-        let powerupTimer = 0;
-        
-        // If autostart, show game immediately
-        if (shouldAutostart) {
-            document.getElementById('menuScreen').style.display = 'none';
-            startGame();
-        }
+        let frameCount = 0;
+        let particles = [];
         
         // Player
         const player = {
-            x: 0,
-            y: 0,
+            x: Math.floor(GRID_SIZE / 2),
+            y: Math.floor(GRID_SIZE / 2),
             size: 10,
-            targetX: 0,
-            targetY: 0,
-            speed: 0.2,
-            color: '#00d9ff',
-            growthAnimation: 0,
-            trail: []
+            targetX: Math.floor(GRID_SIZE / 2),
+            targetY: Math.floor(GRID_SIZE / 2),
+            moveProgress: 0,
+            color: '#00d9ff'
         };
         
-        // Game settings - Optimized for mobile
-        const LEVEL_SIZES = [50, 80, 120, 180, 250]; // Progressive level sizes
-        const MIN_BLOCK_SIZE = 5;
-        const MAX_BLOCK_SIZE = 40;
-        const INITIAL_BLOCKS = 12;
-        const MAX_BLOCKS = 25;
-        const SPAWN_RATE = 180; // frames between spawns
-        const POWERUP_CHANCE = 0.15;
-        const COMBO_DECAY = 180; // 3 seconds at 60fps
-        
-        // Dynamic world size based on screen
-        let WORLD_WIDTH = Math.min(window.innerWidth * 1.5, 600);
-        let WORLD_HEIGHT = Math.min(window.innerHeight * 1.5, 900);
-        
-        // Arrays
+        // Blocks
         let blocks = [];
-        let particles = [];
-        let effects = [];
+        const MIN_SIZE = 5;
+        const MAX_SIZE = 40;
+        const SPAWN_RATE = 60; // frames between spawns
         let spawnTimer = 0;
         
-        // Block types with special effects
-        const blockTypes = {
-            normal: [
-                { color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)' },
-                { color: '#00d9ff', shadow: 'rgba(0, 217, 255, 0.5)' },
-                { color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)' }
-            ],
-            danger: { color: '#ff5252', shadow: 'rgba(255, 82, 82, 0.5)' },
-            powerup: [
-                { type: 'speed', color: '#ffab00', shadow: 'rgba(255, 171, 0, 0.5)', icon: '⚡' },
-                { type: 'magnet', color: '#ff6b6b', shadow: 'rgba(255, 107, 107, 0.5)', icon: '🧲' },
-                { type: 'shield', color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)', icon: '🛡️' },
-                { type: 'multi', color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)', icon: '×2' }
-            ]
-        };
+        // Block colors based on size
+        function getBlockColor(size) {
+            if (size < 10) return '#00ff88'; // Small - green
+            if (size < 20) return '#ffab00'; // Medium - orange
+            if (size < 30) return '#a78bfa'; // Large - purple
+            return '#ff5252'; // Very large - red
+        }
         
         // Initialize game
         function initGame() {
-            // Reset player
-            player.x = WORLD_WIDTH / 2;
-            player.y = WORLD_HEIGHT / 2;
+            player.x = Math.floor(GRID_SIZE / 2);
+            player.y = Math.floor(GRID_SIZE / 2);
+            player.size = 10;
             player.targetX = player.x;
             player.targetY = player.y;
-            player.size = 10;
-            player.growthAnimation = 0;
-            player.trail = [];
+            player.moveProgress = 0;
             
-            // Reset camera
-            cameraZoom = 1;
-            targetZoom = 1;
-            
-            // Clear arrays
             blocks = [];
             particles = [];
-            effects = [];
+            score = 0;
+            frameCount = 0;
             spawnTimer = 0;
             
-            // Create initial blocks
-            for (let i = 0; i < INITIAL_BLOCKS; i++) {
-                createBlock(true);
+            // Spawn initial blocks
+            for (let i = 0; i < 5; i++) {
+                spawnBlock(true);
             }
+            
+            updateUI();
         }
         
-        // Create block with smart spawning
-        function createBlock(initial = false) {
-            if (blocks.length >= MAX_BLOCKS) return;
+        // Spawn new block
+        function spawnBlock(initial = false) {
+            let x, y;
+            let attempts = 0;
             
+            // Find empty position
+            do {
+                if (initial) {
+                    x = Math.floor(Math.random() * GRID_SIZE);
+                    y = Math.floor(Math.random() * GRID_SIZE);
+                } else {
+                    // Spawn from edges
+                    if (Math.random() < 0.5) {
+                        x = Math.random() < 0.5 ? 0 : GRID_SIZE - 1;
+                        y = Math.floor(Math.random() * GRID_SIZE);
+                    } else {
+                        x = Math.floor(Math.random() * GRID_SIZE);
+                        y = Math.random() < 0.5 ? 0 : GRID_SIZE - 1;
+                    }
+                }
+                attempts++;
+            } while ((isOccupied(x, y) || (x === player.x && y === player.y)) && attempts < 50);
+            
+            if (attempts >= 50) return; // Grid too full
+            
+            // Size based on player size and difficulty
             let size;
             const rand = Math.random();
             
-            // Size distribution based on player size
             if (rand < 0.6) {
-                // 60% smaller (easy)
-                size = MIN_BLOCK_SIZE + Math.random() * (player.size * 0.8 - MIN_BLOCK_SIZE);
+                // 60% smaller blocks
+                size = MIN_SIZE + Math.random() * (player.size - MIN_SIZE);
             } else if (rand < 0.85) {
                 // 25% similar size
                 size = player.size * 0.8 + Math.random() * player.size * 0.4;
             } else {
-                // 15% bigger (danger)
-                size = player.size * 1.2 + Math.random() * (MAX_BLOCK_SIZE - player.size);
+                // 15% bigger blocks
+                size = player.size + Math.random() * (MAX_SIZE - player.size);
             }
             
-            size = Math.max(MIN_BLOCK_SIZE, Math.min(MAX_BLOCK_SIZE, size));
-            
-            // Spawn position (always from edges)
-            let x, y;
-            if (initial) {
-                // Random position for initial blocks
-                x = Math.random() * WORLD_WIDTH;
-                y = Math.random() * WORLD_HEIGHT;
-            } else {
-                // Spawn from edges
-                const edge = Math.floor(Math.random() * 4);
-                switch(edge) {
-                    case 0: x = -size; y = Math.random() * WORLD_HEIGHT; break;
-                    case 1: x = WORLD_WIDTH + size; y = Math.random() * WORLD_HEIGHT; break;
-                    case 2: x = Math.random() * WORLD_WIDTH; y = -size; break;
-                    case 3: x = Math.random() * WORLD_WIDTH; y = WORLD_HEIGHT + size; break;
-                }
-            }
-            
-            // Determine type
-            let type, isPowerup = false, powerupType = null;
-            
-            if (!initial && Math.random() < POWERUP_CHANCE && size < player.size) {
-                // Power-up block
-                isPowerup = true;
-                powerupType = blockTypes.powerup[Math.floor(Math.random() * blockTypes.powerup.length)];
-                type = powerupType;
-            } else if (size >= player.size) {
-                // Danger block
-                type = blockTypes.danger;
-            } else {
-                // Normal block
-                type = blockTypes.normal[Math.floor(Math.random() * blockTypes.normal.length)];
-            }
-            
-            const speedMultiplier = 1 + (level - 1) * 0.15;
-            const baseSpeed = (20 / size) * speedMultiplier;
+            size = Math.max(MIN_SIZE, Math.min(MAX_SIZE, Math.round(size)));
             
             blocks.push({
                 x: x,
                 y: y,
                 size: size,
-                speed: baseSpeed * 0.8,
-                type: type,
-                direction: Math.atan2(player.y - y, player.x - x) + (Math.random() - 0.5) * Math.PI / 4,
-                pulseAnimation: 0,
-                isEdible: size < player.size,
-                isPowerup: isPowerup,
-                powerupType: powerupType ? powerupType.type : null,
-                lifetime: 0,
-                targetPlayer: Math.random() < 0.3 // 30% chance to target player
+                targetX: x,
+                targetY: y,
+                moveTimer: 0,
+                moveSpeed: 120 - Math.min(50, size), // Bigger blocks move slower
+                scale: 0,
+                targetScale: 1
             });
         }
         
-        // Update block movement
-        function updateBlock(block, index) {
-            block.lifetime++;
-            
-            // Update edibility
-            block.isEdible = block.size < player.size;
-            
-            // Pulse animation
-            if (block.isEdible) {
-                block.pulseAnimation = (block.pulseAnimation + 0.1) % (Math.PI * 2);
-            }
-            
-            // Movement AI
-            if (block.targetPlayer && block.lifetime % 60 === 0) {
-                // Re-target player occasionally
-                const angle = Math.atan2(player.y - block.y, player.x - block.x);
-                block.direction = angle + (Math.random() - 0.5) * Math.PI / 6;
-            } else if (block.lifetime % 120 === 0) {
-                // Random direction change
-                block.direction += (Math.random() - 0.5) * Math.PI / 2;
-            }
-            
-            // Apply magnet effect
-            if (powerupActive === 'magnet' && block.isEdible) {
-                const dist = Math.hypot(player.x - block.x, player.y - block.y);
-                if (dist < 150) {
-                    const angle = Math.atan2(player.y - block.y, player.x - block.x);
-                    const force = (150 - dist) / 150 * 0.5;
-                    block.x += Math.cos(angle) * force * block.speed;
-                    block.y += Math.sin(angle) * force * block.speed;
+        // Check if position is occupied
+        function isOccupied(x, y) {
+            return blocks.some(block => block.x === x && block.y === y);
+        }
+        
+        // Move block AI
+        function moveBlocks() {
+            blocks.forEach(block => {
+                block.moveTimer++;
+                
+                if (block.moveTimer >= block.moveSpeed) {
+                    block.moveTimer = 0;
+                    
+                    // Simple AI: smaller blocks flee, bigger blocks chase
+                    const dx = player.x - block.x;
+                    const dy = player.y - block.y;
+                    const distance = Math.abs(dx) + Math.abs(dy);
+                    
+                    if (distance > 0 && distance < 5) {
+                        const possibleMoves = [];
+                        
+                        // Check all four directions
+                        const directions = [
+                            { x: 0, y: -1 }, // up
+                            { x: 1, y: 0 },  // right
+                            { x: 0, y: 1 },  // down
+                            { x: -1, y: 0 }  // left
+                        ];
+                        
+                        directions.forEach(dir => {
+                            const newX = block.x + dir.x;
+                            const newY = block.y + dir.y;
+                            
+                            if (newX >= 0 && newX < GRID_SIZE && 
+                                newY >= 0 && newY < GRID_SIZE && 
+                                !isOccupied(newX, newY) &&
+                                !(newX === player.x && newY === player.y)) {
+                                possibleMoves.push({ x: newX, y: newY });
+                            }
+                        });
+                        
+                        if (possibleMoves.length > 0) {
+                            let chosenMove;
+                            
+                            if (block.size < player.size) {
+                                // Flee: move away from player
+                                chosenMove = possibleMoves.reduce((best, move) => {
+                                    const moveDist = Math.abs(move.x - player.x) + Math.abs(move.y - player.y);
+                                    const bestDist = Math.abs(best.x - player.x) + Math.abs(best.y - player.y);
+                                    return moveDist > bestDist ? move : best;
+                                });
+                            } else {
+                                // Chase: move towards player
+                                chosenMove = possibleMoves.reduce((best, move) => {
+                                    const moveDist = Math.abs(move.x - player.x) + Math.abs(move.y - player.y);
+                                    const bestDist = Math.abs(best.x - player.x) + Math.abs(best.y - player.y);
+                                    return moveDist < bestDist ? move : best;
+                                });
+                            }
+                            
+                            block.targetX = chosenMove.x;
+                            block.targetY = chosenMove.y;
+                        }
+                    } else if (Math.random() < 0.3) {
+                        // Random movement
+                        const directions = [
+                            { x: 0, y: -1 }, { x: 1, y: 0 }, 
+                            { x: 0, y: 1 }, { x: -1, y: 0 }
+                        ];
+                        const dir = directions[Math.floor(Math.random() * directions.length)];
+                        const newX = block.x + dir.x;
+                        const newY = block.y + dir.y;
+                        
+                        if (newX >= 0 && newX < GRID_SIZE && 
+                            newY >= 0 && newY < GRID_SIZE && 
+                            !isOccupied(newX, newY) &&
+                            !(newX === player.x && newY === player.y)) {
+                            block.targetX = newX;
+                            block.targetY = newY;
+                        }
+                    }
                 }
-            }
-            
-            // Normal movement
-            block.x += Math.cos(block.direction) * block.speed;
-            block.y += Math.sin(block.direction) * block.speed;
-            
-            // Remove if out of bounds for too long
-            const margin = 100;
-            if (block.x < -margin || block.x > WORLD_WIDTH + margin || 
-                block.y < -margin || block.y > WORLD_HEIGHT + margin) {
-                if (block.lifetime > 180) {
-                    blocks.splice(index, 1);
+                
+                // Smooth movement
+                if (block.x !== block.targetX || block.y !== block.targetY) {
+                    block.x = block.targetX;
+                    block.y = block.targetY;
                 }
-            }
+                
+                // Scale animation
+                if (block.scale < block.targetScale) {
+                    block.scale += 0.1;
+                    if (block.scale > block.targetScale) block.scale = block.targetScale;
+                }
+            });
         }
         
         // Update game
         function update() {
             if (gameState !== 'playing') return;
             
-            // Update world size dynamically
-            WORLD_WIDTH = Math.min(window.innerWidth * 1.5, 600);
-            WORLD_HEIGHT = Math.min(window.innerHeight * 1.5, 900);
+            frameCount++;
             
-            // Player movement with speed boost
-            const speedMultiplier = powerupActive === 'speed' ? 1.5 : 1;
-            const dx = player.targetX - player.x;
-            const dy = player.targetY - player.y;
-            player.x += dx * player.speed * speedMultiplier;
-            player.y += dy * player.speed * speedMultiplier;
+            // Move player smoothly
+            if (player.x !== player.targetX || player.y !== player.targetY) {
+                player.moveProgress += 0.2;
+                if (player.moveProgress >= 1) {
+                    player.x = player.targetX;
+                    player.y = player.targetY;
+                    player.moveProgress = 0;
+                }
+            }
             
-            // Keep in bounds
-            player.x = Math.max(player.size, Math.min(WORLD_WIDTH - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(WORLD_HEIGHT - player.size, player.y));
+            // Move blocks
+            moveBlocks();
             
-            // Update trail
-            player.trail.push({ x: player.x, y: player.y });
-            if (player.trail.length > 10) player.trail.shift();
-            
-            // Update camera zoom
-            targetZoom = Math.max(0.5, Math.min(1, 40 / player.size));
-            cameraZoom += (targetZoom - cameraZoom) * 0.1;
-            
-            // Update animations
-            player.growthAnimation *= 0.92;
-            screenShake *= 0.9;
-            if (comboTimer > 0) comboTimer--;
-            if (powerupTimer > 0) {
-                powerupTimer--;
-                if (powerupTimer === 0) powerupActive = '';
+            // Check collisions
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                const block = blocks[i];
+                
+                if (block.x === player.x && block.y === player.y) {
+                    if (block.size < player.size) {
+                        // Eat block
+                        eatBlock(block, i);
+                    } else {
+                        // Game over
+                        gameOver();
+                        return;
+                    }
+                }
             }
             
             // Spawn new blocks
             spawnTimer++;
-            if (spawnTimer >= SPAWN_RATE / (1 + level * 0.1)) {
+            if (spawnTimer >= SPAWN_RATE) {
                 spawnTimer = 0;
-                createBlock();
-            }
-            
-            // Update blocks
-            for (let i = blocks.length - 1; i >= 0; i--) {
-                const block = blocks[i];
-                updateBlock(block, i);
-                
-                // Check collision
-                const dist = Math.hypot(player.x - block.x, player.y - block.y);
-                const minDist = (player.size + block.size) * 0.85;
-                
-                if (dist < minDist) {
-                    if (block.isEdible) {
-                        eatBlock(block, i);
-                    } else if (powerupActive !== 'shield') {
-                        gameOver();
-                    } else {
-                        // Shield protection
-                        blocks.splice(i, 1);
-                        createShieldEffect();
-                        powerupTimer = 0;
-                        powerupActive = '';
-                    }
+                if (blocks.length < 15) { // Max 15 blocks
+                    spawnBlock();
                 }
             }
             
@@ -773,512 +514,256 @@
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life--;
-                p.vx *= 0.98;
-                p.vy *= 0.98;
+                p.vx *= 0.95;
+                p.vy *= 0.95;
                 return p.life > 0;
             });
             
-            // Update UI
             updateUI();
         }
         
-        // Eat block with effects
+        // Eat block
         function eatBlock(block, index) {
-            // Growth calculation
-            const growthBase = block.size * 0.15;
-            const comboMultiplier = 1 + combo * 0.1;
-            const growth = growthBase * comboMultiplier * (powerupActive === 'multi' ? 2 : 1);
+            // Add score
+            score += block.size * 10;
             
-            player.size += growth;
-            player.growthAnimation = 1;
+            // Grow player
+            const growth = Math.floor(block.size * 0.3);
+            player.size = Math.min(player.size + growth, 50); // Max size 50
             
-            // Score calculation
-            const baseScore = Math.floor(block.size * 10);
-            const comboBonus = combo * 50;
-            const totalScore = (baseScore + comboBonus) * (powerupActive === 'multi' ? 2 : 1);
-            score += totalScore;
+            // Create particles
+            createParticles(block.x, block.y, getBlockColor(block.size));
             
-            // Update combo
-            combo++;
-            comboTimer = COMBO_DECAY;
+            // Show powerup text
+            showPowerupText(block.x, block.y, `+${block.size * 10}`);
             
-            // Show effects
-            if (combo > 1) {
-                showCombo();
-                if (combo % 5 === 0) {
-                    screenFlash();
-                }
-            }
-            
-            // Power-up effect
-            if (block.isPowerup) {
-                activatePowerup(block.powerupType);
-            }
-            
-            // Effects
-            createEatEffects(block, totalScore);
-            
-            // Haptic
-            if (navigator.vibrate) {
-                navigator.vibrate(combo > 5 ? [20, 10, 20] : 20);
-            }
-            
-            // Screen shake on big eats
-            if (block.size > player.size * 0.7) {
-                screenShake = 10;
-            }
-            
-            // Remove and check level
+            // Remove block
             blocks.splice(index, 1);
-            checkLevelUp();
-        }
-        
-        // Check level up
-        function checkLevelUp() {
-            const targetSize = LEVEL_SIZES[Math.min(level - 1, LEVEL_SIZES.length - 1)];
-            if (player.size >= targetSize) {
-                levelUp();
-            }
-        }
-        
-        // Level up
-        function levelUp() {
-            level++;
-            player.size = 10 + level * 2; // Start slightly bigger each level
             
-            // Effects
-            showCombo("LEVEL " + level + "!");
-            screenFlash('#00ff88');
-            screenShake = 20;
-            
-            // Clear screen dramatically
-            blocks.forEach(block => {
-                createParticles(block.x, block.y, block.type, block.size / 2);
-            });
-            blocks = [];
-            
-            // Haptic
+            // Haptic feedback
             if (navigator.vibrate) {
-                navigator.vibrate([50, 100, 50, 100, 50]);
+                navigator.vibrate(20);
             }
-            
-            // Refill with new blocks
-            setTimeout(() => {
-                for (let i = 0; i < INITIAL_BLOCKS + level; i++) {
-                    createBlock(true);
-                }
-            }, 500);
         }
         
-        // Activate powerup
-        function activatePowerup(type) {
-            powerupActive = type;
-            powerupTimer = 300; // 5 seconds
+        // Create particles
+        function createParticles(gridX, gridY, color) {
+            const x = gridX * CELL_SIZE + CELL_SIZE / 2;
+            const y = gridY * CELL_SIZE + CELL_SIZE / 2;
             
-            const indicator = document.getElementById('powerupIndicator');
-            const messages = {
-                speed: '⚡ VELOCITÀ!',
-                magnet: '🧲 MAGNETE!',
-                shield: '🛡️ SCUDO!',
-                multi: '×2 DOPPIO!'
-            };
-            
-            indicator.textContent = messages[type];
-            indicator.style.display = 'block';
-            
-            screenFlash('#ffab00');
-        }
-        
-        // Show combo
-        function showCombo() {
-            const display = document.getElementById('comboDisplay');
-            const indicator = document.getElementById('comboIndicator');
-            
-            display.innerHTML = `<div style="font-size: 64px">${combo}×</div><div style="font-size: 24px">COMBO!</div>`;
-            display.style.display = 'block';
-            display.style.color = combo > 10 ? '#ff6b6b' : combo > 5 ? '#ffab00' : '#00ff88';
-            
-            indicator.textContent = combo + 'x';
-            indicator.style.display = combo > 1 ? 'block' : 'none';
-            
-            setTimeout(() => {
-                display.style.display = 'none';
-            }, 800);
-        }
-        
-        // Create effects
-        function createEatEffects(block, points) {
-            // Particles
-            createParticles(block.x, block.y, block.type, block.size);
-            
-            // Floating text
-            showFloatingText(block.x, block.y, '+' + points, '#00ff88');
-        }
-        
-        function createParticles(x, y, type, size) {
-            const count = Math.min(15, Math.floor(size / 2));
-            for (let i = 0; i < count; i++) {
-                const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-                const speed = 1 + Math.random() * 3;
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
                 particles.push({
                     x: x,
                     y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    life: 20 + Math.random() * 10,
-                    color: type.color,
-                    size: 2 + Math.random() * 4
+                    vx: Math.cos(angle) * 3,
+                    vy: Math.sin(angle) * 3,
+                    color: color,
+                    size: 4,
+                    life: 20
                 });
             }
         }
         
-        function showFloatingText(x, y, text, color) {
+        // Show powerup text
+        function showPowerupText(gridX, gridY, text) {
+            const rect = canvas.getBoundingClientRect();
+            const x = rect.left + gridX * CELL_SIZE + CELL_SIZE / 2;
+            const y = rect.top + gridY * CELL_SIZE + CELL_SIZE / 2;
+            
             const el = document.createElement('div');
-            el.className = 'floating-text';
+            el.className = 'powerup-text';
             el.textContent = text;
-            el.style.color = color;
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.color = '#00ff88';
             
-            const screenPos = worldToScreen(x, y);
-            el.style.left = screenPos.x + 'px';
-            el.style.top = screenPos.y + 'px';
-            
-            document.getElementById('gameContainer').appendChild(el);
+            document.body.appendChild(el);
             setTimeout(() => el.remove(), 1000);
-        }
-        
-        function createShieldEffect() {
-            screenFlash('#00ff88');
-            for (let i = 0; i < 30; i++) {
-                const angle = (Math.PI * 2 / 30) * i;
-                particles.push({
-                    x: player.x + Math.cos(angle) * player.size,
-                    y: player.y + Math.sin(angle) * player.size,
-                    vx: Math.cos(angle) * 2,
-                    vy: Math.sin(angle) * 2,
-                    life: 30,
-                    color: '#00ff88',
-                    size: 4
-                });
-            }
-        }
-        
-        function screenFlash(color = '#fff') {
-            const flash = document.getElementById('screenFlash');
-            flash.style.background = `radial-gradient(circle, ${color}33, transparent)`;
-            flash.style.animation = 'screenFlash 0.3s ease-out';
-            setTimeout(() => {
-                flash.style.animation = '';
-            }, 300);
-        }
-        
-        // World to screen coordinates
-        function worldToScreen(x, y) {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            return {
-                x: centerX + (x - player.x) * cameraZoom,
-                y: centerY + (y - player.y) * cameraZoom
-            };
         }
         
         // Update UI
         function updateUI() {
-            document.getElementById('score').textContent = score.toLocaleString();
-            document.getElementById('level').textContent = level;
-            document.getElementById('currentSize').textContent = Math.floor(player.size);
-            
-            const targetSize = LEVEL_SIZES[Math.min(level - 1, LEVEL_SIZES.length - 1)];
-            document.getElementById('targetSize').textContent = targetSize;
-            
-            const progress = ((player.size - 10) / (targetSize - 10)) * 100;
-            document.getElementById('progressFill').style.width = Math.min(100, Math.max(0, progress)) + '%';
-            
-            // Powerup indicator
-            if (powerupTimer <= 0) {
-                document.getElementById('powerupIndicator').style.display = 'none';
-            }
-            
-            // Combo decay
-            if (comboTimer <= 0 && combo > 0) {
-                combo = 0;
-                document.getElementById('comboIndicator').style.display = 'none';
-            }
+            document.getElementById('score').textContent = score;
+            document.getElementById('playerSize').textContent = player.size;
         }
         
-        // Drawing
+        // Draw game
         function draw() {
-            // Clear
+            // Clear canvas
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             if (gameState !== 'playing') return;
             
-            ctx.save();
-            
-            // Camera shake
-            if (screenShake > 0) {
-                ctx.translate(
-                    (Math.random() - 0.5) * screenShake,
-                    (Math.random() - 0.5) * screenShake
-                );
-            }
-            
-            // Camera zoom and center
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.scale(cameraZoom, cameraZoom);
-            ctx.translate(-player.x, -player.y);
-            
             // Draw grid
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.lineWidth = 1 / cameraZoom;
-            const gridSize = 40;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
             
-            const startX = Math.floor((player.x - canvas.width / cameraZoom) / gridSize) * gridSize;
-            const endX = Math.ceil((player.x + canvas.width / cameraZoom) / gridSize) * gridSize;
-            const startY = Math.floor((player.y - canvas.height / cameraZoom) / gridSize) * gridSize;
-            const endY = Math.ceil((player.y + canvas.height / cameraZoom) / gridSize) * gridSize;
-            
-            for (let x = startX; x <= endX; x += gridSize) {
-                if (x >= 0 && x <= WORLD_WIDTH) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, Math.max(0, startY));
-                    ctx.lineTo(x, Math.min(WORLD_HEIGHT, endY));
-                    ctx.stroke();
-                }
-            }
-            
-            for (let y = startY; y <= endY; y += gridSize) {
-                if (y >= 0 && y <= WORLD_HEIGHT) {
-                    ctx.beginPath();
-                    ctx.moveTo(Math.max(0, startX), y);
-                    ctx.lineTo(Math.min(WORLD_WIDTH, endX), y);
-                    ctx.stroke();
-                }
-            }
-            
-            // Draw world border
-            ctx.strokeStyle = '#ff5252';
-            ctx.lineWidth = 3 / cameraZoom;
-            ctx.strokeRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            
-            // Draw particles
-            particles.forEach(p => {
-                const alpha = p.life / 30;
-                ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+            for (let i = 0; i <= GRID_SIZE; i++) {
+                // Vertical lines
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            // Draw player trail
-            if (player.trail.length > 1) {
-                ctx.strokeStyle = 'rgba(0, 217, 255, 0.3)';
-                ctx.lineWidth = player.size * 0.8;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(player.trail[0].x, player.trail[0].y);
-                for (let i = 1; i < player.trail.length; i++) {
-                    const alpha = i / player.trail.length;
-                    ctx.globalAlpha = alpha * 0.5;
-                    ctx.lineTo(player.trail[i].x, player.trail[i].y);
-                }
+                ctx.moveTo(i * CELL_SIZE, 0);
+                ctx.lineTo(i * CELL_SIZE, BOARD_SIZE);
                 ctx.stroke();
-                ctx.globalAlpha = 1;
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL_SIZE);
+                ctx.lineTo(BOARD_SIZE, i * CELL_SIZE);
+                ctx.stroke();
             }
             
             // Draw blocks
             blocks.forEach(block => {
-                const scale = block.isEdible ? 1 + Math.sin(block.pulseAnimation) * 0.08 : 1;
+                const x = block.x * CELL_SIZE + CELL_SIZE / 2;
+                const y = block.y * CELL_SIZE + CELL_SIZE / 2;
+                const displaySize = (CELL_SIZE * 0.8) * (block.size / 50) * block.scale;
                 
-                ctx.save();
-                ctx.translate(block.x, block.y);
-                ctx.scale(scale, scale);
+                // Shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(
+                    x - displaySize / 2 + 2,
+                    y - displaySize / 2 + 2,
+                    displaySize,
+                    displaySize
+                );
                 
-                // Block shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.beginPath();
-                ctx.arc(2, 2, block.size, 0, Math.PI * 2);
-                ctx.fill();
+                // Block
+                const color = getBlockColor(block.size);
+                ctx.fillStyle = color;
+                ctx.fillRect(
+                    x - displaySize / 2,
+                    y - displaySize / 2,
+                    displaySize,
+                    displaySize
+                );
                 
-                // Block body
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, block.size);
-                gradient.addColorStop(0, block.type.color);
-                gradient.addColorStop(0.8, block.type.shadow);
-                gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
+                // Size text
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${Math.max(12, displaySize * 0.4)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(block.size, x, y);
                 
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(0, 0, block.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Danger indicator
-                if (!block.isEdible && !block.isPowerup) {
+                // Danger indicator for bigger blocks
+                if (block.size >= player.size) {
                     ctx.strokeStyle = '#ff5252';
                     ctx.lineWidth = 2;
                     ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, block.size + 5, 0, Math.PI * 2);
-                    ctx.stroke();
+                    ctx.strokeRect(
+                        x - displaySize / 2 - 4,
+                        y - displaySize / 2 - 4,
+                        displaySize + 8,
+                        displaySize + 8
+                    );
                     ctx.setLineDash([]);
                 }
-                
-                // Size or icon
-                ctx.fillStyle = '#fff';
-                ctx.font = `bold ${block.size * 0.6}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                if (block.isPowerup) {
-                    ctx.font = `${block.size}px Arial`;
-                    ctx.fillText(block.type.icon, 0, 0);
-                } else {
-                    ctx.fillText(Math.floor(block.size), 0, 0);
-                }
-                
-                ctx.restore();
             });
             
-            // Draw player
-            const playerScale = 1 + player.growthAnimation * 0.3;
+            // Draw player with smooth movement
+            let drawX = player.x * CELL_SIZE + CELL_SIZE / 2;
+            let drawY = player.y * CELL_SIZE + CELL_SIZE / 2;
             
-            ctx.save();
-            ctx.translate(player.x, player.y);
-            ctx.scale(playerScale, playerScale);
-            
-            // Shield effect
-            if (powerupActive === 'shield') {
-                ctx.strokeStyle = 'rgba(0, 255, 136, 0.5)';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(0, 0, player.size + 10, 0, Math.PI * 2);
-                ctx.stroke();
+            if (player.moveProgress > 0) {
+                const oldX = player.x * CELL_SIZE + CELL_SIZE / 2;
+                const oldY = player.y * CELL_SIZE + CELL_SIZE / 2;
+                const newX = player.targetX * CELL_SIZE + CELL_SIZE / 2;
+                const newY = player.targetY * CELL_SIZE + CELL_SIZE / 2;
+                
+                drawX = oldX + (newX - oldX) * player.moveProgress;
+                drawY = oldY + (newY - oldY) * player.moveProgress;
             }
+            
+            const playerDisplaySize = (CELL_SIZE * 0.8) * (player.size / 50);
             
             // Player shadow
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.beginPath();
-            ctx.arc(3, 3, player.size, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(
+                drawX - playerDisplaySize / 2 + 2,
+                drawY - playerDisplaySize / 2 + 2,
+                playerDisplaySize,
+                playerDisplaySize
+            );
             
-            // Player body
-            const playerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, player.size);
-            playerGradient.addColorStop(0, '#00d9ff');
-            playerGradient.addColorStop(0.7, '#0099cc');
-            playerGradient.addColorStop(1, '#006699');
-            
-            ctx.fillStyle = playerGradient;
-            ctx.beginPath();
-            ctx.arc(0, 0, player.size, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Player glow
-            if (combo > 5) {
-                ctx.strokeStyle = `rgba(255, 107, 107, ${0.5 + Math.sin(Date.now() * 0.01) * 0.3})`;
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(0, 0, player.size + 5, 0, Math.PI * 2);
-                ctx.stroke();
-            }
+            // Player with glow
+            ctx.shadowColor = player.color;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = player.color;
+            ctx.fillRect(
+                drawX - playerDisplaySize / 2,
+                drawY - playerDisplaySize / 2,
+                playerDisplaySize,
+                playerDisplaySize
+            );
+            ctx.shadowBlur = 0;
             
             // Player size
             ctx.fillStyle = '#fff';
-            ctx.font = `bold ${player.size * 0.7}px Arial`;
+            ctx.font = `bold ${Math.max(14, playerDisplaySize * 0.4)}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(Math.floor(player.size), 0, 0);
+            ctx.fillText(player.size, drawX, drawY);
             
-            ctx.restore();
-            ctx.restore();
+            // Draw particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color + Math.floor((p.life / 20) * 255).toString(16).padStart(2, '0');
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * (p.life / 20), 0, Math.PI * 2);
+                ctx.fill();
+            });
         }
         
-        // Touch controls
-        let touchActive = false;
+        // Input handling
+        canvas.addEventListener('touchstart', handleInput);
+        canvas.addEventListener('mousedown', handleInput);
         
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (gameState === 'playing') {
-                touchActive = true;
-                const touch = e.touches[0];
-                updateTarget(touch.clientX, touch.clientY);
-            }
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (gameState === 'playing' && touchActive) {
-                const touch = e.touches[0];
-                updateTarget(touch.clientX, touch.clientY);
-            }
-        });
-        
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            touchActive = false;
-        });
-        
-        // Mouse controls
-        canvas.addEventListener('mousedown', (e) => {
-            if (gameState === 'playing') {
-                touchActive = true;
-                updateTarget(e.clientX, e.clientY);
-            }
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
-            if (gameState === 'playing' && touchActive) {
-                updateTarget(e.clientX, e.clientY);
-            }
-        });
-        
-        canvas.addEventListener('mouseup', () => {
-            touchActive = false;
-        });
-        
-        function updateTarget(screenX, screenY) {
-            const worldX = (screenX - canvas.width / 2) / cameraZoom + player.x;
-            const worldY = (screenY - canvas.height / 2) / cameraZoom + player.y;
+        function handleInput(e) {
+            if (gameState !== 'playing') return;
             
-            player.targetX = worldX;
-            player.targetY = worldY;
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+            
+            if (e.touches) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            
+            // Convert to grid coordinates
+            const gridX = Math.floor(x / CELL_SIZE);
+            const gridY = Math.floor(y / CELL_SIZE);
+            
+            // Only move to adjacent cells
+            const dx = Math.abs(gridX - player.x);
+            const dy = Math.abs(gridY - player.y);
+            
+            if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+                if (!isOccupied(gridX, gridY)) {
+                    player.targetX = gridX;
+                    player.targetY = gridY;
+                    player.moveProgress = 0;
+                }
+            }
         }
         
         // Game flow
         function startGame() {
             gameState = 'playing';
-            score = 0;
-            level = 1;
-            combo = 0;
-            comboTimer = 0;
-            powerupActive = '';
-            powerupTimer = 0;
-            
-            document.getElementById('menuScreen').style.display = 'none';
-            document.getElementById('gameUI').style.display = 'block';
-            document.getElementById('gameOverScreen').style.display = 'none';
-            
             initGame();
-        }
-        
-        function goHome() {
-            if (confirm('Vuoi tornare alla home?')) {
-                window.location.href = './';
-            }
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
         }
         
         function gameOver() {
             gameState = 'gameOver';
-            
-            if (score > bestScore) {
-                bestScore = score;
-                localStorage.setItem('notamyBlocksBest', bestScore);
-            }
-            
-            document.getElementById('finalScore').textContent = score.toLocaleString();
-            document.getElementById('bestScore').textContent = bestScore.toLocaleString();
+            document.getElementById('finalScore').textContent = score;
             document.getElementById('gameOverScreen').style.display = 'flex';
             
-            // Haptic
             if (navigator.vibrate) {
                 navigator.vibrate([100, 50, 100]);
             }
@@ -1289,21 +774,21 @@
         }
         
         // Game loop
-        let lastTime = 0;
-        function gameLoop(currentTime) {
-            const deltaTime = currentTime - lastTime;
-            
-            if (deltaTime >= 16) { // ~60 FPS
-                update();
-                draw();
-                lastTime = currentTime;
-            }
-            
+        function gameLoop() {
+            update();
+            draw();
             requestAnimationFrame(gameLoop);
         }
         
-        // Start
-        requestAnimationFrame(gameLoop);
+        // Start game loop
+        gameLoop();
+        
+        // Auto-start if from index
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('autostart') === 'true') {
+            document.getElementById('menuScreen').style.display = 'none';
+            startGame();
+        }
     </script>
 </body>
 </html>

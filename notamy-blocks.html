@@ -336,9 +336,24 @@
         function init() {
             gameState.board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
             setupTouchControls();
+            
+            // Check for autostart parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const autostart = urlParams.get('autostart');
+            
+            if (autostart === 'true') {
+                // Hide start screen and start the game immediately
+                document.getElementById('startScreen').style.display = 'none';
+                // Small delay to ensure everything is loaded
+                setTimeout(() => {
+                    startGame();
+                }, 100);
+            }
         }
         
         // Touch Controls
+        let moveRepeatTimer = null;
+        
         function setupTouchControls() {
             let touchStartX = null;
             let touchStartY = null;
@@ -392,6 +407,12 @@
             canvas.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 if (!gameState.gameActive || touchStartX === null) return;
+                
+                // Clear any repeat timer
+                if (moveRepeatTimer) {
+                    clearInterval(moveRepeatTimer);
+                    moveRepeatTimer = null;
+                }
                 
                 const touchDuration = Date.now() - touchStartTime;
                 const touch = e.changedTouches[0];

@@ -673,6 +673,10 @@
         let speedMultiplier = 1;
         let maxSpeedReached = 1;
         
+        // Timers for UI elements
+        let comboTimeout = null;
+        let speedBoostTimeout = null;
+        
         // Safe localStorage handling
         try {
             bestScore = parseInt(localStorage.getItem('notamyFlyBest') || '0');
@@ -822,6 +826,10 @@
             maxSpeedReached = 1;
             nextMilestone = 0;
             
+            // Clear any existing timeouts
+            if (comboTimeout) clearTimeout(comboTimeout);
+            if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
+            
             // Reset bird with validation
             bird.x = WIDTH * 0.25;
             bird.y = HEIGHT / 2;
@@ -951,7 +959,6 @@
                 if (bird.speedBoostTime === 0) {
                     bird.speedBoost = false;
                     speedMultiplier = Math.max(1, speedMultiplier * 0.8);
-                    document.getElementById('speedIndicator').classList.remove('active');
                 }
             }
             
@@ -1066,6 +1073,12 @@
                         
                         document.getElementById('comboIndicator').textContent = `${combo}x COMBO! +${comboBonus}`;
                         document.getElementById('comboIndicator').classList.add('active');
+                        
+                        // Clear previous timeout and set new one
+                        if (comboTimeout) clearTimeout(comboTimeout);
+                        comboTimeout = setTimeout(() => {
+                            document.getElementById('comboIndicator').classList.remove('active');
+                        }, 2000);
                     }
                     
                     // Score particles
@@ -1181,7 +1194,14 @@
                                 bird.speedBoost = true;
                                 bird.speedBoostTime = 360;
                                 speedMultiplier = Math.min(2, speedMultiplier * 1.2);
+                                
+                                // Show speed boost indicator temporarily
                                 document.getElementById('speedIndicator').classList.add('active');
+                                if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
+                                speedBoostTimeout = setTimeout(() => {
+                                    document.getElementById('speedIndicator').classList.remove('active');
+                                }, 2000);
+                                
                                 showAchievement("Speed Boost!");
                                 break;
                             case 'multiplier':
@@ -1398,6 +1418,10 @@
             gameState = 'gameOver';
             
             if (combo > maxCombo) maxCombo = combo;
+            
+            // Clear any active timeouts
+            if (comboTimeout) clearTimeout(comboTimeout);
+            if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
             
             // Create massive explosion
             for (let i = 0; i < 40; i++) {

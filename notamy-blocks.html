@@ -364,8 +364,8 @@
                 const deltaX = touch.clientX - touchStartX;
                 const deltaY = touch.clientY - touchStartY;
                 
-                // Horizontal movement
-                if (Math.abs(deltaX) > 30 && !isDragging) {
+                // Horizontal movement - con soglia più alta
+                if (Math.abs(deltaX) > 40 && !isDragging) {
                     movePiece(deltaX > 0 ? 1 : -1, 0);
                     touchStartX = touch.clientX;
                 }
@@ -386,8 +386,8 @@
                 const deltaX = Math.abs(touch.clientX - touchStartX);
                 const deltaY = Math.abs(touch.clientY - touchStartY);
                 
-                // Tap to rotate
-                if (touchDuration < 300 && deltaX < 20 && deltaY < 20 && !isDragging) {
+                // Tap to rotate - più restrittivo
+                if (touchDuration >= 50 && touchDuration < 200 && deltaX < 10 && deltaY < 10 && !isDragging) {
                     rotatePiece();
                 }
                 
@@ -466,6 +466,11 @@
                 if (!kickWorked) {
                     gameState.currentRotation = oldRotation;
                 }
+            }
+            
+            // Vibrazione feedback (se supportata)
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(10);
             }
         }
         

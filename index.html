@@ -71,33 +71,36 @@
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         /* Static header */
         .header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
         
         /* Simple static logo */
         .logo-text {
-            font-size: 100px;
+            font-size: 80px;
             font-weight: 200;
             background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--purple-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-transform: uppercase;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
         }
         
         .logo-subtitle {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 300;
             color: var(--primary-light);
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             opacity: 0.9;
         }
@@ -105,9 +108,9 @@
         /* Simple grid */
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            max-width: 800px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 600px;
             margin: 0 auto;
         }
         
@@ -116,7 +119,7 @@
             background: rgba(0, 0, 0, 0.6);
             border: 2px solid var(--card-border, rgba(0, 180, 166, 0.3));
             border-radius: 20px;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             position: relative;
             cursor: pointer;
@@ -136,10 +139,10 @@
         
         /* Simple game icons */
         .game-icon {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 25px;
-            border-radius: 25px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -150,7 +153,7 @@
         .icon-inner {
             width: 100%;
             height: 100%;
-            border-radius: 22px;
+            border-radius: 17px;
             background: var(--black-deep);
             border: 1px solid var(--icon-border, rgba(0, 180, 166, 0.3));
             display: flex;
@@ -163,22 +166,22 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 3px;
-            width: 50px;
-            height: 50px;
+            gap: 2px;
+            width: 40px;
+            height: 40px;
         }
         
         .logo-candy {
             width: 100%;
             height: 100%;
-            border-radius: 4px;
+            border-radius: 3px;
         }
         
         /* Static Tetris icon */
         .tetris-icon-container {
             position: relative;
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
         }
         
         .tetris-piece {
@@ -188,48 +191,48 @@
         }
 
         .tetris-block {
-            width: 10px;
-            height: 10px;
-            border-radius: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 1px;
         }
 
         /* I piece */
         .piece-i {
             grid-template-columns: repeat(4, 1fr);
-            top: 8px;
-            left: 8px;
+            top: 6px;
+            left: 6px;
         }
 
         /* T piece */
         .piece-t {
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            bottom: 8px;
-            right: 8px;
+            bottom: 6px;
+            right: 6px;
         }
 
         /* O piece */
         .piece-o {
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            top: 8px;
-            right: 12px;
+            top: 6px;
+            right: 10px;
         }
         
         /* Simple titles */
         .game-title {
-            font-size: 28px;
+            font-size: 22px;
             font-weight: 800;
             color: var(--white);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .game-description {
-            font-size: 16px;
+            font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
-            line-height: 1.5;
+            line-height: 1.4;
         }
         
         /* Card specific colors */
@@ -277,61 +280,144 @@
         
         /* Mobile optimizations */
         @media (max-width: 768px) {
+            body {
+                overflow: hidden;
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height */
+            }
+
             .container {
-                padding: 30px 20px;
+                padding: 15px 10px;
+                padding-top: max(15px, env(safe-area-inset-top));
+                padding-bottom: max(15px, env(safe-area-inset-bottom));
+                height: 100vh;
+                height: 100dvh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                flex-shrink: 0;
             }
             
             .logo-text {
-                font-size: 60px;
-                letter-spacing: 3px;
+                font-size: 50px;
+                letter-spacing: 2px;
+                margin-bottom: 0;
             }
             
             .logo-subtitle {
-                font-size: 16px;
-                letter-spacing: 3px;
+                font-size: 12px;
+                letter-spacing: 2px;
             }
             
             .games-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 15px;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                max-width: 100%;
+                padding-bottom: 20px;
             }
             
             .game-card {
-                padding: 25px;
+                padding: 15px;
+                border-radius: 15px;
+                flex-shrink: 0;
             }
             
             .game-title {
-                font-size: 24px;
+                font-size: 20px;
+            }
+
+            .game-description {
+                font-size: 13px;
             }
             
             .game-icon {
-                width: 80px;
-                height: 80px;
+                width: 70px;
+                height: 70px;
+                margin-bottom: 15px;
             }
             
             .candy-grid {
+                width: 36px;
+                height: 36px;
+                gap: 2px;
+            }
+            
+            .tetris-icon-container {
                 width: 45px;
                 height: 45px;
             }
             
-            .tetris-icon-container {
-                width: 50px;
-                height: 50px;
-            }
-            
             .tetris-block {
-                width: 8px;
-                height: 8px;
+                width: 7px;
+                height: 7px;
             }
         }
         
         @media (max-width: 375px) {
             .logo-text {
-                font-size: 50px;
+                font-size: 45px;
             }
             
             .game-card {
-                padding: 20px;
+                padding: 12px;
+            }
+
+            .game-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .game-title {
+                font-size: 18px;
+            }
+
+            .game-description {
+                font-size: 12px;
+            }
+        }
+
+        /* Extra small height screens */
+        @media (max-height: 700px) and (max-width: 768px) {
+            .header {
+                margin-bottom: 15px;
+            }
+
+            .logo-text {
+                font-size: 40px;
+            }
+
+            .logo-subtitle {
+                font-size: 11px;
+            }
+
+            .games-grid {
+                gap: 10px;
+            }
+
+            .game-card {
+                padding: 12px;
+            }
+
+            .game-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 10px;
+            }
+
+            .game-title {
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+
+            .game-description {
+                font-size: 12px;
             }
         }
     </style>
@@ -375,7 +461,7 @@
                 </div>
                 <h2 class="game-title">Notamy Crush</h2>
                 <p class="game-description">
-                    Match colorful candies in this addictive puzzle adventure
+                    Match colorful candies
                 </p>
             </a>
             
@@ -410,7 +496,7 @@
                 </div>
                 <h2 class="game-title">Notamy Tetris</h2>
                 <p class="game-description">
-                    Classic block-stacking action with modern twists
+                    Classic block-stacking action
                 </p>
             </a>
         </div>

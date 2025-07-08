@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Notamy%20Blocks%22,%22short_name%22:%22Blocks%22,%22display%22:%22fullscreen%22,%22orientation%22:%22portrait%22,%22theme_color%22:%22%23000000%22,%22background_color%22:%22%23000000%22}">
+    <title>Notamy Blocks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #000000, #0A0A0A);
+            font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overscroll-behavior: none;
+        }
+        
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #gameUI {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 0 10px;
+        }
+        
+        .ui-item {
+            background: rgba(26, 26, 26, 0.8);
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1px solid #2A2A2A;
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFFFFF;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            backdrop-filter: blur(10px);
+            animation: statusGlow 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ui-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes statusGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
+        }
+        
+        .ui-item span {
+            color: #00d9ff;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        
+        #sizeBar {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 16px;
+            background: rgba(26, 26, 26, 0.8);
+            border: 1px solid #2A2A2A;
+            border-radius: 999px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        #sizeFill {
+            height: 100%;
+            background: linear-gradient(90deg, #00e676, #00d9ff, #9c27b0);
+            width: 30%;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+        
+        #levelUpMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            font-weight: 200;
+            letter-spacing: -2px;
+            color: #00d9ff;
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+            display: none;
+            z-index: 100;
+            animation: levelUpPulse 1s ease-out;
+        }
+        
+        @keyframes levelUpPulse {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #menuScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000, #0A0A0A);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+        }
+        
+        .menu-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 32px;
+            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            padding: 3px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.6);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            50% { transform: translateY(-10px) scale(1.05) rotate(3deg); }
+        }
+        
+        .logo-inner {
+            width: 114px;
+            height: 114px;
+            border-radius: 30px;
+            background: #000000;
+            border: 1px solid #1A1A1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logo-blocks {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .logo-block {
+            position: absolute;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 700;
+            animation: logoFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(5px, -5px) scale(1.1); }
+            50% { transform: translate(-5px, -8px) scale(0.9); }
+            75% { transform: translate(-8px, 5px) scale(1.05); }
+        }
+        
+        .menu-title {
+            font-size: 48px;
+            font-weight: 200;
+            color: #FFFFFF;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+            50% { text-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
+        }
+        
+        .menu-subtitle {
+            font-size: 20px;
+            color: #00d9ff;
+            margin-bottom: 40px;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .menu-demo {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        .demo-block {
+            position: absolute;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            animation: demoFloat 4s ease-in-out infinite;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        @keyframes demoFloat {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(20px, -20px); }
+            50% { transform: translate(-20px, -30px); }
+            75% { transform: translate(-30px, 20px); }
+        }
+        
+        .menu-button {
+            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            border: none;
+            color: #000000;
+            padding: 24px 72px;
+            margin: 10px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 40px rgba(0, 180, 166, 0.4);
+            transform: scale(1);
+            min-width: 200px;
+            min-height: 60px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .menu-button:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #009a8f, #00b9e6);
+        }
+        
+        @media (max-width: 400px) {
+            .menu-button {
+                padding: 20px 60px;
+                font-size: 18px;
+            }
+        }
+        
+        .menu-instructions {
+            text-align: center;
+            color: #FFFFFF;
+            font-size: 16px;
+            margin-top: 30px;
+            line-height: 1.8;
+            max-width: 400px;
+            opacity: 0.8;
+        }
+        
+        .menu-instructions strong {
+            color: #00d9ff;
+            font-weight: 600;
+        }
+        
+        #tutorialHint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 26, 26, 0.9);
+            padding: 14px 32px;
+            border-radius: 999px;
+            border: 1px solid #00d9ff;
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 500;
+            z-index: 50;
+            animation: tutorialBounce 2s ease-in-out infinite;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+        
+        @keyframes tutorialBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .game-over-title {
+            font-size: 56px;
+            font-weight: 200;
+            color: #ff5252;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            text-shadow: 0 0 30px rgba(255, 82, 82, 0.6);
+        }
+        
+        .final-stats {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 16px;
+            color: #999999;
+            margin-bottom: 5px;
+            font-weight: 400;
+        }
+        
+        .stat-value {
+            font-size: 48px;
+            font-weight: 100;
+            color: #00d9ff;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+        }
+        
+        .best-score {
+            font-size: 18px;
+            color: #999999;
+            margin-bottom: 40px;
+        }
+        
+        .play-again-button {
+            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+            border: none;
+            color: #000000;
+            padding: 16px 48px;
+            border-radius: 999px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+        
+        #touchIndicator {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(0, 212, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            transform: translate(-50%, -50%);
+            animation: touchPulse 1s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+        
+        @keyframes touchPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+        }
+        
+        .eat-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: 600;
+            color: #00e676;
+            pointer-events: none;
+            animation: eatFloat 0.6s ease-out forwards;
+            z-index: 50;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.8);
+        }
+        
+        @keyframes eatFloat {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFade 0.8s ease-out forwards;
+        }
+        
+        @keyframes particleFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .ui-item {
+                padding: 8px 16px;
+                font-size: 14px;
+                gap: 10px;
+            }
+            
+            #gameUI {
+                gap: 10px;
+                top: 10px;
+            }
+            
+            #sizeBar {
+                top: 65px;
+                width: 240px;
+                height: 14px;
+            }
+            
+            .menu-title {
+                font-size: 36px;
+            }
+            
+            .menu-subtitle {
+                font-size: 18px;
+            }
+            
+            .menu-instructions {
+                font-size: 14px;
+            }
+            
+            #levelUpMessage {
+                font-size: 48px;
+            }
+            
+            .game-over-title {
+                font-size: 42px;
+            }
+            
+            .stat-value {
+                font-size: 36px;
+            }
+        }
+        
+        /* Landscape optimization */
+        @media (orientation: landscape) and (max-height: 500px) {
+            #gameUI {
+                flex-direction: row;
+                top: 5px;
+            }
+            
+            .ui-item {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+            
+            #sizeBar {
+                top: 50px;
+                width: 200px;
+                height: 12px;
+            }
+            
+            #menuScreen {
+                padding: 10px;
+            }
+            
+            .menu-logo {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+            }
+            
+            .menu-title {
+                font-size: 32px;
+                margin-bottom: 5px;
+            }
+            
+            .menu-button {
+                padding: 16px 48px;
+                min-height: 48px;
+            }
+        }
+        
+        /* Performance mode for low-end devices */
+        @media (max-width: 400px), (max-height: 600px) {
+            * {
+                animation-duration: 0.5s !important;
+            }
+        }
+        
+        /* Notch/Safe area handling */
+        @supports (padding: env(safe-area-inset-top)) {
+            #gameUI {
+                top: calc(10px + env(safe-area-inset-top));
+            }
+            
+            #gameContainer {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Game UI -->
+        <div id="gameUI">
+            <div class="ui-item">SIZE <span id="playerSize">30</span></div>
+            <div class="ui-item">LEVEL <span id="level">1</span></div>
+            <div class="ui-item">SCORE <span id="score">0</span></div>
+        </div>
+        
+        <!-- Size Progress Bar -->
+        <div id="sizeBar">
+            <div id="sizeFill"></div>
+        </div>
+        
+        <!-- Level Up Message -->
+        <div id="levelUpMessage">LEVEL UP!</div>
+        
+        <!-- Canvas -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Touch Indicator -->
+        <div id="touchIndicator"></div>
+        
+        <!-- Tutorial Hint -->
+        <div id="tutorialHint">Touch & Drag to Move!</div>
+        
+        <!-- Menu Screen -->
+        <div id="menuScreen">
+            <div class="menu-logo">
+                <div class="logo-inner">
+                    <div class="logo-blocks">
+                        <div class="logo-block" style="width: 40px; height: 40px; background: #00d9ff; left: 20px; top: 20px; animation-delay: 0s;">30</div>
+                        <div class="logo-block" style="width: 30px; height: 30px; background: #00e676; left: 0px; top: 0px; animation-delay: 0.5s;">20</div>
+                        <div class="logo-block" style="width: 50px; height: 50px; background: #ff6b6b; left: 30px; top: 30px; animation-delay: 1s;">40</div>
+                        <div class="logo-block" style="width: 25px; height: 25px; background: #ffab00; left: 5px; top: 45px; animation-delay: 1.5s;">15</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-title">Notamy Blocks</div>
+            <div class="menu-subtitle">Eat or be Eaten!</div>
+            
+            <button class="menu-button" onclick="startGame()">PLAY</button>
+            
+            <div class="menu-instructions">
+                <strong>EAT</strong> smaller blocks to grow<br>
+                <strong>AVOID</strong> bigger blocks or die<br>
+                <strong>REACH</strong> size 100 to level up<br>
+                <strong>SURVIVE</strong> increasing speeds!
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen">
+            <div class="game-over-title">GAME OVER</div>
+            
+            <div class="final-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Final Score</div>
+                    <div class="stat-value" id="finalScore">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Level Reached</div>
+                    <div class="stat-value" id="finalLevel">1</div>
+                </div>
+            </div>
+            
+            <div class="best-score">Best Score: <span id="bestScore">0</span></div>
+            
+            <button class="play-again-button" onclick="restartGame()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        // Prevent scrolling and add iOS bounce prevention
+        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.body.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        
+        // Performance detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isLowEndDevice = navigator.hardwareConcurrency <= 2 || (isMobile && window.innerWidth < 400);
+        const supportsVibration = 'vibrate' in navigator;
+        
+        // Canvas and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { 
+            alpha: false,
+            desynchronized: true
+        });
+        
+        // Adaptive canvas sizing
+        let canvasScale = 1;
+        function resizeCanvas() {
+            const maxSize = Math.min(window.innerWidth, window.innerHeight);
+            
+            // Adjust scale for small screens
+            if (maxSize < 400) {
+                canvasScale = 0.8;
+            } else if (maxSize < 600) {
+                canvasScale = 0.9;
+            } else {
+                canvasScale = 1;
+            }
+            
+            canvas.width = window.innerWidth * window.devicePixelRatio * canvasScale;
+            canvas.height = window.innerHeight * window.devicePixelRatio * canvasScale;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            
+            ctx.scale(window.devicePixelRatio * canvasScale, window.devicePixelRatio * canvasScale);
+        }
+        resizeCanvas();
+        
+        // Throttled resize handler
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 100);
+        });
+        
+        // Prevent orientation change issues
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+        
+        // Haptic feedback
+        function vibrate(pattern) {
+            if (supportsVibration && !isLowEndDevice) {
+                navigator.vibrate(pattern);
+            }
+        }
+        
+        // Game state
+        let gameState = 'menu';
+        let score = 0;
+        let level = 1;
+        let speedMultiplier = 1;
+        let bestScore = parseInt(localStorage.getItem('notamyBlocksBest') || '0');
+        let camera = { zoom: 1, targetZoom: 1 };
+        
+        // Performance settings
+        const MAX_PARTICLES = isLowEndDevice ? 20 : 50;
+        const PARTICLE_COUNT_MULTIPLIER = isLowEndDevice ? 0.5 : 1;
+        const TRAIL_LENGTH = isLowEndDevice ? 5 : 10;
+        const ENABLE_GLOW = !isLowEndDevice;
+        const ENABLE_ROTATION = !isLowEndDevice;
+        
+        // Touch optimization
+        let lastTouchTime = 0;
+        const DOUBLE_TAP_DELAY = 300;
+        
+        // Player
+        const player = {
+            x: 0,
+            y: 0,
+            size: 30,
+            targetX: 0,
+            targetY: 0,
+            speed: 0.2,
+            color: '#00d9ff',
+            trail: []
+        };
+        
+        // Game objects
+        let blocks = [];
+        let particles = [];
+        
+        // Block colors from Notamy Crush palette
+        const blockColors = [
+            { main: '#00b4a6', gradient: ['#00d9ff', '#00b4a6', '#008a7f'] },
+            { main: '#00d9ff', gradient: ['#66e7ff', '#00d9ff', '#0099cc'] },
+            { main: '#ff6b6b', gradient: ['#ff9999', '#ff6b6b', '#cc5555'] },
+            { main: '#ffab00', gradient: ['#ffd966', '#ffab00', '#cc8800'] },
+            { main: '#00e676', gradient: ['#66ff99', '#00e676', '#00b85f'] },
+            { main: '#9c27b0', gradient: ['#c966d9', '#9c27b0', '#7a1f8d'] },
+            { main: '#ff5252', gradient: ['#ff8a80', '#ff5252', '#d32f2f'] }
+        ];
+        
+        // Constants - Mobile optimized
+        const MIN_BLOCK_SIZE = 10;
+        const MAX_BLOCK_SIZE = 70;
+        const LEVEL_SIZE = 100;
+        const WORLD_SIZE = 1200;
+        
+        // Initialize game
+        function initGame() {
+            // Reset player
+            player.x = WORLD_SIZE / 2;
+            player.y = WORLD_SIZE / 2;
+            player.targetX = player.x;
+            player.targetY = player.y;
+            player.size = 30;
+            player.trail = [];
+            
+            // Clear arrays
+            blocks = [];
+            particles = [];
+            
+            // Create initial blocks
+            const blockCount = 30 + level * 5;
+            for (let i = 0; i < blockCount; i++) {
+                createBlock();
+            }
+            
+            // Update camera
+            updateCamera();
+        }
+        
+        // Create block
+        function createBlock() {
+            let size;
+            const rand = Math.random();
+            
+            if (rand < 0.5) {
+                // 50% smaller than player
+                size = MIN_BLOCK_SIZE + Math.random() * (player.size - MIN_BLOCK_SIZE - 5);
+            } else if (rand < 0.8) {
+                // 30% around player size
+                size = player.size * 0.9 + Math.random() * player.size * 0.2;
+            } else {
+                // 20% bigger than player
+                size = player.size * 1.1 + Math.random() * (MAX_BLOCK_SIZE - player.size * 1.1);
+            }
+            
+            size = Math.max(MIN_BLOCK_SIZE, Math.min(MAX_BLOCK_SIZE, size));
+            
+            let x, y;
+            do {
+                x = Math.random() * WORLD_SIZE;
+                y = Math.random() * WORLD_SIZE;
+            } while (Math.abs(x - player.x) < 300 && Math.abs(y - player.y) < 300);
+            
+            const colorIndex = Math.floor(Math.random() * blockColors.length);
+            const isSmaller = size < player.size;
+            
+            blocks.push({
+                x: x,
+                y: y,
+                size: size,
+                speed: (20 / size) * speedMultiplier * 0.5,
+                colorData: blockColors[colorIndex],
+                color: isSmaller ? '#00e676' : '#ff5252',
+                direction: Math.random() * Math.PI * 2,
+                directionChange: 0,
+                rotation: 0,
+                glowIntensity: 0
+            });
+        }
+        
+        // Update camera
+        function updateCamera() {
+            camera.targetZoom = 30 / player.size;
+            camera.zoom += (camera.targetZoom - camera.zoom) * 0.1;
+        }
+        
+        // Update game
+        function update() {
+            if (gameState !== 'playing') return;
+            
+            // Update player movement
+            const dx = player.targetX - player.x;
+            const dy = player.targetY - player.y;
+            player.x += dx * player.speed;
+            player.y += dy * player.speed;
+            
+            // Keep player in bounds
+            player.x = Math.max(player.size/2, Math.min(WORLD_SIZE - player.size/2, player.x));
+            player.y = Math.max(player.size/2, Math.min(WORLD_SIZE - player.size/2, player.y));
+            
+            // Update trail (with performance optimization)
+            player.trail.push({ x: player.x, y: player.y });
+            if (player.trail.length > TRAIL_LENGTH) player.trail.shift();
+            
+            // Update blocks
+            blocks.forEach((block, index) => {
+                // AI movement
+                block.directionChange--;
+                if (block.directionChange <= 0) {
+                    block.directionChange = 60 + Math.random() * 120;
+                    block.direction += (Math.random() - 0.5) * Math.PI;
+                }
+                
+                // Move
+                block.x += Math.cos(block.direction) * block.speed;
+                block.y += Math.sin(block.direction) * block.speed;
+                
+                // Bounce off walls
+                if (block.x <= block.size/2 || block.x >= WORLD_SIZE - block.size/2) {
+                    block.direction = Math.PI - block.direction;
+                    block.x = Math.max(block.size/2, Math.min(WORLD_SIZE - block.size/2, block.x));
+                }
+                if (block.y <= block.size/2 || block.y >= WORLD_SIZE - block.size/2) {
+                    block.direction = -block.direction;
+                    block.y = Math.max(block.size/2, Math.min(WORLD_SIZE - block.size/2, block.y));
+                }
+                
+                // Update color based on size comparison
+                block.color = block.size < player.size ? '#00e676' : '#ff5252';
+                
+                // Subtle rotation (only on high-end devices)
+                if (ENABLE_ROTATION) {
+                    block.rotation += 0.5;
+                }
+                
+                // Check collision with player
+                const dist = Math.sqrt(Math.pow(player.x - block.x, 2) + Math.pow(player.y - block.y, 2));
+                const minDist = (player.size + block.size) / 2;
+                
+                // Glow when close
+                block.glowIntensity = Math.max(0, 1 - (dist / 200));
+                
+                if (dist < minDist) {
+                    if (block.size < player.size) {
+                        // Eat block
+                        const growth = block.size * 0.2;
+                        player.size += growth;
+                        score += Math.floor(block.size);
+                        
+                        createParticles(block.x, block.y, block.color, block.size);
+                        showEatEffect(block.x, block.y, Math.floor(block.size));
+                        
+                        // Haptic feedback for eating
+                        vibrate(20);
+                        
+                        blocks.splice(index, 1);
+                        createBlock();
+                        
+                        // Check level up
+                        if (player.size >= LEVEL_SIZE) {
+                            levelUp();
+                        }
+                    } else {
+                        // Game over
+                        vibrate([100, 50, 100]); // Strong vibration for death
+                        gameOver();
+                    }
+                }
+            });
+            
+            // Update particles
+            particles.forEach((particle, index) => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life--;
+                particle.vx *= 0.98;
+                particle.vy *= 0.98;
+                
+                if (particle.life <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+            
+            // Update camera
+            updateCamera();
+            
+            // Update UI
+            updateUI();
+        }
+        
+        // Level up
+        function levelUp() {
+            level++;
+            speedMultiplier = 1 + (level - 1) * 0.2;
+            player.size = 30;
+            
+            // Haptic feedback for level up
+            vibrate([50, 100, 50]);
+            
+            // Show level up message
+            document.getElementById('levelUpMessage').style.display = 'block';
+            document.getElementById('levelUpMessage').textContent = `LEVEL ${level}!`;
+            
+            setTimeout(() => {
+                document.getElementById('levelUpMessage').style.display = 'none';
+            }, 1000);
+            
+            // Recreate blocks with new speed
+            blocks = [];
+            const blockCount = 30 + level * 5;
+            for (let i = 0; i < blockCount; i++) {
+                createBlock();
+            }
+        }
+        
+        // Create particles
+        function createParticles(x, y, color, size) {
+            // Limit particles on low-end devices
+            if (particles.length > MAX_PARTICLES) return;
+            
+            const count = Math.floor(size / 5 * PARTICLE_COUNT_MULTIPLIER);
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 / count) * i;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * (2 + Math.random() * 3),
+                    vy: Math.sin(angle) * (2 + Math.random() * 3),
+                    life: 30,
+                    color: color,
+                    size: 3 + Math.random() * (size / 10)
+                });
+            }
+        }
+        
+        // Show eat effect
+        function showEatEffect(x, y, points) {
+            const worldToScreen = getWorldToScreen();
+            const screenX = (x - player.x) * camera.zoom + canvas.width / 2;
+            const screenY = (y - player.y) * camera.zoom + canvas.height / 2;
+            
+            const effect = document.createElement('div');
+            effect.className = 'eat-effect';
+            effect.textContent = '+' + points;
+            effect.style.left = screenX + 'px';
+            effect.style.top = screenY + 'px';
+            document.getElementById('gameContainer').appendChild(effect);
+            
+            setTimeout(() => effect.remove(), 600);
+        }
+        
+        // Update UI
+        function updateUI() {
+            document.getElementById('playerSize').textContent = Math.floor(player.size);
+            document.getElementById('level').textContent = level;
+            document.getElementById('score').textContent = score;
+            
+            // Update size bar
+            const progress = (player.size - 30) / (LEVEL_SIZE - 30) * 100;
+            document.getElementById('sizeFill').style.width = Math.min(100, progress) + '%';
+        }
+        
+        // Drawing
+        function draw() {
+            // Clear with gradient background
+            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bgGradient.addColorStop(0, '#000000');
+            bgGradient.addColorStop(1, '#0A0A0A');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Save context for camera transform
+            ctx.save();
+            
+            // Apply camera transform
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(camera.zoom, camera.zoom);
+            ctx.translate(-player.x, -player.y);
+            
+            // Draw subtle grid
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.05)';
+            ctx.lineWidth = 1;
+            const gridSize = 100;
+            
+            const startX = Math.floor((player.x - canvas.width / camera.zoom) / gridSize) * gridSize;
+            const endX = Math.ceil((player.x + canvas.width / camera.zoom) / gridSize) * gridSize;
+            const startY = Math.floor((player.y - canvas.height / camera.zoom) / gridSize) * gridSize;
+            const endY = Math.ceil((player.y + canvas.height / camera.zoom) / gridSize) * gridSize;
+            
+            for (let x = startX; x <= endX; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, endY);
+                ctx.stroke();
+            }
+            
+            for (let y = startY; y <= endY; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(startX, y);
+                ctx.lineTo(endX, y);
+                ctx.stroke();
+            }
+            
+            // Draw world boundaries with glow (only on high-end devices)
+            if (ENABLE_GLOW) {
+                ctx.shadowColor = '#ff5252';
+                ctx.shadowBlur = 20;
+            }
+            ctx.strokeStyle = '#ff5252';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+            ctx.shadowBlur = 0;
+            
+            // Draw particles
+            particles.forEach(particle => {
+                const alpha = particle.life / 30;
+                
+                // Create gradient for particle
+                const gradient = ctx.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, particle.size
+                );
+                gradient.addColorStop(0, particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0'));
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    particle.x - particle.size,
+                    particle.y - particle.size,
+                    particle.size * 2,
+                    particle.size * 2
+                );
+            });
+            
+            // Draw blocks
+            blocks.forEach(block => {
+                const screenDist = Math.sqrt(Math.pow(block.x - player.x, 2) + Math.pow(block.y - player.y, 2));
+                if (screenDist < canvas.width / camera.zoom) {
+                    ctx.save();
+                    ctx.translate(block.x, block.y);
+                    if (ENABLE_ROTATION) {
+                        ctx.rotate(block.rotation * Math.PI / 180);
+                    }
+                    
+                    // Glow effect (only on high-end devices)
+                    if (ENABLE_GLOW && block.glowIntensity > 0) {
+                        ctx.shadowColor = block.color;
+                        ctx.shadowBlur = 20 * block.glowIntensity;
+                    }
+                    
+                    // Simplified gradient for low-end devices
+                    if (isLowEndDevice) {
+                        ctx.fillStyle = block.color;
+                    } else {
+                        // Create gradient
+                        const gradient = ctx.createLinearGradient(
+                            -block.size/2, -block.size/2,
+                            block.size/2, block.size/2
+                        );
+                        gradient.addColorStop(0, block.color);
+                        gradient.addColorStop(0.5, block.colorData.main);
+                        gradient.addColorStop(1, block.color);
+                        ctx.fillStyle = gradient;
+                    }
+                    
+                    // Draw block with rounded corners
+                    ctx.beginPath();
+                    ctx.roundRect(-block.size/2, -block.size/2, block.size, block.size, block.size/8);
+                    ctx.fill();
+                    
+                    // Inner highlight (only on high-end devices)
+                    if (!isLowEndDevice) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                        ctx.beginPath();
+                        ctx.roundRect(-block.size/3, -block.size/3, block.size/3, block.size/3, block.size/12);
+                        ctx.fill();
+                    }
+                    
+                    // Size text
+                    ctx.restore();
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.font = `bold ${Math.max(12, block.size * 0.4)}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(Math.floor(block.size), block.x, block.y);
+                }
+            });
+            
+            // Draw player trail
+            player.trail.forEach((pos, i) => {
+                const alpha = (i / player.trail.length) * 0.3;
+                const gradient = ctx.createRadialGradient(
+                    pos.x, pos.y, 0,
+                    pos.x, pos.y, player.size * (0.5 + i / player.trail.length * 0.5)
+                );
+                gradient.addColorStop(0, player.color + Math.floor(alpha * 255).toString(16).padStart(2, '0'));
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                const size = player.size * (0.5 + i / player.trail.length * 0.5);
+                ctx.fillRect(pos.x - size/2, pos.y - size/2, size, size);
+            });
+            
+            // Draw player with glow (optimized)
+            if (ENABLE_GLOW) {
+                ctx.shadowColor = player.color;
+                ctx.shadowBlur = 30;
+            }
+            
+            // Player gradient (simplified for low-end)
+            if (isLowEndDevice) {
+                ctx.fillStyle = player.color;
+            } else {
+                const playerGradient = ctx.createRadialGradient(
+                    player.x - player.size/4, player.y - player.size/4, 0,
+                    player.x, player.y, player.size/2
+                );
+                playerGradient.addColorStop(0, '#66e7ff');
+                playerGradient.addColorStop(0.5, player.color);
+                playerGradient.addColorStop(1, '#0099cc');
+                ctx.fillStyle = playerGradient;
+            }
+            
+            ctx.beginPath();
+            ctx.roundRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size, player.size/6);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            
+            // Player inner glow (only on high-end)
+            if (!isLowEndDevice) {
+                const innerGlow = ctx.createRadialGradient(
+                    player.x, player.y, 0,
+                    player.x, player.y, player.size/3
+                );
+                innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+                innerGlow.addColorStop(1, 'transparent');
+                ctx.fillStyle = innerGlow;
+                ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+            }
+            
+            // Player size text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold ${Math.max(14, player.size * 0.5)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(Math.floor(player.size), player.x, player.y);
+            
+            // Restore context
+            ctx.restore();
+        }
+        
+        // Get world to screen coordinates
+        function getWorldToScreen() {
+            return {
+                x: (worldX) => (worldX - player.x) * camera.zoom + canvas.width / 2,
+                y: (worldY) => (worldY - player.y) * camera.zoom + canvas.height / 2
+            };
+        }
+        
+        // Get screen to world coordinates
+        function getScreenToWorld(screenX, screenY) {
+            return {
+                x: (screenX - canvas.width / 2) / camera.zoom + player.x,
+                y: (screenY - canvas.height / 2) / camera.zoom + player.y
+            };
+        }
+        
+        // Input handlers with improved touch response
+        function handleInput(screenX, screenY) {
+            const world = getScreenToWorld(screenX, screenY);
+            player.targetX = world.x;
+            player.targetY = world.y;
+            
+            // Show touch indicator
+            const indicator = document.getElementById('touchIndicator');
+            indicator.style.display = 'block';
+            indicator.style.left = screenX + 'px';
+            indicator.style.top = screenY + 'px';
+        }
+        
+        // Prevent double tap zoom
+        let lastTouchEnd = 0;
+        canvas.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+            document.getElementById('touchIndicator').style.display = 'none';
+        });
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState === 'playing') {
+                const touch = e.touches[0];
+                handleInput(touch.clientX, touch.clientY);
+                vibrate(10); // Light haptic feedback
+            }
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (gameState === 'playing') {
+                const touch = e.touches[0];
+                handleInput(touch.clientX, touch.clientY);
+            }
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameState === 'playing') {
+                handleInput(e.clientX, e.clientY);
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameState === 'playing' && e.buttons === 1) {
+                handleInput(e.clientX, e.clientY);
+            }
+        });
+        
+        canvas.addEventListener('mouseup', (e) => {
+            document.getElementById('touchIndicator').style.display = 'none';
+        });
+        
+        // Game flow
+        function startGame() {
+            gameState = 'playing';
+            document.getElementById('menuScreen').style.display = 'none';
+            score = 0;
+            level = 1;
+            speedMultiplier = 1;
+            initGame();
+            
+            // Show tutorial for 5 seconds
+            document.getElementById('tutorialHint').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('tutorialHint').style.display = 'none';
+            }, 5000);
+        }
+        
+        function gameOver() {
+            gameState = 'gameOver';
+            
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('notamyBlocksBest', bestScore);
+            }
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalLevel').textContent = level;
+            document.getElementById('bestScore').textContent = bestScore;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOverScreen').style.display = 'none';
+            startGame();
+        }
+        
+        // Game loop with performance optimization
+        let lastTime = 0;
+        const targetFPS = isLowEndDevice ? 30 : 60;
+        const frameTime = 1000 / targetFPS;
+        
+        function gameLoop(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            
+            if (deltaTime >= frameTime) {
+                update();
+                draw();
+                lastTime = currentTime - (deltaTime % frameTime);
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Polyfill for roundRect if needed
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+        
+        gameLoop();
+    </script>
+</body>
+</html>

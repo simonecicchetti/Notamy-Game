@@ -22,8 +22,22 @@
             touch-action: none;
         }
         
+        :root {
+            --primary-teal: #00b4a6;
+            --primary-light: #00d9ff;
+            --cyan-neon: #00ffff;
+            --cyan-deep: #00cccc;
+            --purple-accent: #b366ff;
+            --pink-neon: #ff6b6b;
+            --orange-neon: #ffab00;
+            --green-neon: #00e676;
+            --black-deep: #000000;
+            --black-soft: #0a0a0a;
+            --white: #ffffff;
+        }
+        
         body {
-            background: #000;
+            background: var(--black-deep);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             overflow: hidden;
             position: fixed;
@@ -32,11 +46,31 @@
             overscroll-behavior: none;
         }
         
+        /* Neon Grid Background */
+        .neon-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 180, 166, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 166, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -2;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
         #gameContainer {
             width: 100vw;
             height: 100vh;
             position: relative;
-            background: #000;
+            background: transparent;
             display: flex;
             flex-direction: column;
         }
@@ -56,18 +90,19 @@
         
         .time-display {
             background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #ff6b6b;
+            border: 3px solid var(--pink-neon);
             border-radius: 25px;
             padding: 8px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
             box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            backdrop-filter: blur(10px);
         }
         
         .time-label {
             font-size: 14px;
-            color: #ff6b6b;
+            color: var(--pink-neon);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -76,26 +111,27 @@
         .time-value {
             font-size: 28px;
             font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 20px #ff6b6b;
+            color: var(--white);
+            text-shadow: 0 0 20px var(--pink-neon);
             min-width: 40px;
             text-align: center;
         }
         
         .score-display {
             background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #00d9ff;
+            border: 3px solid var(--primary-teal);
             border-radius: 25px;
             padding: 8px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+            box-shadow: 0 0 30px rgba(0, 180, 166, 0.5);
+            backdrop-filter: blur(10px);
         }
         
         .score-label {
             font-size: 14px;
-            color: #00d9ff;
+            color: var(--primary-teal);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -104,8 +140,8 @@
         .score-value {
             font-size: 28px;
             font-weight: 900;
-            color: #fff;
-            text-shadow: 0 0 20px #00d9ff;
+            color: var(--white);
+            text-shadow: 0 0 20px var(--primary-teal);
             min-width: 80px;
             text-align: right;
         }
@@ -117,15 +153,18 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.9);
-            border: 3px solid #00d9ff;
+            border: 3px solid var(--primary-teal);
             border-radius: 20px;
             padding: 10px;
-            box-shadow: 0 0 50px rgba(0, 217, 255, 0.5);
+            box-shadow: 
+                0 0 50px rgba(0, 180, 166, 0.5),
+                inset 0 0 30px rgba(0, 180, 166, 0.1);
+            backdrop-filter: blur(20px);
         }
         
         #gameCanvas {
             display: block;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 20, 0.9) 100%);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 20, 0.95) 100%);
             border-radius: 10px;
         }
         
@@ -137,7 +176,7 @@
             transform: translate(-50%, -50%);
             font-size: 72px;
             font-weight: 900;
-            color: #00ff88;
+            color: var(--green-neon);
             text-shadow: 0 0 50px currentColor;
             pointer-events: none;
             opacity: 0;
@@ -187,12 +226,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(10px);
         }
         
         .game-over-title {
             font-size: 56px;
             font-weight: 900;
-            color: #ff6b6b;
+            color: var(--pink-neon);
             margin-bottom: 20px;
             text-shadow: 0 0 40px currentColor;
             animation: pulse 1s ease-in-out infinite;
@@ -205,14 +245,14 @@
         
         .final-score {
             font-size: 32px;
-            color: #fff;
+            color: var(--white);
             margin-bottom: 40px;
         }
         
         .restart-btn {
-            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-light));
             border: none;
-            color: #000;
+            color: var(--black-deep);
             padding: 15px 50px;
             border-radius: 40px;
             font-size: 24px;
@@ -220,7 +260,8 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 180, 166, 0.5);
+            transition: all 0.3s ease;
         }
         
         .restart-btn:active {
@@ -234,7 +275,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: #000;
+            background: var(--black-deep);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -246,18 +287,24 @@
         .welcome-title {
             font-size: 72px;
             font-weight: 900;
-            background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b);
+            background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--pink-neon));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 40px;
-            text-shadow: 0 0 50px rgba(0, 217, 255, 0.5);
+            text-shadow: 0 0 50px rgba(0, 180, 166, 0.5);
+            animation: neonFlicker 2s ease-in-out infinite;
+        }
+        
+        @keyframes neonFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.98; }
         }
         
         .start-btn {
-            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            background: linear-gradient(135deg, var(--primary-teal), var(--primary-light));
             border: none;
-            color: #000;
+            color: var(--black-deep);
             padding: 20px 60px;
             border-radius: 50px;
             font-size: 28px;
@@ -265,7 +312,7 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 3px;
-            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 180, 166, 0.5);
             animation: btnPulse 2s ease-in-out infinite;
         }
         
@@ -283,7 +330,7 @@
             position: absolute;
             width: 100%;
             height: 30px;
-            background: linear-gradient(90deg, transparent, #fff, transparent);
+            background: linear-gradient(90deg, transparent, var(--cyan-neon), transparent);
             opacity: 0;
             pointer-events: none;
             z-index: 50;
@@ -306,6 +353,40 @@
                 transform: scaleX(1.2);
                 opacity: 0;
             }
+        }
+        
+        /* Floating shapes */
+        .neon-shape {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: float 15s infinite ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary-teal);
+            top: -200px;
+            left: -200px;
+        }
+
+        .shape2 {
+            width: 600px;
+            height: 600px;
+            background: var(--purple-accent);
+            bottom: -300px;
+            right: -300px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-100px, 100px) scale(0.9); }
         }
         
         @media (max-height: 700px) {
@@ -333,12 +414,19 @@
     </style>
 </head>
 <body>
+    <!-- Neon Grid Background -->
+    <div class="neon-grid"></div>
+    
+    <!-- Floating Shapes -->
+    <div class="neon-shape shape1"></div>
+    <div class="neon-shape shape2"></div>
+
     <div id="gameContainer">
         <!-- Top UI -->
         <div class="top-ui">
             <div class="time-display">
                 <span class="time-label">TIME</span>
-                <span class="time-value" id="timeDisplay">30</span>
+                <span class="time-value" id="timeDisplay">60</span>
             </div>
             <div class="score-display">
                 <span class="score-label">SCORE</span>
@@ -370,61 +458,62 @@
 
     <script>
         // Configuration
-        const BOARD_WIDTH = 10;
-        const BOARD_HEIGHT = 20;
+        const BOARD_WIDTH = 12;  // Aumentato da 10
+        const BOARD_HEIGHT = 22; // Aumentato da 20
         const BLOCK_SIZE = Math.min(
             Math.floor((window.innerWidth - 40) / BOARD_WIDTH),
             Math.floor((window.innerHeight - 200) / BOARD_HEIGHT),
-            35
+            32  // Ridotto leggermente per adattarsi meglio
         );
-        const INITIAL_TIME = 30;
+        const INITIAL_TIME = 60; // Aumentato da 30 a 60 secondi
         const DROP_SPEED = 800;
+        const FAST_DROP_SPEED = 50; // Velocità quando si trascina verso il basso
         
-        // Tetromino pieces
+        // Tetromino pieces con colori Notamy
         const PIECES = [
             // I
             {
                 shape: [[1,1,1,1]],
-                color: '#00d9ff'
+                color: '#00d9ff' // primary-light
             },
             // O
             {
                 shape: [[1,1],[1,1]],
-                color: '#ffab00'
+                color: '#ffab00' // orange-neon
             },
             // T
             {
                 shape: [[0,1,0],[1,1,1]],
-                color: '#a78bfa'
+                color: '#b366ff' // purple-accent
             },
             // S
             {
                 shape: [[0,1,1],[1,1,0]],
-                color: '#00ff88'
+                color: '#00e676' // green-neon
             },
             // Z
             {
                 shape: [[1,1,0],[0,1,1]],
-                color: '#ff6b6b'
+                color: '#ff6b6b' // pink-neon
             },
             // J
             {
                 shape: [[1,0,0],[1,1,1]],
-                color: '#3f51b5'
+                color: '#00cccc' // cyan-deep
             },
             // L
             {
                 shape: [[0,0,1],[1,1,1]],
-                color: '#ff5252'
+                color: '#00b4a6' // primary-teal
             }
         ];
         
-        // Time bonuses - FIXED!
+        // Time bonuses - Aumentati per rendere il gioco più facile
         const TIME_BONUSES = {
-            1: 3,   // +3 seconds for 1 line
-            2: 8,   // +8 seconds for 2 lines
-            3: 15,  // +15 seconds for 3 lines
-            4: 25   // +25 seconds for 4 lines (TETRIS!)
+            1: 5,   // +5 seconds for 1 line (aumentato da 3)
+            2: 12,  // +12 seconds for 2 lines (aumentato da 8)
+            3: 20,  // +20 seconds for 3 lines (aumentato da 15)
+            4: 35   // +35 seconds for 4 lines TETRIS! (aumentato da 25)
         };
         
         // Game state
@@ -436,6 +525,8 @@
         let gameActive = false;
         let dropTimer = 0;
         let lastTime = 0;
+        let fastDropping = false;
+        let touchStartY = null;
         
         // Canvas
         const canvas = document.getElementById('gameCanvas');
@@ -477,9 +568,10 @@
                 const touch = e.touches[0];
                 const rect = canvas.getBoundingClientRect();
                 const x = touch.clientX - rect.left;
-                const canvasCenter = canvas.width / 2;
+                const y = touch.clientY - rect.top;
                 
                 touchStartX = x;
+                touchStartY = y;
                 touchStartTime = Date.now();
             });
             
@@ -495,7 +587,11 @@
                     rotatePiece();
                 }
                 
+                // Reset fast drop
+                fastDropping = false;
+                
                 touchStartX = null;
+                touchStartY = null;
             });
             
             // Swipe controls
@@ -506,11 +602,21 @@
                 const touch = e.touches[0];
                 const rect = canvas.getBoundingClientRect();
                 const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
                 const deltaX = x - touchStartX;
+                const deltaY = y - touchStartY;
                 
+                // Movimento orizzontale
                 if (Math.abs(deltaX) > 30) {
                     movePiece(deltaX > 0 ? 1 : -1, 0);
                     touchStartX = x;
+                }
+                
+                // Movimento verticale - trascinamento verso il basso
+                if (deltaY > 20) {
+                    fastDropping = true;
+                    dropPiece();
+                    touchStartY = y;
                 }
             });
             
@@ -586,7 +692,7 @@
             return false;
         }
         
-        // Rotate piece - FIXED!
+        // Rotate piece
         function rotatePiece() {
             // Create rotated shape
             const rotated = currentPiece.shape[0].map((_, index) =>
@@ -667,7 +773,7 @@
             }
         }
         
-        // Check lines - FIXED TIME BONUS!
+        // Check lines
         function checkLines() {
             const linesToClear = [];
             
@@ -825,7 +931,9 @@
             
             // Drop piece
             dropTimer += deltaTime;
-            if (dropTimer >= DROP_SPEED) {
+            const currentDropSpeed = fastDropping ? FAST_DROP_SPEED : DROP_SPEED;
+            
+            if (dropTimer >= currentDropSpeed) {
                 dropTimer = 0;
                 dropPiece();
             }
@@ -837,11 +945,11 @@
         // Draw game
         function draw() {
             // Clear canvas
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.95)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw grid
-            ctx.strokeStyle = 'rgba(0, 217, 255, 0.1)';
+            // Draw grid con colori Notamy
+            ctx.strokeStyle = 'rgba(0, 180, 166, 0.1)';
             ctx.lineWidth = 1;
             for (let x = 0; x <= BOARD_WIDTH; x++) {
                 ctx.beginPath();
@@ -880,10 +988,42 @@
                         }
                     }
                 }
+                
+                // Draw ghost piece (preview where piece will land)
+                drawGhostPiece();
             }
         }
         
-        // Draw block
+        // Draw ghost piece
+        function drawGhostPiece() {
+            const ghost = {
+                ...currentPiece,
+                y: currentPiece.y
+            };
+            
+            // Move ghost down until collision
+            while (isValidPosition(ghost, 0, 1)) {
+                ghost.y++;
+            }
+            
+            // Draw ghost
+            ctx.save();
+            ctx.globalAlpha = 0.2;
+            for (let y = 0; y < ghost.shape.length; y++) {
+                for (let x = 0; x < ghost.shape[y].length; x++) {
+                    if (ghost.shape[y][x]) {
+                        drawBlock(
+                            (ghost.x + x) * BLOCK_SIZE,
+                            (ghost.y + y) * BLOCK_SIZE,
+                            ghost.color
+                        );
+                    }
+                }
+            }
+            ctx.restore();
+        }
+        
+        // Draw block con stile Notamy
         function drawBlock(x, y, color, active = false) {
             const padding = 2;
             const bx = x + padding;
@@ -893,24 +1033,36 @@
             // Glow effect
             if (active) {
                 ctx.shadowColor = color;
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 20;
             }
             
-            // Main block
+            // Main block con gradiente
             const gradient = ctx.createLinearGradient(bx, by, bx + size, by + size);
             gradient.addColorStop(0, color);
-            gradient.addColorStop(1, shadeColor(color, -30));
+            gradient.addColorStop(0.5, shadeColor(color, 20));
+            gradient.addColorStop(1, shadeColor(color, -20));
             
             ctx.fillStyle = gradient;
             ctx.fillRect(bx, by, size, size);
             
-            // Border
+            // Neon border
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
             ctx.strokeRect(bx, by, size, size);
             
+            // Inner glow
+            const innerGradient = ctx.createRadialGradient(
+                bx + size/2, by + size/2, 0,
+                bx + size/2, by + size/2, size/2
+            );
+            innerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            innerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = innerGradient;
+            ctx.fillRect(bx, by, size, size);
+            
             // Highlight
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.fillRect(bx + 2, by + 2, size - 4, 2);
             ctx.fillRect(bx + 2, by + 2, 2, size - 4);
             
@@ -936,10 +1088,10 @@
             display.textContent = Math.ceil(timeLeft);
             
             if (timeLeft < 10) {
-                display.style.color = '#ff6b6b';
+                display.style.color = var(--pink-neon);
                 display.style.animation = 'pulse 0.5s ease-in-out infinite';
             } else {
-                display.style.color = '#fff';
+                display.style.color = var(--white);
                 display.style.animation = 'none';
             }
         }
@@ -959,6 +1111,7 @@
             timeLeft = INITIAL_TIME;
             dropTimer = 0;
             gameActive = true;
+            fastDropping = false;
             
             // Create first piece
             currentPiece = createPiece(getRandomPiece());

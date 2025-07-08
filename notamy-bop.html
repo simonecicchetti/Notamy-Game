@@ -459,6 +459,16 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
         
+        /* Warning flash */
+        .warning-flash {
+            animation: warningFlash 0.5s ease-in-out;
+        }
+        
+        @keyframes warningFlash {
+            0%, 100% { background-color: rgba(26, 26, 26, 0.8); }
+            50% { background-color: rgba(255, 82, 82, 0.4); }
+        }
+        
         /* Responsive adjustments */
         @media (max-height: 700px) {
             .menu-logo { width: 100px; height: 100px; }
@@ -484,7 +494,7 @@
             <div id="gameInfo">
                 <div class="status-item">LVL <span id="level">1</span></div>
                 <div class="status-item">❤️ <span id="lives">3</span></div>
-                <div class="status-item">⏱ <span id="timer">90</span></div>
+                <div class="status-item" id="timerContainer">⏱ <span id="timer">60</span></div>
             </div>
         </div>
         
@@ -500,7 +510,7 @@
         </div>
         
         <!-- Touch hint -->
-        <div class="touch-hint" id="touchHint">Touch to move ← →</div>
+        <div class="touch-hint" id="touchHint">Tocca e tieni premuto ← →</div>
         
         <!-- Power-ups display -->
         <div id="powerUps">
@@ -531,11 +541,11 @@
             </div>
             <div class="menu-title">Bubble Pop</div>
             <div class="menu-subtitle">Notamy Mini Game</div>
-            <button class="menu-button" ontouchstart="startGame()" onclick="startGame()">PLAY</button>
+            <button class="menu-button" ontouchstart="startGame()" onclick="startGame()">GIOCA</button>
             <div class="menu-instructions">
-                <span>Touch & Hold</span> to move<br>
-                <span>Auto-shoot</span> enabled<br>
-                <span>Hit bubbles</span> for mega points!
+                <span>Tocca e tieni premuto</span> per muovere<br>
+                <span>Sparo automatico</span> attivato<br>
+                <span>Colpisci le bolle</span> per mega punti!
             </div>
         </div>
         
@@ -543,8 +553,8 @@
         <div id="gameOverScreen">
             <div class="game-over-title">Game Over</div>
             <div class="final-score" id="finalScore">0</div>
-            <div class="best-score">Best: <span id="bestScore">0</span></div>
-            <button class="play-again-button" ontouchstart="restartGame()" onclick="restartGame()">PLAY AGAIN</button>
+            <div class="best-score">Record: <span id="bestScore">0</span></div>
+            <button class="play-again-button" ontouchstart="restartGame()" onclick="restartGame()">RIGIOCA</button>
         </div>
     </div>
 
@@ -585,7 +595,8 @@
         let score = 0;
         let lives = 3;
         let level = 1;
-        let timer = 90;
+        let timer = 60;
+        let lastTimerUpdate = 0;
         let combo = 0;
         let comboTimer = 0;
         let streak = 0;
@@ -604,8 +615,8 @@
             width: 60,
             height: 80,
             speed: 18,
-            shootCooldown: 30, // Small initial cooldown
-            autoShootInterval: 20,
+            shootCooldown: 0,
+            autoShootInterval: 18, // Velocità di sparo base
             powerUps: [],
             shield: false,
             multiShot: false,
@@ -646,15 +657,15 @@
             }
         };
         
-        // Power-up types
+        // Power-up types - durate bilanciate
         const powerUpTypes = {
-            shield: { icon: '🛡️', color: '#00e676', duration: 400 },
-            multishot: { icon: '🎯', color: '#00d9ff', duration: 500 },
-            rapidfire: { icon: '⚡', color: '#ffab00', duration: 450 },
+            shield: { icon: '🛡️', color: '#00e676', duration: 240 }, // 4 secondi
+            multishot: { icon: '🎯', color: '#00d9ff', duration: 300 }, // 5 secondi
+            rapidfire: { icon: '⚡', color: '#ffab00', duration: 180 }, // 3 secondi
             bomb: { icon: '💣', color: '#ff5252', instant: true },
             extralife: { icon: '❤️', color: '#ff6b6b', instant: true },
-            magnet: { icon: '🧲', color: '#2196f3', duration: 350 },
-            doublepoints: { icon: '✨', color: '#ffd700', duration: 300 }
+            magnet: { icon: '🧲', color: '#2196f3', duration: 240 }, // 4 secondi
+            doublepoints: { icon: '✨', color: '#ffd700', duration: 360 } // 6 secondi
         };
         
         const touchArea = document.getElementById('touchArea');
@@ -670,7 +681,7 @@
                 const indicator = document.getElementById('touchIndicator');
                 indicator.style.display = 'block';
                 indicator.style.left = touchX - 40 + 'px';
-                indicator.style.bottom = '60px';
+                indicator.style.top = touch.clientY - 40 + 'px';
             }
         });
         
@@ -682,6 +693,7 @@
                 
                 const indicator = document.getElementById('touchIndicator');
                 indicator.style.left = touchX - 40 + 'px';
+                indicator.style.top = touch.clientY - 40 + 'px';
             }
         });
         
@@ -735,7 +747,8 @@
             score = 0;
             lives = 3;
             level = 1;
-            timer = 90;
+            timer = 60;
+            lastTimerUpdate = Date.now();
             combo = 0;
             comboTimer = 0;
             streak = 0;
@@ -744,7 +757,7 @@
             
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - player.height - 100;
-            player.shootCooldown = 30; // Small delay before first shot
+            player.shootCooldown = 0;
             player.powerUps = [];
             player.shield = false;
             player.multiShot = false;
@@ -763,7 +776,7 @@
         }
         
         function initLevel() {
-            // Clear EVERYTHING before starting new level
+            // Clear everything
             bullets = [];
             balls = [];
             particles = [];
@@ -773,55 +786,81 @@
             
             levelTransitioning = false;
             
-            // Reset combo and hide indicators
+            // Reset combo
             combo = 0;
             comboTimer = 0;
             document.getElementById('comboIndicator').classList.remove('show');
             document.getElementById('streakIndicator').classList.remove('show');
             
-            // Reset player shoot cooldown
-            player.shootCooldown = 30;
-            
-            // Set timer for new level
-            timer = 90 + (level * 10);
+            // Timer più difficile: meno tempo per livelli alti
+            timer = Math.max(30, 60 - (level - 1) * 5); // Da 60s al livello 1 a 30s al livello 7+
+            lastTimerUpdate = Date.now();
             
             // Show level indicator
             const levelDiv = document.getElementById('levelIndicator');
             levelDiv.textContent = `Level ${level}`;
             levelDiv.style.opacity = '1';
             
-            // Hide level indicator after animation
             setTimeout(() => {
                 levelDiv.style.opacity = '0';
             }, 2000);
             
-            // Create single ball from top after short delay
+            // Spawn iniziale più interessante basato sul livello
             setTimeout(() => {
-                // Always start with just one normal ball
-                const x = canvas.width / 2;
-                const y = 100;
+                const patterns = [
+                    // Livello 1: 1 palla normale
+                    () => {
+                        createBall(canvas.width / 2, 100, 'large', 'normal');
+                    },
+                    // Livello 2: 2 palle normali
+                    () => {
+                        createBall(canvas.width * 0.3, 100, 'large', 'normal');
+                        createBall(canvas.width * 0.7, 100, 'large', 'normal');
+                    },
+                    // Livello 3: 1 palla speciale + 1 normale
+                    () => {
+                        createBall(canvas.width * 0.3, 100, 'large', 'bouncy');
+                        createBall(canvas.width * 0.7, 100, 'large', 'normal');
+                    },
+                    // Livello 4: formazione triangolare
+                    () => {
+                        createBall(canvas.width * 0.5, 80, 'large', 'special');
+                        createBall(canvas.width * 0.3, 140, 'large', 'normal');
+                        createBall(canvas.width * 0.7, 140, 'large', 'normal');
+                    },
+                    // Livello 5+: pattern sempre più complessi
+                    () => {
+                        const ballCount = Math.min(2 + Math.floor((level - 5) / 2), 5);
+                        for (let i = 0; i < ballCount; i++) {
+                            const x = (canvas.width / (ballCount + 1)) * (i + 1);
+                            const type = ['normal', 'bouncy', 'special'][Math.floor(Math.random() * 3)];
+                            createBall(x, 100 + (i % 2) * 40, 'large', type);
+                        }
+                    }
+                ];
                 
-                createBall(x, y, 'large', 'normal');
-                player.shootCooldown = 0; // Enable shooting when ball appears
+                const patternIndex = Math.min(level - 1, patterns.length - 1);
+                patterns[patternIndex]();
+                
             }, 1000);
         }
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
-            const speedMultiplier = 1 + (level - 1) * 0.03; // Only 3% increase per level
+            const speedMultiplier = 1 + (level - 1) * 0.08; // 8% di aumento per livello
             
             const ball = {
                 x: x,
                 y: y,
-                velX: 0,
-                velY: 2,
+                velX: (Math.random() - 0.5) * 2 * speedMultiplier, // Velocità iniziale casuale
+                velY: 2 * speedMultiplier,
                 radius: ballData.radius,
                 size: size,
                 type: type,
                 color: ballData.color,
                 points: ballData.points,
-                gravity: 0.25,
-                bounceVelocity: -9 * speedMultiplier,
+                gravity: 0.25 + (level - 1) * 0.02, // Gravità aumenta con il livello
+                bounceVelocity: -10 * speedMultiplier,
                 rotation: 0,
                 glowIntensity: 0
             };
@@ -833,7 +872,7 @@
         function shootBullet() {
             if (player.shootCooldown > 0 || levelTransitioning || gameState !== 'playing') return;
             
-            const cooldown = player.rapidFire ? 4 : player.autoShootInterval;
+            const cooldown = player.rapidFire ? 6 : player.autoShootInterval;
             player.shootCooldown = cooldown;
             
             if (player.multiShot) {
@@ -868,7 +907,9 @@
         }
         
         function createPowerUp(x, y) {
-            if (Math.random() < 0.3) { // 30% chance for power-ups
+            // Probabilità aumenta con il livello
+            const chance = 0.25 + (level * 0.02); // Da 25% a 35% al livello 5
+            if (Math.random() < chance) {
                 const types = Object.keys(powerUpTypes);
                 const type = types[Math.floor(Math.random() * types.length)];
                 
@@ -876,7 +917,7 @@
                     x: x,
                     y: y,
                     type: type,
-                    velY: 1.5,
+                    velY: 2,
                     size: 35,
                     bounce: 0,
                     collected: false,
@@ -889,7 +930,7 @@
             const power = powerUpTypes[powerUp.type];
             
             createParticles(powerUp.x, powerUp.y, 30, power.color);
-            addScorePopup(powerUp.y, power.icon);
+            addScorePopup(powerUp.x, powerUp.y, power.icon);
             
             visualEffects.push({
                 type: 'ring',
@@ -960,19 +1001,18 @@
             });
         }
         
-        function addScorePopup(y, text) {
+        function addScorePopup(x, y, text) {
             const popup = document.createElement('div');
             popup.className = 'score-popup';
             popup.textContent = text;
-            popup.style.left = '50%';
+            popup.style.left = x + 'px';
             popup.style.top = y + 'px';
-            popup.style.transform = 'translateX(-50%)';
             document.getElementById('gameContainer').appendChild(popup);
             
             setTimeout(() => popup.remove(), 1000);
         }
         
-        function addPerfectShot(x, y, text = 'PERFECT!') {
+        function addPerfectShot(x, y, text = 'PERFETTO!') {
             const perfect = document.createElement('div');
             perfect.className = 'perfect-shot';
             perfect.textContent = text;
@@ -1016,18 +1056,19 @@
             if (touchX !== null && touchActive && !levelTransitioning) {
                 const targetX = touchX - player.width / 2;
                 const diff = targetX - player.x;
-                player.x += diff * 0.5; // Increased responsiveness
+                player.x += diff * 0.5;
             }
             
             player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
             
-            // Auto-shoot - always active during gameplay
+            // Auto-shoot sempre attivo
             if (player.shootCooldown > 0) {
                 player.shootCooldown--;
             } else if (!levelTransitioning && gameState === 'playing') {
                 shootBullet();
             }
             
+            // Update power-ups
             for (let i = player.powerUps.length - 1; i >= 0; i--) {
                 player.powerUps[i].duration--;
                 if (player.powerUps[i].duration <= 0) {
@@ -1083,7 +1124,7 @@
                         
                         ball.glowIntensity = 1;
                         createParticles(ball.x, ball.y, 30, ball.color);
-                        addScorePopup(ball.y, '+' + points);
+                        addScorePopup(ball.x, ball.y, '+' + points);
                         createPowerUp(ball.x, ball.y);
                         
                         if (combo >= 3) {
@@ -1107,15 +1148,15 @@
                         
                         const ballData = ballTypes[ball.type].sizes[ball.size];
                         if (ballData.nextSize) {
-                            const speedMultiplier = 1 + (level - 1) * 0.03; // Same 3% increase
+                            const speedMultiplier = 1 + (level - 1) * 0.08;
                             
                             for (let k = 0; k < 2; k++) {
                                 const angle = k === 0 ? -0.5 : 0.5;
                                 const newX = ball.x + (k === 0 ? -30 : 30);
                                 const newY = ball.y;
                                 const newBall = createBall(newX, newY, ballData.nextSize, ball.type);
-                                newBall.velX = angle * 2 * speedMultiplier;
-                                newBall.velY = -2 * speedMultiplier;
+                                newBall.velX = angle * 3 * speedMultiplier;
+                                newBall.velY = -3 * speedMultiplier;
                             }
                         }
                         
@@ -1132,8 +1173,6 @@
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
                 
-                // Trail removed for cleaner gameplay
-                
                 ball.x += ball.velX;
                 ball.y += ball.velY;
                 ball.velY += ball.gravity;
@@ -1143,18 +1182,23 @@
                     ball.glowIntensity *= 0.95;
                 }
                 
+                // Rimbalzo sui lati
                 if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
-                    ball.velX *= -1;
+                    ball.velX *= -0.9; // Leggera perdita di energia
                     ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
                     createParticles(ball.x, ball.y, 8, ball.color, true);
                 }
                 
+                // Rimbalzo sul pavimento
                 if (ball.y + ball.radius >= canvas.height - 150) {
                     ball.y = canvas.height - 150 - ball.radius;
                     ball.velY = ball.bounceVelocity;
+                    
+                    // Aggiungi un po' di movimento laterale se la palla è ferma
                     if (Math.abs(ball.velX) < 0.5) {
-                        ball.velX = (Math.random() - 0.5) * 2;
+                        ball.velX = (Math.random() - 0.5) * 4;
                     }
+                    
                     createParticles(ball.x, ball.y + ball.radius, 12, ball.color, true);
                     
                     visualEffects.push({
@@ -1168,11 +1212,13 @@
                     });
                 }
                 
+                // Rimbalzo sul soffitto
                 if (ball.y - ball.radius <= 80) {
                     ball.y = 80 + ball.radius;
                     ball.velY = Math.abs(ball.velY) * 0.8;
                 }
                 
+                // Collisione con il giocatore
                 if (!player.shield && checkCircleRectCollision(ball, player)) {
                     lives--;
                     createParticles(player.x + player.width/2, player.y + player.height/2, 40, theme.colors.error);
@@ -1184,25 +1230,27 @@
                         duration: 30
                     });
                     
+                    // Respawn al centro
                     player.x = canvas.width / 2 - player.width / 2;
                     
                     if (lives <= 0) {
                         gameOver();
                     } else {
+                        // Shield temporaneo dopo essere stati colpiti
                         player.shield = true;
                         player.powerUps.push({
                             type: 'shield',
-                            duration: 90
+                            duration: 120 // 2 secondi
                         });
                         updatePowerUpDisplay();
                     }
                 }
             }
             
+            // Check level completion
             if (balls.length === 0 && gameState === 'playing' && !levelTransitioning) {
                 levelTransitioning = true;
                 
-                // Clear any remaining bullets or powerups immediately
                 bullets = [];
                 powerUps = [];
                 particles = [];
@@ -1210,10 +1258,9 @@
                 level++;
                 const bonus = timer * 10;
                 score += bonus;
-                addScorePopup(canvas.height/2, 'Level Complete! +' + bonus);
+                addScorePopup(canvas.width/2, canvas.height/2, 'Livello Completato! +' + bonus);
                 updateScore();
                 
-                // Wait a bit then start next level clean
                 setTimeout(() => {
                     initLevel();
                 }, 2000);
@@ -1224,6 +1271,7 @@
             for (let i = powerUps.length - 1; i >= 0; i--) {
                 const powerUp = powerUps[i];
                 
+                // Magnetismo
                 if (player.magnetPower) {
                     const dx = (player.x + player.width/2) - powerUp.x;
                     const dy = (player.y + player.height/2) - powerUp.y;
@@ -1231,8 +1279,8 @@
                     
                     if (dist < 200) {
                         powerUp.magnetized = true;
-                        powerUp.x += dx * 0.08;
-                        powerUp.y += dy * 0.08;
+                        powerUp.x += dx * 0.1;
+                        powerUp.y += dy * 0.1;
                     }
                 }
                 
@@ -1247,6 +1295,7 @@
                     continue;
                 }
                 
+                // Collisione con il giocatore
                 if (checkCircleRectCollision({
                     x: powerUp.x,
                     y: powerUp.y,
@@ -1308,14 +1357,28 @@
         
         function updateTimer() {
             if (gameState === 'playing' && !levelTransitioning) {
-                timer--;
-                if (timer <= 0) {
-                    lives--;
-                    if (lives <= 0) {
-                        gameOver();
-                    } else {
-                        timer = 90;
-                        addScorePopup(canvas.height/2, 'Time Up! -1 ❤️');
+                const now = Date.now();
+                if (now - lastTimerUpdate >= 1000) {
+                    timer--;
+                    lastTimerUpdate = now;
+                    
+                    // Warning flash quando il tempo sta per scadere
+                    if (timer <= 10 && timer > 0) {
+                        document.getElementById('timerContainer').classList.add('warning-flash');
+                        setTimeout(() => {
+                            document.getElementById('timerContainer').classList.remove('warning-flash');
+                        }, 500);
+                    }
+                    
+                    if (timer <= 0) {
+                        lives--;
+                        if (lives <= 0) {
+                            gameOver();
+                        } else {
+                            timer = Math.max(30, 60 - (level - 1) * 5);
+                            lastTimerUpdate = Date.now();
+                            addScorePopup(canvas.width/2, canvas.height/2, 'Tempo Scaduto! -1 ❤️');
+                        }
                     }
                 }
             }
@@ -1359,6 +1422,7 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // Effetti di sfondo animati
             const time = Date.now() * 0.0002;
             
             ctx.globalAlpha = 0.15;
@@ -1403,6 +1467,7 @@
             const playerX = player.x;
             const playerY = player.y;
             
+            // Shield effect
             if (player.shield) {
                 const time = Date.now() * 0.003;
                 const shieldGradient = ctx.createRadialGradient(
@@ -1419,6 +1484,7 @@
                 ctx.fillStyle = shieldGradient;
                 ctx.fillRect(playerX - 30, playerY - 30, player.width + 60, player.height + 60);
                 
+                // Hexagon shield
                 ctx.strokeStyle = 'rgba(0, 230, 118, 0.6)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
@@ -1434,6 +1500,7 @@
                 ctx.stroke();
             }
             
+            // Player ship
             const gradient = ctx.createLinearGradient(
                 playerX, playerY,
                 playerX, playerY + player.height
@@ -1452,6 +1519,7 @@
             ctx.closePath();
             ctx.fill();
             
+            // Cockpit
             ctx.fillStyle = theme.colors.accent;
             ctx.beginPath();
             ctx.arc(playerX + player.width/2, playerY + player.height/2, 18, 0, Math.PI * 2);
@@ -1462,6 +1530,7 @@
             ctx.arc(playerX + player.width/2, playerY + player.height/2, 12, 0, Math.PI * 2);
             ctx.fill();
             
+            // Engine glow
             const engineTime = Date.now() * 0.01;
             const engineGlow = ctx.createRadialGradient(
                 playerX + player.width/2,
@@ -1482,8 +1551,7 @@
         
         function drawBalls() {
             for (let ball of balls) {
-                // Trail effect removed for cleaner look
-                
+                // Glow effect
                 if (ball.glowIntensity > 0) {
                     const glowGradient = ctx.createRadialGradient(
                         ball.x, ball.y, ball.radius,
@@ -1495,6 +1563,7 @@
                     ctx.fillRect(ball.x - ball.radius * 2, ball.y - ball.radius * 2, ball.radius * 4, ball.radius * 4);
                 }
                 
+                // Ball gradient
                 const gradient = ctx.createRadialGradient(
                     ball.x - ball.radius * 0.3, 
                     ball.y - ball.radius * 0.3,
@@ -1513,6 +1582,7 @@
                 ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Pattern based on type
                 ctx.save();
                 ctx.translate(ball.x, ball.y);
                 ctx.rotate(ball.rotation);
@@ -1521,6 +1591,7 @@
                 ctx.lineWidth = 2;
                 
                 if (ball.type === 'bouncy') {
+                    // Spring pattern
                     for (let i = 0; i < 4; i++) {
                         const angle = (Math.PI / 2) * i;
                         ctx.beginPath();
@@ -1534,6 +1605,7 @@
                         ctx.stroke();
                     }
                 } else if (ball.type === 'special') {
+                    // Star pattern
                     ctx.beginPath();
                     for (let i = 0; i < 6; i++) {
                         const angle = (Math.PI / 3) * i;
@@ -1548,6 +1620,7 @@
                 
                 ctx.restore();
                 
+                // Highlight
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.beginPath();
                 ctx.arc(
@@ -1563,6 +1636,7 @@
         
         function drawBullets() {
             for (let bullet of bullets) {
+                // Trail
                 for (let i = 0; i < bullet.trail.length; i++) {
                     const trail = bullet.trail[i];
                     const alpha = (i / bullet.trail.length);
@@ -1579,6 +1653,7 @@
                     ctx.fillRect(trail.x - width/2, trail.y, width, 10);
                 }
                 
+                // Bullet
                 const gradient = ctx.createLinearGradient(
                     bullet.x, bullet.y,
                     bullet.x, bullet.y + bullet.height
@@ -1591,6 +1666,7 @@
                 ctx.fillStyle = gradient;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
                 
+                // Glow
                 ctx.shadowColor = bullet.color;
                 ctx.shadowBlur = 15;
                 ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
@@ -1608,6 +1684,7 @@
                 ctx.translate(powerUp.x, powerUp.y + bounce);
                 ctx.rotate(rotation);
                 
+                // Glow
                 const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, powerUp.size * 2);
                 glow.addColorStop(0, power.color + '60');
                 glow.addColorStop(0.5, power.color + '30');
@@ -1615,6 +1692,7 @@
                 ctx.fillStyle = glow;
                 ctx.fillRect(-powerUp.size * 2, -powerUp.size * 2, powerUp.size * 4, powerUp.size * 4);
                 
+                // Power-up circle
                 const gradient = ctx.createRadialGradient(
                     -powerUp.size * 0.3, -powerUp.size * 0.3, 0,
                     0, 0, powerUp.size
@@ -1628,17 +1706,20 @@
                 ctx.arc(0, 0, powerUp.size, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Inner circle
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
                 ctx.beginPath();
                 ctx.arc(0, 0, powerUp.size * 0.8, 0, Math.PI * 2);
                 ctx.fill();
                 
+                // Icon
                 ctx.fillStyle = '#FFFFFF';
                 ctx.font = `${powerUp.size * 0.8}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(power.icon, 0, 0);
                 
+                // Magnetized effect
                 if (powerUp.magnetized) {
                     ctx.strokeStyle = '#2196f3';
                     ctx.lineWidth = 2;
@@ -1709,10 +1790,7 @@
                 updateParticles();
                 updateVisualEffects();
                 updateCombo();
-                
-                if (Date.now() % 1000 < 16) {
-                    updateTimer();
-                }
+                updateTimer();
             }
             
             drawParticles();

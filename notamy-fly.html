@@ -567,19 +567,23 @@
         function playSound(frequency, duration, type = 'sine') {
             if (!soundEnabled) return;
             
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = type;
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = type;
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                // Ignora errori audio
+            }
         }
         
         function toggleSound() {
@@ -598,12 +602,12 @@
         let maxCombo = 0;
         let powerupsCollected = 0;
         
-        // Bird object - POSIZIONE PIÙ CENTRALE
+        // Bird object - UCCELLO PIÙ PICCOLO
         const bird = {
             x: WIDTH * 0.25,  // Più a sinistra per dare più tempo di reazione
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 20,  // Uccellino più piccolo per passare meglio
+            radius: 12,  // RIDOTTO DA 20 A 12 - Uccellino molto più piccolo
             trail: [],
             angle: 0,
             shielded: false,
@@ -839,9 +843,20 @@
                 });
             }
             
-            // Check boundaries with bigger margin
-            const margin = 40;
-            if (!bird.invincible && (bird.y - bird.radius < margin || bird.y + bird.radius > HEIGHT - margin)) {
+            // Check boundaries - ASSICURIAMOCI CHE L'UCCELLO NON ESCA MAI DALLO SCHERMO
+            const margin = bird.radius + 5;  // Usa il raggio dell'uccello come margine
+            
+            // Limita la posizione dell'uccello ai bordi dello schermo
+            if (bird.y - bird.radius < margin) {
+                bird.y = margin + bird.radius;
+                bird.velocity = Math.max(bird.velocity, 0); // Ferma la velocità verso l'alto
+            } else if (bird.y + bird.radius > HEIGHT - margin) {
+                bird.y = HEIGHT - margin - bird.radius;
+                bird.velocity = Math.min(bird.velocity, 0); // Ferma la velocità verso il basso
+            }
+            
+            // Controlla collisione con i bordi solo se non invincibile
+            if (!bird.invincible && (bird.y - bird.radius <= 0 || bird.y + bird.radius >= HEIGHT)) {
                 if (bird.shielded) {
                     bird.shielded = false;
                     bird.invincible = true;
@@ -1031,8 +1046,8 @@
             if (bird.invincible) return;
             
             pipes.forEach(pipe => {
-                // Hitbox più piccola per rendere il gioco più facile
-                const collisionMargin = 10;  // Margine ancora più grande
+                // Hitbox più piccola per rendere il gioco più facile - ADATTATA ALL'UCCELLO PIÙ PICCOLO
+                const collisionMargin = 5;  // Margine ridotto per l'uccello più piccolo
                 
                 // Check top pipe
                 if (bird.x + bird.radius - collisionMargin > pipe.x && 
@@ -1221,13 +1236,13 @@
             
             // Shield effect
             if (bird.shielded) {
-                const shieldGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2);
+                const shieldGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2.5);
                 shieldGradient.addColorStop(0, 'transparent');
                 shieldGradient.addColorStop(0.7, 'rgba(255, 107, 107, 0.2)');
                 shieldGradient.addColorStop(1, 'rgba(255, 107, 107, 0.4)');
                 ctx.fillStyle = shieldGradient;
                 ctx.beginPath();
-                ctx.arc(0, 0, bird.radius * 2, 0, Math.PI * 2);
+                ctx.arc(0, 0, bird.radius * 2.5, 0, Math.PI * 2);
                 ctx.fill();
             }
             
@@ -1253,30 +1268,30 @@
                 ctx.setLineDash([5, 5]);
                 ctx.lineDashOffset = frameCount * 0.5;
                 ctx.beginPath();
-                ctx.arc(0, 0, bird.radius * 1.8 * pulseScale, 0, Math.PI * 2);
+                ctx.arc(0, 0, bird.radius * 2.2 * pulseScale, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
                 // Glowing effect
                 if (frameCount % 20 < 10) {
-                    const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 2.5);
+                    const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 3);
                     invincibleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
                     invincibleGradient.addColorStop(1, 'transparent');
                     ctx.fillStyle = invincibleGradient;
                     ctx.beginPath();
-                    ctx.arc(0, 0, bird.radius * 2.5, 0, Math.PI * 2);
+                    ctx.arc(0, 0, bird.radius * 3, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
             
-            // Bird glow
-            const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 2);
-            glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.3)');
+            // Bird glow - adattato all'uccello più piccolo
+            const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 2.5);
+            glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.4)');
             glowGradient.addColorStop(1, 'transparent');
             ctx.fillStyle = glowGradient;
-            ctx.fillRect(-bird.radius * 2, -bird.radius * 2, bird.radius * 4, bird.radius * 4);
+            ctx.fillRect(-bird.radius * 2.5, -bird.radius * 2.5, bird.radius * 5, bird.radius * 5);
             
-            // Draw bird corpo semplificato
+            // Draw bird corpo semplificato e più piccolo
             ctx.fillStyle = COLORS.bird;
             ctx.strokeStyle = COLORS.birdGlow;
             ctx.lineWidth = 2;
@@ -1290,32 +1305,45 @@
             // Eye
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.4, -bird.radius * 0.3, bird.radius * 0.3, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.4, -bird.radius * 0.3, bird.radius * 0.35, 0, Math.PI * 2);
             ctx.fill();
             
             // Pupil
             ctx.fillStyle = '#000000';
             ctx.beginPath();
-            ctx.arc(bird.radius * 0.5, -bird.radius * 0.3, bird.radius * 0.15, 0, Math.PI * 2);
+            ctx.arc(bird.radius * 0.5, -bird.radius * 0.3, bird.radius * 0.2, 0, Math.PI * 2);
             ctx.fill();
             
             // Beak
             ctx.fillStyle = '#ff6600';
             ctx.beginPath();
             ctx.moveTo(bird.radius * 0.8, -bird.radius * 0.1);
-            ctx.lineTo(bird.radius * 1.3, 0);
+            ctx.lineTo(bird.radius * 1.4, 0);
             ctx.lineTo(bird.radius * 0.8, bird.radius * 0.1);
             ctx.closePath();
             ctx.fill();
             
-            // Wing (animated)
-            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 5;
+            // Wing (animated) - più piccola
+            const wingOffset = Math.sin(bird.wingAnimation * 0.3) * 3;
             ctx.fillStyle = '#0099cc';
             ctx.beginPath();
-            ctx.ellipse(-bird.radius * 0.3, wingOffset, bird.radius * 0.6, bird.radius * 0.4, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(-bird.radius * 0.3, wingOffset, bird.radius * 0.7, bird.radius * 0.5, -0.3, 0, Math.PI * 2);
             ctx.fill();
             
             ctx.restore();
+            
+            // ASSICURIAMOCI CHE L'UCCELLO SIA SEMPRE BEN VISIBILE
+            // Aggiungiamo un contorno luminoso extra se necessario
+            if (frameCount % 60 < 30) {  // Effetto pulsante ogni secondo
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.strokeStyle = COLORS.birdGlow;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(bird.x, bird.y, bird.radius + 2, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
         }
         
         function drawPipes() {
@@ -1472,10 +1500,11 @@
             
             updateParticles();
             
-            drawPipes();
-            drawPowerups();
-            drawParticles();
-            drawBird();
+            // ORDINE DI RENDERING CORRETTO per assicurarsi che l'uccello sia sempre visibile
+            drawPipes();      // Prima i tubi (sfondo)
+            drawPowerups();   // Poi i power-up (mezzo)
+            drawParticles();  // Poi le particelle (effetti)
+            drawBird();       // Infine l'uccello (primo piano) - SEMPRE SOPRA TUTTO
             
             requestAnimationFrame(gameLoop);
         }
@@ -1487,9 +1516,15 @@
             canvas.width = WIDTH;
             canvas.height = HEIGHT;
             
-            // Adjust bird position
+            // Adjust bird position - ASSICURIAMOCI CHE RIMANGA NEI LIMITI
             if (bird.x > WIDTH * 0.25) {
                 bird.x = WIDTH * 0.25;
+            }
+            if (bird.y < bird.radius) {
+                bird.y = bird.radius;
+            }
+            if (bird.y > HEIGHT - bird.radius) {
+                bird.y = HEIGHT - bird.radius;
             }
         });
         

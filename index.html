@@ -41,6 +41,7 @@
             min-height: 100vh;
             color: var(--white);
             margin: 0;
+            /* Removed overflow hidden to allow scrolling */
         }
 
         /* Simple static grid */
@@ -114,6 +115,7 @@
             gap: 25px;
             max-width: 900px;
             margin: 0 auto;
+            width: 100%;
         }
         
         /* Ultra simple game cards */
@@ -353,17 +355,18 @@
         /* Mobile optimizations */
         @media (max-width: 768px) {
             body {
-                overflow: hidden;
-                height: 100vh;
-                height: 100dvh; /* Dynamic viewport height */
+                /* Removed overflow hidden to allow natural scrolling */
+                /* Removed fixed height */
             }
 
             .container {
                 padding: 20px 12px;
                 padding-top: max(20px, env(safe-area-inset-top));
-                padding-bottom: max(20px, env(safe-area-inset-bottom));
-                height: 100vh;
-                height: 100dvh;
+                /* Extra padding at bottom for iPhone home indicator */
+                padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
+                /* Changed from fixed height to min-height */
+                min-height: 100vh;
+                min-height: 100dvh;
                 display: flex;
                 flex-direction: column;
             }
@@ -391,20 +394,16 @@
             .games-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
+                /* Removed flex properties that were causing issues */
+                /* Natural grid layout allows proper scrolling */
                 max-width: 100%;
-                padding-bottom: 20px;
+                margin-bottom: 20px;
             }
             
             .game-card {
                 padding: 20px;
                 border-radius: 18px;
-                flex-shrink: 0;
+                /* Removed flex-shrink */
             }
             
             .game-title {
@@ -467,6 +466,11 @@
         }
         
         @media (max-width: 375px) {
+            .container {
+                /* Even more padding for smaller screens */
+                padding-bottom: max(50px, calc(30px + env(safe-area-inset-bottom)));
+            }
+
             .logo-text {
                 font-size: 70px;
             }
@@ -502,6 +506,12 @@
 
         /* Extra small height screens */
         @media (max-height: 700px) and (max-width: 768px) {
+            .container {
+                /* Ensure scrolling works on small height screens */
+                min-height: auto;
+                padding-bottom: max(40px, calc(20px + env(safe-area-inset-bottom)));
+            }
+
             .header {
                 margin-bottom: 18px;
             }
@@ -543,6 +553,13 @@
 
             .game-description {
                 font-size: 12px;
+            }
+        }
+
+        /* Ensure proper scrolling on iOS */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-overflow-scrolling: touch;
             }
         }
     </style>

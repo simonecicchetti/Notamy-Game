@@ -1154,33 +1154,35 @@
                 window.navigator.vibrate([30, 10, 30]);
             }
             
-            // Check for power-up creation
+            // Process each match group
             matches.forEach((match, index) => {
                 let centerX = 0, centerY = 0;
                 let powerUpPos = null;
                 
-                // Calculate time bonus based on match size and combo
+                // Calculate time bonus based on match size
                 let matchTimeBonus = 0;
                 if (match.length === 3) {
                     matchTimeBonus = 1.5; // Basic match gives 1.5 seconds
                 } else if (match.length === 4) {
-                    matchTimeBonus = 3; // 4-match gives 3 seconds
+                    matchTimeBonus = 3; // 4-match gives 3 seconds  
                 } else if (match.length >= 5) {
                     matchTimeBonus = 5; // 5+ match gives 5 seconds
                 }
                 
-                // Add combo multiplier to time bonus
-                matchTimeBonus *= (1 + (combo - 1) * 0.5); // Each combo level adds 50% more time
+                // Apply combo multiplier (each combo level adds 50% more time)
+                if (combo > 1) {
+                    matchTimeBonus *= (1 + (combo - 1) * 0.5);
+                }
                 
-                // Add streak bonus
+                // Apply streak multiplier (each streak adds 25% more time)
                 if (streak > 1) {
-                    matchTimeBonus *= (1 + (streak - 1) * 0.25); // Each streak adds 25% more time
+                    matchTimeBonus *= (1 + (streak - 1) * 0.25);
                 }
                 
                 totalTimeBonus += matchTimeBonus;
                 
                 // Determine power-up type based on match
-                if (match.length >= 5 || (match.length >= 5 && checkIfTShape(match))) {
+                if (match.length >= 5 || checkIfTShape(match)) {
                     // 5+ match or T/L shape = Rainbow
                     powerUpPos = match[Math.floor(match.length / 2)];
                     board[powerUpPos.row][powerUpPos.col].powerUp = 'rainbow';
@@ -1190,6 +1192,8 @@
                     board[powerUpPos.row][powerUpPos.col].powerUp = 'bomb';
                 }
                 
+                // Process each candy in the match
+                let validCandyCount = 0;
                 match.forEach(pos => {
                     if (board[pos.row][pos.col] && !board[pos.row][pos.col].marked) {
                         // Don't mark the position where we're creating a power-up
@@ -1208,6 +1212,7 @@
                             const candy = board[pos.row][pos.col];
                             centerX += candy.x + CANDY_SIZE/2;
                             centerY += candy.y + CANDY_SIZE/2;
+                            validCandyCount++;
                             
                             // Create burst particles
                             createBurstParticles(
@@ -1220,17 +1225,22 @@
                 });
                 
                 // Show score popup
-                if (match.length > 0) {
-                    centerX /= match.length;
-                    centerY /= match.length;
+                if (validCandyCount > 0) {
+                    centerX /= validCandyCount;
+                    centerY /= validCandyCount;
                     createScorePopup(centerX, centerY, totalScore);
                 }
             });
             
-            // Apply time bonus
+            // Apply time bonus IMMEDIATELY
             if (totalTimeBonus > 0 && gameState === 'playing') {
+                const oldTime = timeLeft;
                 timeLeft = Math.min(120, timeLeft + totalTimeBonus);
-                createTimeBonus(Math.round(totalTimeBonus));
+                const actualBonus = timeLeft - oldTime;
+                
+                if (actualBonus > 0) {
+                    createTimeBonus(Math.round(actualBonus));
+                }
             }
             
             score += totalScore;
@@ -1359,8 +1369,13 @@
             
             // Add time bonus for power-up
             if (bonusTime > 0 && gameState === 'playing') {
-                timeLeft = Math.min(120, timeLeft + bonusTime); // Max 120 instead of 180
-                createTimeBonus(bonusTime);
+                const oldTime = timeLeft;
+                timeLeft = Math.min(120, timeLeft + bonusTime);
+                const actualBonus = timeLeft - oldTime;
+                
+                if (actualBonus > 0) {
+                    createTimeBonus(Math.round(actualBonus));
+                }
             }
             
             // Remove power-up candy itself
@@ -1639,7 +1654,7 @@
                     canvas.style.transform = 'translate(-50%, -50%)';
                 }
                 
-                // Decrease time with decay rate
+                // Decrease time with decay rate (0.1 seconds every 100ms = 1 second per second)
                 timeLeft -= (0.1 * timeDecayRate);
                 
                 // Update time display
@@ -1681,6 +1696,7 @@
         function updateUI() {
             document.getElementById('score').textContent = score;
             document.getElementById('level').textContent = level;
+            document.getElementById('time').textContent = Math.ceil(timeLeft);
         }
         
         // Start game

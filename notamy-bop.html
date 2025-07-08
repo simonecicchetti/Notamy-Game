@@ -709,25 +709,31 @@
         function initLevel() {
             balls = [];
             timer = 90 + (level * 15); // More time per level
-            const ballCount = Math.min(1 + Math.floor((level - 1) / 2), 4); // Start with 1 ball
+            
+            // Always start with one ball
             const ballTypes = level > 2 ? ['normal', 'bouncy'] : ['normal'];
             if (level > 5) ballTypes.push('special');
             
-            for (let i = 0; i < ballCount; i++) {
-                const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
-                const x = 100 + (canvas.width - 200) / Math.max(ballCount, 2) * i + Math.random() * 50;
-                const y = 80 + Math.random() * 50;
-                createBall(x, y, 'large', type);
-            }
+            const type = ballTypes[Math.floor(Math.random() * ballTypes.length)];
+            const x = canvas.width / 2 + (Math.random() - 0.5) * 100; // Center with slight variation
+            const y = canvas.height - 200; // Start near bottom
+            
+            const ball = createBall(x, y, 'large', type);
+            // Set initial upward velocity so ball bounces to top
+            balls[balls.length - 1].velY = -12; // Initial upward velocity
+            balls[balls.length - 1].velX = (Math.random() - 0.5) * 3; // Slight horizontal movement
         }
         
         function createBall(x, y, size, type = 'normal') {
             const ballData = ballTypes[type].sizes[size];
             
-            balls.push({
+            // Speed multiplier that increases slightly with level
+            const speedMultiplier = 1 + (level - 1) * 0.1; // 10% increase per level
+            
+            const ball = {
                 x: x,
                 y: y,
-                velX: (Math.random() - 0.5) * 2, // Slower horizontal movement
+                velX: (Math.random() - 0.5) * 2 * speedMultiplier, // Horizontal velocity scales with level
                 velY: 0,
                 radius: ballData.radius,
                 size: size,
@@ -735,11 +741,14 @@
                 color: ballData.color,
                 points: ballData.points,
                 gravity: 0.25, // Constant gravity for all balls
-                bounceVelocity: -12, // Fixed bounce velocity to reach top
+                bounceVelocity: -12 * speedMultiplier, // Bounce velocity scales with level
                 rotation: 0,
                 trail: [],
                 glowIntensity: 0
-            });
+            };
+            
+            balls.push(ball);
+            return ball;
         }
         
         function shootBullet() {
@@ -1028,11 +1037,17 @@
                         // Split ball
                         const ballData = ballTypes[ball.type].sizes[ball.size];
                         if (ballData.nextSize) {
+                            // Speed multiplier for split balls
+                            const speedMultiplier = 1 + (level - 1) * 0.1;
+                            
                             for (let k = 0; k < 2; k++) {
                                 const angle = (k / 2) * Math.PI * 2 + Math.random() * 0.5;
                                 const newX = ball.x + Math.cos(angle) * 40;
                                 const newY = ball.y + Math.sin(angle) * 40;
-                                createBall(newX, newY, ballData.nextSize, ball.type);
+                                const newBall = createBall(newX, newY, ballData.nextSize, ball.type);
+                                // Give split balls some initial velocity
+                                balls[balls.length - 1].velX = Math.cos(angle) * 3 * speedMultiplier;
+                                balls[balls.length - 1].velY = -5 * speedMultiplier;
                             }
                         }
                         
@@ -1127,6 +1142,22 @@
                 addScorePopup(canvas.width/2, canvas.height/2, 'Level Complete! +' + bonus);
                 updateScore();
                 
+                // Show level indicator
+                const levelDiv = document.createElement('div');
+                levelDiv.style.position = 'absolute';
+                levelDiv.style.top = '50%';
+                levelDiv.style.left = '50%';
+                levelDiv.style.transform = 'translate(-50%, -50%)';
+                levelDiv.style.fontSize = '48px';
+                levelDiv.style.fontWeight = '600';
+                levelDiv.style.color = theme.colors.primaryLight;
+                levelDiv.style.textShadow = '0 0 20px rgba(0, 212, 255, 0.8)';
+                levelDiv.style.animation = 'perfectPop 1.5s ease-out forwards';
+                levelDiv.style.pointerEvents = 'none';
+                levelDiv.style.zIndex = '20';
+                levelDiv.textContent = `Level ${level}`;
+                document.getElementById('gameContainer').appendChild(levelDiv);
+                
                 // Celebration effect
                 for (let i = 0; i < 50; i++) {
                     setTimeout(() => {
@@ -1139,7 +1170,10 @@
                     }, i * 30);
                 }
                 
-                setTimeout(() => initLevel(), 2000);
+                setTimeout(() => {
+                    levelDiv.remove();
+                    initLevel();
+                }, 2000);
             }
         }
         

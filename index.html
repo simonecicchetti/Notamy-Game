@@ -88,18 +88,18 @@
         @keyframes logo-pulse {
             0%, 100% { 
                 transform: scale(1);
-                filter: drop-shadow(0 0 30px rgba(0, 217, 255, 0.5));
+                filter: drop-shadow(0 0 30px rgba(0, 180, 166, 0.5));
             }
             50% { 
                 transform: scale(1.05);
-                filter: drop-shadow(0 0 50px rgba(0, 217, 255, 0.8));
+                filter: drop-shadow(0 0 50px rgba(0, 180, 166, 0.8));
             }
         }
         
         .logo-text {
             font-size: 4rem;
             font-weight: 900;
-            background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b, #00d9ff);
+            background: linear-gradient(45deg, #00b4a6, #00d9ff, #00e676, #00b4a6);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -114,10 +114,10 @@
         .logo-subtitle {
             font-size: 1.2rem;
             font-weight: 700;
-            color: #00ff88;
+            color: #00e676;
             text-transform: uppercase;
             letter-spacing: 4px;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            text-shadow: 0 0 20px rgba(0, 230, 118, 0.5);
         }
         
         @keyframes gradientFlow {
@@ -133,9 +133,9 @@
         }
         
         .game-card {
-            background: rgba(26, 26, 26, 0.6);
-            border: 2px solid transparent;
-            border-radius: 25px;
+            background: #0A0A0A;
+            border: 1px solid #1A1A1A;
+            border-radius: 20px;
             padding: 30px;
             text-align: center;
             position: relative;
@@ -155,7 +155,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, var(--glow-color, rgba(0, 217, 255, 0.15)) 0%, transparent 70%);
+            background: radial-gradient(circle, var(--glow-color, rgba(0, 180, 166, 0.15)) 0%, transparent 70%);
             animation: rotate 15s linear infinite;
             opacity: 0;
             transition: opacity 0.4s ease;
@@ -168,9 +168,9 @@
         
         .game-card:hover {
             transform: translateY(-10px) scale(1.02);
-            border-color: var(--border-color, #00d9ff);
+            border-color: var(--border-color, #00b4a6);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
-                        0 0 60px var(--shadow-color, rgba(0, 217, 255, 0.4));
+                        0 0 60px var(--shadow-color, rgba(0, 180, 166, 0.4));
         }
         
         .game-card:hover::before {
@@ -187,9 +187,9 @@
             justify-content: center;
             position: relative;
             z-index: 1;
-            background: linear-gradient(135deg, var(--icon-color1, #00d9ff), var(--icon-color2, #00ff88));
+            background: linear-gradient(135deg, var(--icon-color1, #00b4a6), var(--icon-color2, #00d9ff));
             padding: 3px;
-            box-shadow: 0 0 30px var(--icon-shadow, rgba(0, 217, 255, 0.5));
+            box-shadow: 0 0 30px var(--icon-shadow, rgba(0, 180, 166, 0.5));
             animation: icon-float 3s ease-in-out infinite;
         }
         
@@ -207,7 +207,7 @@
             height: 100%;
             border-radius: 22px;
             background: #000000;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #1A1A1A;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -292,7 +292,7 @@
         
         .game-description {
             font-size: 16px;
-            color: #999999;
+            color: #E0E0E0;
             line-height: 1.5;
             position: relative;
             z-index: 1;
@@ -302,7 +302,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background: linear-gradient(135deg, var(--badge-color1, #00d9ff), var(--badge-color2, #00ff88));
+            background: linear-gradient(135deg, var(--badge-color1, #00b4a6), var(--badge-color2, #00d9ff));
             color: #000000;
             padding: 6px 16px;
             border-radius: 999px;
@@ -311,17 +311,17 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             animation: badge-pulse 2s ease-in-out infinite;
-            box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 217, 255, 0.4));
+            box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 180, 166, 0.4));
         }
         
         @keyframes badge-pulse {
             0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 217, 255, 0.4));
+                box-shadow: 0 4px 15px var(--badge-shadow, rgba(0, 180, 166, 0.4));
             }
             50% { 
                 transform: scale(1.05);
-                box-shadow: 0 6px 20px var(--badge-shadow, rgba(0, 217, 255, 0.6));
+                box-shadow: 0 6px 20px var(--badge-shadow, rgba(0, 180, 166, 0.6));
             }
         }
         
@@ -331,7 +331,7 @@
             --shadow-color: rgba(255, 107, 107, 0.4);
             --glow-color: rgba(255, 107, 107, 0.15);
             --icon-color1: #ff6b6b;
-            --icon-color2: #ffab00;
+            --icon-color2: #ff8787;
             --icon-shadow: rgba(255, 107, 107, 0.5);
             --badge-color1: #ff6b6b;
             --badge-color2: #ffab00;
@@ -340,15 +340,15 @@
         
         /* Notamy Blocks specific styling */
         .blocks-card {
-            --border-color: #00d9ff;
-            --shadow-color: rgba(0, 217, 255, 0.4);
-            --glow-color: rgba(0, 217, 255, 0.15);
-            --icon-color1: #00d9ff;
-            --icon-color2: #00ff88;
-            --icon-shadow: rgba(0, 217, 255, 0.5);
-            --badge-color1: #00d9ff;
-            --badge-color2: #00ff88;
-            --badge-shadow: rgba(0, 217, 255, 0.4);
+            --border-color: #00b4a6;
+            --shadow-color: rgba(0, 180, 166, 0.4);
+            --glow-color: rgba(0, 180, 166, 0.15);
+            --icon-color1: #00b4a6;
+            --icon-color2: #00d9ff;
+            --icon-shadow: rgba(0, 180, 166, 0.5);
+            --badge-color1: #00b4a6;
+            --badge-color2: #00e676;
+            --badge-shadow: rgba(0, 180, 166, 0.4);
         }
         
         /* Mobile optimizations */
@@ -467,7 +467,7 @@
     <div class="bg-animation">
         <script>
             // Create floating particles with Notamy colors
-            const colors = ['#00d9ff', '#00ff88', '#ff6b6b', '#ffab00', '#a78bfa'];
+            const colors = ['#00b4a6', '#00d9ff', '#00e676', '#ff6b6b', '#ffab00'];
             for (let i = 0; i < 40; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'bg-particle';
@@ -501,14 +501,14 @@
                     <div class="icon-inner">
                         <div class="candy-grid">
                             <div class="logo-candy" style="background: #ff6b6b; animation-delay: 0s;"></div>
-                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.2s;"></div>
+                            <div class="logo-candy" style="background: #00b4a6; animation-delay: 0.2s;"></div>
                             <div class="logo-candy" style="background: #ffab00; animation-delay: 0.4s;"></div>
-                            <div class="logo-candy" style="background: #00ff88; animation-delay: 0.6s;"></div>
-                            <div class="logo-candy" style="background: #a78bfa; animation-delay: 0.8s;"></div>
-                            <div class="logo-candy" style="background: #ff6b6b; animation-delay: 1s;"></div>
-                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 1.2s;"></div>
+                            <div class="logo-candy" style="background: #00e676; animation-delay: 0.6s;"></div>
+                            <div class="logo-candy" style="background: #00d9ff; animation-delay: 0.8s;"></div>
+                            <div class="logo-candy" style="background: #ff8787; animation-delay: 1s;"></div>
+                            <div class="logo-candy" style="background: #00b4a6; animation-delay: 1.2s;"></div>
                             <div class="logo-candy" style="background: #ffab00; animation-delay: 1.4s;"></div>
-                            <div class="logo-candy" style="background: #00ff88; animation-delay: 1.6s;"></div>
+                            <div class="logo-candy" style="background: #00e676; animation-delay: 1.6s;"></div>
                         </div>
                     </div>
                 </div>
@@ -524,8 +524,8 @@
                 <div class="game-icon">
                     <div class="icon-inner">
                         <div class="blocks-icon-container">
-                            <div class="falling-block" style="width: 25px; height: 25px; background: #00d9ff; left: 0; top: 0; animation-delay: 0s;">2</div>
-                            <div class="falling-block" style="width: 20px; height: 20px; background: #00ff88; right: 5px; top: 10px; animation-delay: 0.5s;">4</div>
+                            <div class="falling-block" style="width: 25px; height: 25px; background: #00b4a6; left: 0; top: 0; animation-delay: 0s;">2</div>
+                            <div class="falling-block" style="width: 20px; height: 20px; background: #00e676; right: 5px; top: 10px; animation-delay: 0.5s;">4</div>
                             <div class="falling-block" style="width: 30px; height: 30px; background: #ff6b6b; left: 15px; bottom: 0; animation-delay: 1s;">8</div>
                             <div class="falling-block" style="width: 18px; height: 18px; background: #ffab00; right: 0; bottom: 15px; animation-delay: 1.5s;">16</div>
                         </div>

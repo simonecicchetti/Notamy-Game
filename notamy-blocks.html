@@ -7,7 +7,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="data:application/json,{%22name%22:%22Notamy%20Blocks%22,%22short_name%22:%22Blocks%22,%22display%22:%22fullscreen%22,%22orientation%22:%22portrait%22,%22theme_color%22:%22%23000000%22,%22background_color%22:%22%23000000%22}">
     <title>Notamy Blocks</title>
     <style>
         * {
@@ -21,14 +20,13 @@
         }
         
         body {
-            background: linear-gradient(135deg, #000000, #0A0A0A);
+            background: #000;
             font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
             overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
             touch-action: none;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             overscroll-behavior: none;
         }
         
@@ -38,107 +36,141 @@
             position: relative;
             display: flex;
             flex-direction: column;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000 100%);
         }
         
         #gameUI {
             position: absolute;
-            top: 20px;
+            top: env(safe-area-inset-top, 10px);
             left: 0;
             right: 0;
             z-index: 10;
             display: none;
-            justify-content: center;
+            padding: 10px;
+        }
+        
+        .ui-top {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            padding: 0 10px;
+            margin-bottom: 10px;
         }
         
-        .ui-item {
-            background: rgba(26, 26, 26, 0.8);
-            padding: 10px 20px;
-            border-radius: 999px;
-            border: 1px solid #2A2A2A;
-            font-size: 16px;
-            font-weight: 600;
-            color: #FFFFFF;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        .home-button {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #333;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
             backdrop-filter: blur(10px);
-            animation: statusGlow 3s ease-in-out infinite;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.3s;
         }
         
-        .ui-item::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+        .home-button:active {
+            transform: scale(0.9);
+            border-color: #00d9ff;
         }
         
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes statusGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
-        }
-        
-        .ui-item span {
-            color: #00d9ff;
+        .score-display {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid #00d9ff;
+            font-size: 20px;
             font-weight: 700;
-            position: relative;
-            z-index: 1;
+            color: #fff;
+            text-shadow: 0 0 10px #00d9ff;
+            backdrop-filter: blur(10px);
+        }
+        
+        .score-display .score-value {
+            color: #00ff88;
+            font-size: 24px;
+        }
+        
+        .level-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.5);
         }
         
         #sizeBar {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 280px;
-            height: 16px;
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #2A2A2A;
-            border-radius: 999px;
+            position: relative;
+            width: 100%;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #333;
+            border-radius: 12px;
             overflow: hidden;
             backdrop-filter: blur(10px);
-            display: none;
         }
         
         #sizeFill {
             height: 100%;
-            background: linear-gradient(90deg, #00e676, #00d9ff, #9c27b0);
-            width: 30%;
+            background: linear-gradient(90deg, #00ff88, #00d9ff, #ff6b6b);
+            width: 0%;
             transition: width 0.3s ease-out;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            box-shadow: 0 0 20px currentColor;
+            position: relative;
         }
         
-        #levelUpMessage {
+        #sizeFill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 0 0 10px #fff;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .size-label {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 64px;
-            font-weight: 200;
-            letter-spacing: -2px;
-            color: #00d9ff;
-            text-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
-            display: none;
-            z-index: 100;
-            animation: levelUpPulse 1s ease-out;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
         }
         
-        @keyframes levelUpPulse {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        #comboDisplay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 40px currentColor;
+            display: none;
+            z-index: 100;
+            animation: comboPopup 0.5s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes comboPopup {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
         }
         
         #gameCanvas {
@@ -147,6 +179,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            image-rendering: crisp-edges;
         }
         
         #menuScreen {
@@ -155,7 +188,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #000000, #0A0A0A);
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -164,182 +197,130 @@
             padding: 20px;
         }
         
-        .menu-logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 32px;
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
-            padding: 3px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: float 3s ease-in-out infinite;
-            box-shadow: 0 0 60px rgba(0, 212, 255, 0.6);
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-            50% { transform: translateY(-10px) scale(1.05) rotate(3deg); }
-        }
-        
-        .logo-inner {
-            width: 114px;
-            height: 114px;
-            border-radius: 30px;
-            background: #000000;
-            border: 1px solid #1A1A1A;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .logo-animation {
+            width: 150px;
+            height: 150px;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .logo-blocks {
-            position: relative;
-            width: 80px;
-            height: 80px;
+            margin-bottom: 40px;
         }
         
         .logo-block {
             position: absolute;
-            border-radius: 4px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-radius: 20%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #FFFFFF;
-            font-size: 14px;
-            font-weight: 700;
-            animation: logoFloat 4s ease-in-out infinite;
+            color: #000;
+            font-weight: 900;
+            font-size: 24px;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.5);
         }
         
-        @keyframes logoFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(5px, -5px) scale(1.1); }
-            50% { transform: translate(-5px, -8px) scale(0.9); }
-            75% { transform: translate(-8px, 5px) scale(1.05); }
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(20px, -20px) rotate(10deg) scale(1.1); }
+            66% { transform: translate(-20px, 10px) rotate(-10deg) scale(0.9); }
         }
         
-        .menu-title {
-            font-size: 48px;
-            font-weight: 200;
-            color: #FFFFFF;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
-            animation: titleGlow 2s ease-in-out infinite;
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(-20px, 20px) rotate(-15deg) scale(0.9); }
+            66% { transform: translate(20px, -10px) rotate(15deg) scale(1.1); }
         }
         
-        @keyframes titleGlow {
-            0%, 100% { text-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
-            50% { text-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
+        .title {
+            font-size: 56px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d9ff, #00ff88, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(0, 217, 255, 0.5);
         }
         
-        .menu-subtitle {
-            font-size: 20px;
-            color: #00d9ff;
-            margin-bottom: 40px;
-            font-weight: 300;
-            opacity: 0.9;
-        }
-        
-        .menu-demo {
-            width: 200px;
-            height: 200px;
-            position: relative;
-            margin-bottom: 40px;
-        }
-        
-        .demo-block {
-            position: absolute;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            animation: demoFloat 4s ease-in-out infinite;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        @keyframes demoFloat {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(20px, -20px); }
-            50% { transform: translate(-20px, -30px); }
-            75% { transform: translate(-30px, 20px); }
-        }
-        
-        .menu-button {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+        .play-button {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
-            color: #000000;
-            padding: 24px 72px;
-            margin: 10px;
-            border-radius: 999px;
-            font-size: 20px;
-            font-weight: 600;
+            color: #000;
+            padding: 20px 80px;
+            border-radius: 50px;
+            font-size: 28px;
+            font-weight: 900;
             cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
             text-transform: uppercase;
-            box-shadow: 0 10px 40px rgba(0, 180, 166, 0.4);
-            transform: scale(1);
-            min-width: 200px;
-            min-height: 60px;
-            -webkit-tap-highlight-color: transparent;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            animation: buttonPulse 2s ease-in-out infinite;
         }
         
-        .menu-button:active {
+        @keyframes buttonPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(0, 255, 136, 0.7); }
+        }
+        
+        .play-button:active {
             transform: scale(0.95);
-            background: linear-gradient(135deg, #009a8f, #00b9e6);
         }
         
-        @media (max-width: 400px) {
-            .menu-button {
-                padding: 20px 60px;
-                font-size: 18px;
-            }
-        }
-        
-        .menu-instructions {
+        .instructions {
             text-align: center;
-            color: #FFFFFF;
-            font-size: 16px;
-            margin-top: 30px;
-            line-height: 1.8;
-            max-width: 400px;
-            opacity: 0.8;
+            color: #aaa;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 350px;
         }
         
-        .menu-instructions strong {
-            color: #00d9ff;
+        .instructions em {
+            color: #00ff88;
+            font-style: normal;
             font-weight: 600;
         }
         
-        #tutorialHint {
+        #tutorialOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 50;
+            backdrop-filter: blur(5px);
+        }
+        
+        .tutorial-hand {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+            border: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: tutorialMove 3s ease-in-out infinite;
+        }
+        
+        @keyframes tutorialMove {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(100px, -50px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        .tutorial-text {
             position: absolute;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(26, 26, 26, 0.9);
-            padding: 14px 32px;
-            border-radius: 999px;
-            border: 1px solid #00d9ff;
-            color: #FFFFFF;
-            font-size: 16px;
-            font-weight: 500;
-            z-index: 50;
-            animation: tutorialBounce 2s ease-in-out infinite;
-            display: none;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-        }
-        
-        @keyframes tutorialBounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-10px); }
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px 40px;
+            border-radius: 30px;
+            border: 2px solid #00ff88;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
         }
         
         #gameOverScreen {
@@ -355,209 +336,93 @@
             align-items: center;
             z-index: 25;
             padding: 20px;
-            backdrop-filter: blur(10px);
         }
         
         .game-over-title {
-            font-size: 56px;
-            font-weight: 200;
+            font-size: 64px;
+            font-weight: 900;
             color: #ff5252;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-            text-shadow: 0 0 30px rgba(255, 82, 82, 0.6);
-        }
-        
-        .final-stats {
-            display: flex;
-            gap: 40px;
             margin-bottom: 30px;
+            text-shadow: 0 0 40px rgba(255, 82, 82, 0.8);
+            animation: gameOverShake 0.5s ease-in-out;
         }
         
-        .stat-box {
-            text-align: center;
+        @keyframes gameOverShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
         
-        .stat-label {
-            font-size: 16px;
-            color: #999999;
-            margin-bottom: 5px;
-            font-weight: 400;
-        }
-        
-        .stat-value {
-            font-size: 48px;
-            font-weight: 100;
-            color: #00d9ff;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+        .final-score {
+            font-size: 80px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
         }
         
         .best-score {
-            font-size: 18px;
-            color: #999999;
+            font-size: 24px;
+            color: #aaa;
             margin-bottom: 40px;
         }
         
-        .play-again-button {
-            background: linear-gradient(135deg, #00b4a6, #00d9ff);
+        .best-score .best-value {
+            color: #ffab00;
+            font-weight: 700;
+        }
+        
+        .restart-button {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
-            color: #000000;
-            padding: 16px 48px;
-            border-radius: 999px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-        }
-        
-        #touchIndicator {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(0, 212, 255, 0.6);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 100;
-            display: none;
-            transform: translate(-50%, -50%);
-            animation: touchPulse 1s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-        }
-        
-        @keyframes touchPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
-        }
-        
-        .eat-effect {
-            position: absolute;
+            color: #000;
+            padding: 16px 60px;
+            border-radius: 50px;
             font-size: 24px;
-            font-weight: 600;
-            color: #00e676;
-            pointer-events: none;
-            animation: eatFloat 0.6s ease-out forwards;
-            z-index: 50;
-            text-shadow: 0 0 10px rgba(0, 230, 118, 0.8);
-        }
-        
-        @keyframes eatFloat {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -150%) scale(1.5); opacity: 0; }
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+            text-transform: uppercase;
+            animation: buttonPulse 2s ease-in-out infinite;
         }
         
         .particle {
             position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        
+        .powerup-effect {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 4px solid #ffab00;
             border-radius: 50%;
             pointer-events: none;
-            animation: particleFade 0.8s ease-out forwards;
+            animation: powerupRing 1s ease-out forwards;
         }
         
-        @keyframes particleFade {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.5); }
+        @keyframes powerupRing {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
         }
         
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            .ui-item {
-                padding: 8px 16px;
-                font-size: 14px;
-                gap: 10px;
-            }
-            
-            #gameUI {
-                gap: 10px;
-                top: 10px;
-            }
-            
-            #sizeBar {
-                top: 65px;
-                width: 240px;
-                height: 14px;
-            }
-            
-            .menu-title {
-                font-size: 36px;
-            }
-            
-            .menu-subtitle {
-                font-size: 18px;
-            }
-            
-            .menu-instructions {
-                font-size: 14px;
-            }
-            
-            #levelUpMessage {
-                font-size: 48px;
-            }
-            
-            .game-over-title {
-                font-size: 42px;
-            }
-            
-            .stat-value {
-                font-size: 36px;
-            }
+        .floating-score {
+            position: absolute;
+            font-size: 32px;
+            font-weight: 900;
+            color: #00ff88;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 0 0 10px currentColor;
         }
         
-        /* Landscape optimization */
-        @media (orientation: landscape) and (max-height: 500px) {
-            #gameUI {
-                flex-direction: row;
-                top: 5px;
-            }
-            
-            .ui-item {
-                padding: 6px 14px;
-                font-size: 12px;
-            }
-            
-            #sizeBar {
-                top: 50px;
-                width: 200px;
-                height: 12px;
-            }
-            
-            #menuScreen {
-                padding: 10px;
-            }
-            
-            .menu-logo {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 20px;
-            }
-            
-            .menu-title {
-                font-size: 32px;
-                margin-bottom: 5px;
-            }
-            
-            .menu-button {
-                padding: 16px 48px;
-                min-height: 48px;
-            }
-        }
-        
-        /* Performance mode for low-end devices */
-        @media (max-width: 400px), (max-height: 600px) {
-            * {
-                animation-duration: 0.5s !important;
-            }
-        }
-        
-        /* Notch/Safe area handling */
-        @supports (padding: env(safe-area-inset-top)) {
-            #gameUI {
-                top: calc(10px + env(safe-area-inset-top));
-            }
-            
-            #gameContainer {
-                padding-top: env(safe-area-inset-top);
-                padding-bottom: env(safe-area-inset-bottom);
-            }
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -150%) scale(1.5); opacity: 1; }
+            100% { transform: translate(-50%, -250%) scale(1); opacity: 0; }
         }
     </style>
 </head>
@@ -565,157 +430,94 @@
     <div id="gameContainer">
         <!-- Game UI -->
         <div id="gameUI">
-            <div class="ui-item">SIZE <span id="playerSize">30</span></div>
-            <div class="ui-item">LEVEL <span id="level">1</span></div>
-            <div class="ui-item">SCORE <span id="score">0</span></div>
+            <div class="ui-top">
+                <button class="home-button" onclick="goHome()">🏠</button>
+                <div class="score-display">
+                    <span class="score-value" id="score">0</span>
+                </div>
+                <div class="level-badge">LV <span id="level">1</span></div>
+            </div>
+            <div id="sizeBar">
+                <div id="sizeFill"></div>
+                <div class="size-label"><span id="playerSize">30</span> / 100</div>
+            </div>
         </div>
         
-        <!-- Size Progress Bar -->
-        <div id="sizeBar">
-            <div id="sizeFill"></div>
-        </div>
-        
-        <!-- Level Up Message -->
-        <div id="levelUpMessage">LEVEL UP!</div>
+        <!-- Combo Display -->
+        <div id="comboDisplay"></div>
         
         <!-- Canvas -->
         <canvas id="gameCanvas"></canvas>
         
-        <!-- Touch Indicator -->
-        <div id="touchIndicator"></div>
-        
-        <!-- Tutorial Hint -->
-        <div id="tutorialHint">Touch & Drag to Move!</div>
+        <!-- Tutorial Overlay -->
+        <div id="tutorialOverlay">
+            <div class="tutorial-hand"></div>
+            <div class="tutorial-text">Tocca e trascina per muoverti!</div>
+        </div>
         
         <!-- Menu Screen -->
-        <div id="menuScreen">
-            <div class="menu-logo">
-                <div class="logo-inner">
-                    <div class="logo-blocks">
-                        <div class="logo-block" style="width: 40px; height: 40px; background: #00d9ff; left: 20px; top: 20px; animation-delay: 0s;">30</div>
-                        <div class="logo-block" style="width: 30px; height: 30px; background: #00e676; left: 0px; top: 0px; animation-delay: 0.5s;">20</div>
-                        <div class="logo-block" style="width: 50px; height: 50px; background: #ff6b6b; left: 30px; top: 30px; animation-delay: 1s;">40</div>
-                        <div class="logo-block" style="width: 25px; height: 25px; background: #ffab00; left: 5px; top: 45px; animation-delay: 1.5s;">15</div>
-                    </div>
-                </div>
+        <div id="menuScreen" style="display: none;">
+            <div class="logo-animation">
+                <div class="logo-block" style="width: 60px; height: 60px; top: 20px; left: 20px; animation: float1 4s ease-in-out infinite;">30</div>
+                <div class="logo-block" style="width: 80px; height: 80px; top: 50px; right: 10px; animation: float2 4s ease-in-out infinite; animation-delay: 0.5s;">50</div>
+                <div class="logo-block" style="width: 50px; height: 50px; bottom: 20px; left: 40px; animation: float1 4s ease-in-out infinite; animation-delay: 1s;">20</div>
             </div>
             
-            <div class="menu-title">Notamy Blocks</div>
-            <div class="menu-subtitle">Eat or be Eaten!</div>
+            <div class="title">BLOCKS</div>
             
-            <button class="menu-button" onclick="startGame()">PLAY</button>
+            <button class="play-button" onclick="startGame()">GIOCA</button>
             
-            <div class="menu-instructions">
-                <strong>EAT</strong> smaller blocks to grow<br>
-                <strong>AVOID</strong> bigger blocks or die<br>
-                <strong>REACH</strong> size 100 to level up<br>
-                <strong>SURVIVE</strong> increasing speeds!
+            <div class="instructions">
+                Mangia i blocchi <em>più piccoli</em> per crescere<br>
+                Evita quelli <em>più grandi</em>!<br>
+                Raggiungi taglia <em>100</em> per salire di livello
             </div>
         </div>
         
         <!-- Game Over Screen -->
         <div id="gameOverScreen">
             <div class="game-over-title">GAME OVER</div>
-            
-            <div class="final-stats">
-                <div class="stat-box">
-                    <div class="stat-label">Final Score</div>
-                    <div class="stat-value" id="finalScore">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Level Reached</div>
-                    <div class="stat-value" id="finalLevel">1</div>
-                </div>
-            </div>
-            
-            <div class="best-score">Best Score: <span id="bestScore">0</span></div>
-            
-            <button class="play-again-button" onclick="restartGame()">PLAY AGAIN</button>
+            <div class="final-score" id="finalScore">0</div>
+            <div class="best-score">Record: <span class="best-value" id="bestScore">0</span></div>
+            <button class="restart-button" onclick="restartGame()">RIGIOCA</button>
         </div>
     </div>
 
     <script>
-        // Check if we should autostart the game
+        // Check autostart parameter
         const urlParams = new URLSearchParams(window.location.search);
         const shouldAutostart = urlParams.get('autostart') === 'true';
         
-        // Prevent scrolling and add iOS bounce prevention
+        // Prevent all scrolling and zooming
         document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
         document.addEventListener('gesturestart', (e) => e.preventDefault());
-        document.body.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
         
-        // Performance detection
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isLowEndDevice = navigator.hardwareConcurrency <= 2 || (isMobile && window.innerWidth < 400);
-        const supportsVibration = 'vibrate' in navigator;
-        
-        // Canvas and context
+        // Canvas setup
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d', { 
-            alpha: false,
-            desynchronized: true
-        });
+        const ctx = canvas.getContext('2d', { alpha: false });
         
-        // Adaptive canvas sizing
-        let canvasScale = 1;
+        // Responsive canvas
         function resizeCanvas() {
-            const maxSize = Math.min(window.innerWidth, window.innerHeight);
-            
-            // Adjust scale for small screens
-            if (maxSize < 400) {
-                canvasScale = 0.8;
-            } else if (maxSize < 600) {
-                canvasScale = 0.9;
-            } else {
-                canvasScale = 1;
-            }
-            
-            canvas.width = window.innerWidth * window.devicePixelRatio * canvasScale;
-            canvas.height = window.innerHeight * window.devicePixelRatio * canvasScale;
-            canvas.style.width = window.innerWidth + 'px';
-            canvas.style.height = window.innerHeight + 'px';
-            
-            ctx.scale(window.devicePixelRatio * canvasScale, window.devicePixelRatio * canvasScale);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
         resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
         
-        // Throttled resize handler
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(resizeCanvas, 100);
-        });
-        
-        // Prevent orientation change issues
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100);
-        });
-        
-        // Haptic feedback
-        function vibrate(pattern) {
-            if (supportsVibration && !isLowEndDevice) {
-                navigator.vibrate(pattern);
-            }
-        }
-        
-        // Game state
+        // Game variables
         let gameState = 'menu';
         let score = 0;
         let level = 1;
-        let speedMultiplier = 1;
+        let combo = 0;
+        let comboTimer = 0;
         let bestScore = parseInt(localStorage.getItem('notamyBlocksBest') || '0');
-        let camera = { zoom: 1, targetZoom: 1 };
         
-        // Performance settings
-        const MAX_PARTICLES = isLowEndDevice ? 20 : 50;
-        const PARTICLE_COUNT_MULTIPLIER = isLowEndDevice ? 0.5 : 1;
-        const TRAIL_LENGTH = isLowEndDevice ? 5 : 10;
-        const ENABLE_GLOW = !isLowEndDevice;
-        const ENABLE_ROTATION = !isLowEndDevice;
-        
-        // Touch optimization
-        let lastTouchTime = 0;
-        const DOUBLE_TAP_DELAY = 300;
+        // If autostart, show game immediately
+        if (shouldAutostart) {
+            document.getElementById('menuScreen').style.display = 'none';
+        } else {
+            document.getElementById('menuScreen').style.display = 'flex';
+        }
         
         // Player
         const player = {
@@ -724,31 +526,34 @@
             size: 30,
             targetX: 0,
             targetY: 0,
-            speed: 0.2,
+            speed: 0.15,
             color: '#00d9ff',
-            trail: []
+            growthAnimation: 0
         };
         
-        // Game objects
+        // Game settings - EASIER!
+        const LEVEL_SIZE = 100;
+        const WORLD_SIZE = 800; // Smaller world for mobile
+        const MIN_BLOCK_SIZE = 10;
+        const MAX_BLOCK_SIZE = 60; // Smaller max size
+        const INITIAL_BLOCKS = 20; // Fewer blocks
+        const SPAWN_SAFE_DISTANCE = 200;
+        const EAT_GROWTH_MULTIPLIER = 0.3; // More growth per eat
+        const SPEED_INCREASE_PER_LEVEL = 0.1; // Slower speed increase
+        
+        // Arrays
         let blocks = [];
         let particles = [];
+        let effects = [];
         
-        // Block colors from Notamy Crush palette
-        const blockColors = [
-            { main: '#00b4a6', gradient: ['#00d9ff', '#00b4a6', '#008a7f'] },
-            { main: '#00d9ff', gradient: ['#66e7ff', '#00d9ff', '#0099cc'] },
-            { main: '#ff6b6b', gradient: ['#ff9999', '#ff6b6b', '#cc5555'] },
-            { main: '#ffab00', gradient: ['#ffd966', '#ffab00', '#cc8800'] },
-            { main: '#00e676', gradient: ['#66ff99', '#00e676', '#00b85f'] },
-            { main: '#9c27b0', gradient: ['#c966d9', '#9c27b0', '#7a1f8d'] },
-            { main: '#ff5252', gradient: ['#ff8a80', '#ff5252', '#d32f2f'] }
+        // Block types with friendly colors
+        const blockTypes = [
+            { color: '#00ff88', shadow: 'rgba(0, 255, 136, 0.5)' },
+            { color: '#00d9ff', shadow: 'rgba(0, 217, 255, 0.5)' },
+            { color: '#ffab00', shadow: 'rgba(255, 171, 0, 0.5)' },
+            { color: '#ff6b6b', shadow: 'rgba(255, 107, 107, 0.5)' },
+            { color: '#a78bfa', shadow: 'rgba(167, 139, 250, 0.5)' }
         ];
-        
-        // Constants - Mobile optimized
-        const MIN_BLOCK_SIZE = 10;
-        const MAX_BLOCK_SIZE = 70;
-        const LEVEL_SIZE = 100;
-        const WORLD_SIZE = 1200;
         
         // Initialize game
         function initGame() {
@@ -758,526 +563,487 @@
             player.targetX = player.x;
             player.targetY = player.y;
             player.size = 30;
-            player.trail = [];
+            player.growthAnimation = 0;
             
             // Clear arrays
             blocks = [];
             particles = [];
+            effects = [];
             
-            // Create initial blocks
-            const blockCount = 30 + level * 5;
-            for (let i = 0; i < blockCount; i++) {
+            // Create blocks with easier distribution
+            for (let i = 0; i < INITIAL_BLOCKS + level * 2; i++) {
                 createBlock();
             }
-            
-            // Update camera
-            updateCamera();
         }
         
-        // Create block
+        // Create block with balanced difficulty
         function createBlock() {
             let size;
             const rand = Math.random();
             
-            if (rand < 0.5) {
-                // 50% smaller than player
-                size = MIN_BLOCK_SIZE + Math.random() * (player.size - MIN_BLOCK_SIZE - 5);
-            } else if (rand < 0.8) {
-                // 30% around player size
-                size = player.size * 0.9 + Math.random() * player.size * 0.2;
-            } else {
-                // 20% bigger than player
+            // 70% smaller blocks (easier!)
+            if (rand < 0.7) {
+                size = MIN_BLOCK_SIZE + Math.random() * (player.size * 0.8 - MIN_BLOCK_SIZE);
+            } 
+            // 20% similar size
+            else if (rand < 0.9) {
+                size = player.size * 0.8 + Math.random() * player.size * 0.4;
+            } 
+            // 10% bigger (danger!)
+            else {
                 size = player.size * 1.1 + Math.random() * (MAX_BLOCK_SIZE - player.size * 1.1);
             }
             
             size = Math.max(MIN_BLOCK_SIZE, Math.min(MAX_BLOCK_SIZE, size));
             
+            // Spawn away from player
             let x, y;
             do {
                 x = Math.random() * WORLD_SIZE;
                 y = Math.random() * WORLD_SIZE;
-            } while (Math.abs(x - player.x) < 300 && Math.abs(y - player.y) < 300);
+            } while (Math.hypot(x - player.x, y - player.y) < SPAWN_SAFE_DISTANCE);
             
-            const colorIndex = Math.floor(Math.random() * blockColors.length);
-            const isSmaller = size < player.size;
+            const type = blockTypes[Math.floor(Math.random() * blockTypes.length)];
+            const speedMultiplier = 1 + (level - 1) * SPEED_INCREASE_PER_LEVEL;
             
             blocks.push({
                 x: x,
                 y: y,
                 size: size,
-                speed: (20 / size) * speedMultiplier * 0.5,
-                colorData: blockColors[colorIndex],
-                color: isSmaller ? '#00e676' : '#ff5252',
+                speed: (15 / size) * speedMultiplier * 0.5,
+                type: type,
                 direction: Math.random() * Math.PI * 2,
                 directionChange: 0,
-                rotation: 0,
-                glowIntensity: 0
+                pulseAnimation: 0,
+                isEdible: size < player.size
             });
         }
         
-        // Update camera
-        function updateCamera() {
-            camera.targetZoom = 30 / player.size;
-            camera.zoom += (camera.targetZoom - camera.zoom) * 0.1;
+        // Simple AI movement
+        function updateBlockAI(block) {
+            block.directionChange--;
+            if (block.directionChange <= 0) {
+                block.directionChange = 60 + Math.random() * 60;
+                block.direction += (Math.random() - 0.5) * Math.PI * 0.5;
+            }
+            
+            // Move
+            block.x += Math.cos(block.direction) * block.speed;
+            block.y += Math.sin(block.direction) * block.speed;
+            
+            // Bounce off walls
+            if (block.x <= block.size || block.x >= WORLD_SIZE - block.size) {
+                block.direction = Math.PI - block.direction;
+                block.x = Math.max(block.size, Math.min(WORLD_SIZE - block.size, block.x));
+            }
+            if (block.y <= block.size || block.y >= WORLD_SIZE - block.size) {
+                block.direction = -block.direction;
+                block.y = Math.max(block.size, Math.min(WORLD_SIZE - block.size, block.y));
+            }
         }
         
         // Update game
         function update() {
             if (gameState !== 'playing') return;
             
-            // Update player movement
+            // Smooth player movement
             const dx = player.targetX - player.x;
             const dy = player.targetY - player.y;
             player.x += dx * player.speed;
             player.y += dy * player.speed;
             
-            // Keep player in bounds
-            player.x = Math.max(player.size/2, Math.min(WORLD_SIZE - player.size/2, player.x));
-            player.y = Math.max(player.size/2, Math.min(WORLD_SIZE - player.size/2, player.y));
+            // Keep in bounds
+            player.x = Math.max(player.size, Math.min(WORLD_SIZE - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(WORLD_SIZE - player.size, player.y));
             
-            // Update trail (with performance optimization)
-            player.trail.push({ x: player.x, y: player.y });
-            if (player.trail.length > TRAIL_LENGTH) player.trail.shift();
+            // Update animations
+            player.growthAnimation *= 0.95;
+            if (comboTimer > 0) comboTimer--;
             
             // Update blocks
             blocks.forEach((block, index) => {
-                // AI movement
-                block.directionChange--;
-                if (block.directionChange <= 0) {
-                    block.directionChange = 60 + Math.random() * 120;
-                    block.direction += (Math.random() - 0.5) * Math.PI;
+                updateBlockAI(block);
+                
+                // Update edibility
+                block.isEdible = block.size < player.size;
+                
+                // Pulse animation for edible blocks
+                if (block.isEdible) {
+                    block.pulseAnimation = (block.pulseAnimation + 0.1) % (Math.PI * 2);
                 }
                 
-                // Move
-                block.x += Math.cos(block.direction) * block.speed;
-                block.y += Math.sin(block.direction) * block.speed;
-                
-                // Bounce off walls
-                if (block.x <= block.size/2 || block.x >= WORLD_SIZE - block.size/2) {
-                    block.direction = Math.PI - block.direction;
-                    block.x = Math.max(block.size/2, Math.min(WORLD_SIZE - block.size/2, block.x));
-                }
-                if (block.y <= block.size/2 || block.y >= WORLD_SIZE - block.size/2) {
-                    block.direction = -block.direction;
-                    block.y = Math.max(block.size/2, Math.min(WORLD_SIZE - block.size/2, block.y));
-                }
-                
-                // Update color based on size comparison
-                block.color = block.size < player.size ? '#00e676' : '#ff5252';
-                
-                // Subtle rotation (only on high-end devices)
-                if (ENABLE_ROTATION) {
-                    block.rotation += 0.5;
-                }
-                
-                // Check collision with player
-                const dist = Math.sqrt(Math.pow(player.x - block.x, 2) + Math.pow(player.y - block.y, 2));
-                const minDist = (player.size + block.size) / 2;
-                
-                // Glow when close
-                block.glowIntensity = Math.max(0, 1 - (dist / 200));
+                // Check collision
+                const dist = Math.hypot(player.x - block.x, player.y - block.y);
+                const minDist = (player.size + block.size) * 0.8; // More forgiving collision
                 
                 if (dist < minDist) {
-                    if (block.size < player.size) {
-                        // Eat block
-                        const growth = block.size * 0.2;
-                        player.size += growth;
-                        score += Math.floor(block.size);
-                        
-                        createParticles(block.x, block.y, block.color, block.size);
-                        showEatEffect(block.x, block.y, Math.floor(block.size));
-                        
-                        // Haptic feedback for eating
-                        vibrate(20);
-                        
-                        blocks.splice(index, 1);
-                        createBlock();
-                        
-                        // Check level up
-                        if (player.size >= LEVEL_SIZE) {
-                            levelUp();
-                        }
+                    if (block.isEdible) {
+                        // EAT!
+                        eatBlock(block, index);
                     } else {
                         // Game over
-                        vibrate([100, 50, 100]); // Strong vibration for death
                         gameOver();
                     }
                 }
             });
             
             // Update particles
-            particles.forEach((particle, index) => {
-                particle.x += particle.vx;
-                particle.y += particle.vy;
-                particle.life--;
-                particle.vx *= 0.98;
-                particle.vy *= 0.98;
-                
-                if (particle.life <= 0) {
-                    particles.splice(index, 1);
-                }
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                p.vx *= 0.95;
+                p.vy *= 0.95;
+                return p.life > 0;
             });
-            
-            // Update camera
-            updateCamera();
             
             // Update UI
             updateUI();
         }
         
-        // Level up
+        // Eat block with juicy feedback
+        function eatBlock(block, index) {
+            // Calculate growth
+            const growth = block.size * EAT_GROWTH_MULTIPLIER;
+            player.size += growth;
+            player.growthAnimation = 1;
+            
+            // Score with combo
+            const baseScore = Math.floor(block.size);
+            combo++;
+            comboTimer = 60; // 1 second at 60fps
+            const comboBonus = combo > 1 ? combo * 10 : 0;
+            score += baseScore + comboBonus;
+            
+            // Show combo
+            if (combo > 2) {
+                showCombo(combo);
+            }
+            
+            // Particles explosion
+            createParticles(block.x, block.y, block.type, block.size);
+            
+            // Floating score
+            showFloatingScore(block.x, block.y, baseScore + comboBonus);
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(20);
+            }
+            
+            // Remove and replace
+            blocks.splice(index, 1);
+            createBlock();
+            
+            // Check level up
+            if (player.size >= LEVEL_SIZE) {
+                levelUp();
+            }
+        }
+        
+        // Level up celebration
         function levelUp() {
             level++;
-            speedMultiplier = 1 + (level - 1) * 0.2;
             player.size = 30;
+            combo = 0;
             
-            // Haptic feedback for level up
-            vibrate([50, 100, 50]);
+            // Big celebration
+            showCombo("LEVEL UP!");
+            createPowerupEffect(player.x, player.y);
             
-            // Show level up message
-            document.getElementById('levelUpMessage').style.display = 'block';
-            document.getElementById('levelUpMessage').textContent = `LEVEL ${level}!`;
+            // Haptic
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 100, 50]);
+            }
             
-            setTimeout(() => {
-                document.getElementById('levelUpMessage').style.display = 'none';
-            }, 1000);
-            
-            // Recreate blocks with new speed
+            // Regenerate world
             blocks = [];
-            const blockCount = 30 + level * 5;
-            for (let i = 0; i < blockCount; i++) {
+            for (let i = 0; i < INITIAL_BLOCKS + level * 2; i++) {
                 createBlock();
             }
         }
         
-        // Create particles
-        function createParticles(x, y, color, size) {
-            // Limit particles on low-end devices
-            if (particles.length > MAX_PARTICLES) return;
+        // Show combo popup
+        function showCombo(text) {
+            const comboEl = document.getElementById('comboDisplay');
+            comboEl.textContent = typeof text === 'number' ? `${text}x COMBO!` : text;
+            comboEl.style.display = 'block';
             
-            const count = Math.floor(size / 5 * PARTICLE_COUNT_MULTIPLIER);
+            setTimeout(() => {
+                comboEl.style.display = 'none';
+            }, 1000);
+        }
+        
+        // Create particles
+        function createParticles(x, y, type, size) {
+            const count = Math.min(20, Math.floor(size / 3));
             for (let i = 0; i < count; i++) {
                 const angle = (Math.PI * 2 / count) * i;
+                const speed = 2 + Math.random() * 3;
                 particles.push({
                     x: x,
                     y: y,
-                    vx: Math.cos(angle) * (2 + Math.random() * 3),
-                    vy: Math.sin(angle) * (2 + Math.random() * 3),
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
                     life: 30,
-                    color: color,
-                    size: 3 + Math.random() * (size / 10)
+                    color: type.color,
+                    size: 3 + Math.random() * 5
                 });
             }
         }
         
-        // Show eat effect
-        function showEatEffect(x, y, points) {
-            const worldToScreen = getWorldToScreen();
-            const screenX = (x - player.x) * camera.zoom + canvas.width / 2;
-            const screenY = (y - player.y) * camera.zoom + canvas.height / 2;
+        // Show floating score
+        function showFloatingScore(x, y, points) {
+            const el = document.createElement('div');
+            el.className = 'floating-score';
+            el.textContent = '+' + points;
             
-            const effect = document.createElement('div');
-            effect.className = 'eat-effect';
-            effect.textContent = '+' + points;
-            effect.style.left = screenX + 'px';
-            effect.style.top = screenY + 'px';
-            document.getElementById('gameContainer').appendChild(effect);
+            const screenX = (x - player.x) + canvas.width / 2;
+            const screenY = (y - player.y) + canvas.height / 2;
             
-            setTimeout(() => effect.remove(), 600);
+            el.style.left = screenX + 'px';
+            el.style.top = screenY + 'px';
+            
+            document.getElementById('gameContainer').appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+        
+        // Create powerup effect
+        function createPowerupEffect(x, y) {
+            const el = document.createElement('div');
+            el.className = 'powerup-effect';
+            
+            const screenX = (x - player.x) + canvas.width / 2;
+            const screenY = (y - player.y) + canvas.height / 2;
+            
+            el.style.left = screenX + 'px';
+            el.style.top = screenY + 'px';
+            
+            document.getElementById('gameContainer').appendChild(el);
+            setTimeout(() => el.remove(), 1000);
         }
         
         // Update UI
         function updateUI() {
-            document.getElementById('playerSize').textContent = Math.floor(player.size);
-            document.getElementById('level').textContent = level;
             document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('playerSize').textContent = Math.floor(player.size);
             
-            // Update size bar
-            const progress = (player.size - 30) / (LEVEL_SIZE - 30) * 100;
-            document.getElementById('sizeFill').style.width = Math.min(100, progress) + '%';
+            const progress = ((player.size - 30) / (LEVEL_SIZE - 30)) * 100;
+            document.getElementById('sizeFill').style.width = Math.min(100, Math.max(0, progress)) + '%';
+            
+            if (comboTimer <= 0) combo = 0;
         }
         
         // Drawing
         function draw() {
-            // Only draw if game is playing
             if (gameState !== 'playing') return;
             
-            // Clear with gradient background
-            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            bgGradient.addColorStop(0, '#000000');
-            bgGradient.addColorStop(1, '#0A0A0A');
-            ctx.fillStyle = bgGradient;
+            // Clear
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Save context for camera transform
+            // Camera follow player
             ctx.save();
+            ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
             
-            // Apply camera transform
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.scale(camera.zoom, camera.zoom);
-            ctx.translate(-player.x, -player.y);
-            
-            // Draw subtle grid
-            ctx.strokeStyle = 'rgba(0, 212, 255, 0.05)';
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
             ctx.lineWidth = 1;
-            const gridSize = 100;
+            const gridSize = 50;
             
-            const startX = Math.floor((player.x - canvas.width / camera.zoom) / gridSize) * gridSize;
-            const endX = Math.ceil((player.x + canvas.width / camera.zoom) / gridSize) * gridSize;
-            const startY = Math.floor((player.y - canvas.height / camera.zoom) / gridSize) * gridSize;
-            const endY = Math.ceil((player.y + canvas.height / camera.zoom) / gridSize) * gridSize;
-            
-            for (let x = startX; x <= endX; x += gridSize) {
+            for (let x = 0; x < WORLD_SIZE; x += gridSize) {
                 ctx.beginPath();
-                ctx.moveTo(x, startY);
-                ctx.lineTo(x, endY);
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, WORLD_SIZE);
                 ctx.stroke();
             }
             
-            for (let y = startY; y <= endY; y += gridSize) {
+            for (let y = 0; y < WORLD_SIZE; y += gridSize) {
                 ctx.beginPath();
-                ctx.moveTo(startX, y);
-                ctx.lineTo(endX, y);
+                ctx.moveTo(0, y);
+                ctx.lineTo(WORLD_SIZE, y);
                 ctx.stroke();
             }
             
-            // Draw world boundaries with glow (only on high-end devices)
-            if (ENABLE_GLOW) {
-                ctx.shadowColor = '#ff5252';
-                ctx.shadowBlur = 20;
-            }
+            // Draw world border
             ctx.strokeStyle = '#ff5252';
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 4;
             ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
-            ctx.shadowBlur = 0;
             
             // Draw particles
-            particles.forEach(particle => {
-                const alpha = particle.life / 30;
-                
-                // Create gradient for particle
-                const gradient = ctx.createRadialGradient(
-                    particle.x, particle.y, 0,
-                    particle.x, particle.y, particle.size
-                );
-                gradient.addColorStop(0, particle.color + Math.floor(alpha * 255).toString(16).padStart(2, '0'));
-                gradient.addColorStop(1, 'transparent');
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(
-                    particle.x - particle.size,
-                    particle.y - particle.size,
-                    particle.size * 2,
-                    particle.size * 2
-                );
+            particles.forEach(p => {
+                const alpha = p.life / 30;
+                ctx.fillStyle = p.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
             });
             
             // Draw blocks
             blocks.forEach(block => {
-                const screenDist = Math.sqrt(Math.pow(block.x - player.x, 2) + Math.pow(block.y - player.y, 2));
-                if (screenDist < canvas.width / camera.zoom) {
-                    ctx.save();
-                    ctx.translate(block.x, block.y);
-                    if (ENABLE_ROTATION) {
-                        ctx.rotate(block.rotation * Math.PI / 180);
-                    }
-                    
-                    // Glow effect (only on high-end devices)
-                    if (ENABLE_GLOW && block.glowIntensity > 0) {
-                        ctx.shadowColor = block.color;
-                        ctx.shadowBlur = 20 * block.glowIntensity;
-                    }
-                    
-                    // Simplified gradient for low-end devices
-                    if (isLowEndDevice) {
-                        ctx.fillStyle = block.color;
-                    } else {
-                        // Create gradient
-                        const gradient = ctx.createLinearGradient(
-                            -block.size/2, -block.size/2,
-                            block.size/2, block.size/2
-                        );
-                        gradient.addColorStop(0, block.color);
-                        gradient.addColorStop(0.5, block.colorData.main);
-                        gradient.addColorStop(1, block.color);
-                        ctx.fillStyle = gradient;
-                    }
-                    
-                    // Draw block with rounded corners
-                    ctx.beginPath();
-                    ctx.roundRect(-block.size/2, -block.size/2, block.size, block.size, block.size/8);
-                    ctx.fill();
-                    
-                    // Inner highlight (only on high-end devices)
-                    if (!isLowEndDevice) {
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                        ctx.beginPath();
-                        ctx.roundRect(-block.size/3, -block.size/3, block.size/3, block.size/3, block.size/12);
-                        ctx.fill();
-                    }
-                    
-                    // Size text
-                    ctx.restore();
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = `bold ${Math.max(12, block.size * 0.4)}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(Math.floor(block.size), block.x, block.y);
+                const scale = block.isEdible ? 1 + Math.sin(block.pulseAnimation) * 0.05 : 1;
+                
+                ctx.save();
+                ctx.translate(block.x, block.y);
+                ctx.scale(scale, scale);
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(-block.size/2 + 2, -block.size/2 + 2, block.size, block.size);
+                
+                // Block with gradient
+                const gradient = ctx.createLinearGradient(-block.size/2, -block.size/2, block.size/2, block.size/2);
+                if (block.isEdible) {
+                    gradient.addColorStop(0, block.type.color);
+                    gradient.addColorStop(1, block.type.shadow);
+                } else {
+                    gradient.addColorStop(0, '#ff5252');
+                    gradient.addColorStop(1, 'rgba(255, 82, 82, 0.7)');
                 }
-            });
-            
-            // Draw player trail
-            player.trail.forEach((pos, i) => {
-                const alpha = (i / player.trail.length) * 0.3;
-                const gradient = ctx.createRadialGradient(
-                    pos.x, pos.y, 0,
-                    pos.x, pos.y, player.size * (0.5 + i / player.trail.length * 0.5)
-                );
-                gradient.addColorStop(0, player.color + Math.floor(alpha * 255).toString(16).padStart(2, '0'));
-                gradient.addColorStop(1, 'transparent');
+                
                 ctx.fillStyle = gradient;
-                const size = player.size * (0.5 + i / player.trail.length * 0.5);
-                ctx.fillRect(pos.x - size/2, pos.y - size/2, size, size);
+                ctx.fillRect(-block.size/2, -block.size/2, block.size, block.size);
+                
+                // Shine effect
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(-block.size/2, -block.size/2, block.size * 0.3, block.size * 0.3);
+                
+                // Size text
+                ctx.restore();
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${Math.max(14, block.size * 0.4)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(Math.floor(block.size), block.x, block.y);
             });
             
-            // Draw player with glow (optimized)
-            if (ENABLE_GLOW) {
-                ctx.shadowColor = player.color;
-                ctx.shadowBlur = 30;
+            // Draw player with growth animation
+            const playerScale = 1 + player.growthAnimation * 0.2;
+            
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.scale(playerScale, playerScale);
+            
+            // Player shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(-player.size/2 + 3, -player.size/2 + 3, player.size, player.size);
+            
+            // Player gradient
+            const playerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, player.size/2);
+            playerGradient.addColorStop(0, '#00d9ff');
+            playerGradient.addColorStop(0.7, '#0099cc');
+            playerGradient.addColorStop(1, '#006699');
+            
+            ctx.fillStyle = playerGradient;
+            ctx.fillRect(-player.size/2, -player.size/2, player.size, player.size);
+            
+            // Player shine
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(-player.size/2, -player.size/2, player.size * 0.4, player.size * 0.4);
+            
+            // Player outline when growing
+            if (player.growthAnimation > 0.1) {
+                ctx.strokeStyle = `rgba(0, 255, 136, ${player.growthAnimation})`;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(-player.size/2, -player.size/2, player.size, player.size);
             }
             
-            // Player gradient (simplified for low-end)
-            if (isLowEndDevice) {
-                ctx.fillStyle = player.color;
-            } else {
-                const playerGradient = ctx.createRadialGradient(
-                    player.x - player.size/4, player.y - player.size/4, 0,
-                    player.x, player.y, player.size/2
-                );
-                playerGradient.addColorStop(0, '#66e7ff');
-                playerGradient.addColorStop(0.5, player.color);
-                playerGradient.addColorStop(1, '#0099cc');
-                ctx.fillStyle = playerGradient;
-            }
+            ctx.restore();
             
-            ctx.beginPath();
-            ctx.roundRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size, player.size/6);
-            ctx.fill();
-            
-            ctx.shadowBlur = 0;
-            
-            // Player inner glow (only on high-end)
-            if (!isLowEndDevice) {
-                const innerGlow = ctx.createRadialGradient(
-                    player.x, player.y, 0,
-                    player.x, player.y, player.size/3
-                );
-                innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-                innerGlow.addColorStop(1, 'transparent');
-                ctx.fillStyle = innerGlow;
-                ctx.fillRect(player.x - player.size/2, player.y - player.size/2, player.size, player.size);
-            }
-            
-            // Player size text
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = `bold ${Math.max(14, player.size * 0.5)}px Arial`;
+            // Player size
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold ${Math.max(16, player.size * 0.5)}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(Math.floor(player.size), player.x, player.y);
             
-            // Restore context
             ctx.restore();
         }
         
-        // Get world to screen coordinates
-        function getWorldToScreen() {
-            return {
-                x: (worldX) => (worldX - player.x) * camera.zoom + canvas.width / 2,
-                y: (worldY) => (worldY - player.y) * camera.zoom + canvas.height / 2
-            };
-        }
-        
-        // Get screen to world coordinates
-        function getScreenToWorld(screenX, screenY) {
-            return {
-                x: (screenX - canvas.width / 2) / camera.zoom + player.x,
-                y: (screenY - canvas.height / 2) / camera.zoom + player.y
-            };
-        }
-        
-        // Input handlers with improved touch response
-        function handleInput(screenX, screenY) {
-            const world = getScreenToWorld(screenX, screenY);
-            player.targetX = world.x;
-            player.targetY = world.y;
-            
-            // Show touch indicator
-            const indicator = document.getElementById('touchIndicator');
-            indicator.style.display = 'block';
-            indicator.style.left = screenX + 'px';
-            indicator.style.top = screenY + 'px';
-        }
-        
-        // Prevent double tap zoom
-        let lastTouchEnd = 0;
-        canvas.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-            document.getElementById('touchIndicator').style.display = 'none';
-        });
+        // Touch controls
+        let touchActive = false;
         
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if (gameState === 'playing') {
+                touchActive = true;
                 const touch = e.touches[0];
-                handleInput(touch.clientX, touch.clientY);
-                vibrate(10); // Light haptic feedback
+                updateTarget(touch.clientX, touch.clientY);
             }
         });
         
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (gameState === 'playing') {
+            if (gameState === 'playing' && touchActive) {
                 const touch = e.touches[0];
-                handleInput(touch.clientX, touch.clientY);
+                updateTarget(touch.clientX, touch.clientY);
             }
         });
         
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchActive = false;
+        });
+        
+        // Mouse controls
         canvas.addEventListener('mousedown', (e) => {
             if (gameState === 'playing') {
-                handleInput(e.clientX, e.clientY);
+                touchActive = true;
+                updateTarget(e.clientX, e.clientY);
             }
         });
         
         canvas.addEventListener('mousemove', (e) => {
-            if (gameState === 'playing' && e.buttons === 1) {
-                handleInput(e.clientX, e.clientY);
+            if (gameState === 'playing' && touchActive) {
+                updateTarget(e.clientX, e.clientY);
             }
         });
         
-        canvas.addEventListener('mouseup', (e) => {
-            document.getElementById('touchIndicator').style.display = 'none';
+        canvas.addEventListener('mouseup', () => {
+            touchActive = false;
         });
+        
+        function updateTarget(screenX, screenY) {
+            // Convert screen to world coordinates
+            const worldX = screenX - canvas.width / 2 + player.x;
+            const worldY = screenY - canvas.height / 2 + player.y;
+            
+            player.targetX = worldX;
+            player.targetY = worldY;
+        }
         
         // Game flow
         function startGame() {
             gameState = 'playing';
-            document.getElementById('menuScreen').style.display = 'none';
-            document.getElementById('gameUI').style.display = 'flex';
-            document.getElementById('sizeBar').style.display = 'block';
             score = 0;
             level = 1;
-            speedMultiplier = 1;
+            combo = 0;
+            comboTimer = 0;
+            
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('gameUI').style.display = 'block';
+            
             initGame();
             
-            // Show tutorial for 5 seconds
-            document.getElementById('tutorialHint').style.display = 'block';
+            // Show tutorial for first time
+            if (!localStorage.getItem('notamyTutorialShown')) {
+                showTutorial();
+                localStorage.setItem('notamyTutorialShown', 'true');
+            }
+        }
+        
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        function showTutorial() {
+            const overlay = document.getElementById('tutorialOverlay');
+            overlay.style.display = 'block';
+            
             setTimeout(() => {
-                document.getElementById('tutorialHint').style.display = 'none';
-            }, 5000);
+                overlay.style.display = 'none';
+            }, 3000);
         }
         
         function gameOver() {
@@ -1289,7 +1055,6 @@
             }
             
             document.getElementById('finalScore').textContent = score;
-            document.getElementById('finalLevel').textContent = level;
             document.getElementById('bestScore').textContent = bestScore;
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
@@ -1299,47 +1064,29 @@
             startGame();
         }
         
-        // Game loop with performance optimization
+        // Game loop
         let lastTime = 0;
-        const targetFPS = isLowEndDevice ? 30 : 60;
-        const frameTime = 1000 / targetFPS;
-        
         function gameLoop(currentTime) {
             const deltaTime = currentTime - lastTime;
             
-            if (deltaTime >= frameTime) {
+            if (deltaTime >= 16) { // ~60 FPS
                 update();
                 draw();
-                lastTime = currentTime - (deltaTime % frameTime);
+                lastTime = currentTime;
             }
             
             requestAnimationFrame(gameLoop);
         }
         
-        // Polyfill for roundRect if needed
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-                if (w < 2 * r) r = w / 2;
-                if (h < 2 * r) r = h / 2;
-                this.moveTo(x + r, y);
-                this.arcTo(x + w, y, x + w, y + h, r);
-                this.arcTo(x + w, y + h, x, y + h, r);
-                this.arcTo(x, y + h, x, y, r);
-                this.arcTo(x, y, x + w, y, r);
-                this.closePath();
-                return this;
-            };
-        }
-        
-        // Start the game loop
+        // Start
         requestAnimationFrame(gameLoop);
         
-        // Autostart if coming from index
-        window.addEventListener('load', () => {
-            if (shouldAutostart) {
-                setTimeout(startGame, 100); // Small delay to ensure everything is loaded
-            }
-        });
+        // Auto-start if from index
+        if (shouldAutostart) {
+            setTimeout(() => {
+                startGame();
+            }, 100);
+        }
     </script>
 </body>
 </html>

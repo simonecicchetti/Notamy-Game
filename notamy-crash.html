@@ -396,7 +396,7 @@
         <div id="gameHeader">
             <div id="gameInfo">
                 <div class="status-item">SCORE <span id="score">0</span></div>
-                <div class="status-item" id="timeItem">TIME <span id="time">120</span></div>
+                <div class="status-item" id="timeItem">TIME <span id="time">90</span></div>
                 <div class="status-item">LEVEL <span id="level">1</span></div>
             </div>
         </div>
@@ -477,7 +477,7 @@
         // Game state
         let gameState = 'menu';
         let score = 0;
-        let timeLeft = 120; // Reduced from 180 to 120 seconds (2 minutes)
+        let timeLeft = 90; // Reduced from 120 to 90 seconds
         let level = 1;
         let combo = 0;
         let streak = 0;
@@ -713,7 +713,7 @@
             }
             
             // Set new timer
-            hintTimer = setTimeout(showHint, 8000); // Increased from 5000ms to 8000ms
+            hintTimer = setTimeout(showHint, 5000); // Reduced from 8000ms to 5000ms
         }
         
         // Check matches at position
@@ -1146,6 +1146,7 @@
         // Enhanced match processing with power-up creation
         function processMatches(matches) {
             let totalScore = 0;
+            let totalTimeBonus = 0;
             combo++;
             
             // Vibrate for successful match
@@ -1157,6 +1158,26 @@
             matches.forEach((match, index) => {
                 let centerX = 0, centerY = 0;
                 let powerUpPos = null;
+                
+                // Calculate time bonus based on match size and combo
+                let matchTimeBonus = 0;
+                if (match.length === 3) {
+                    matchTimeBonus = 1.5; // Basic match gives 1.5 seconds
+                } else if (match.length === 4) {
+                    matchTimeBonus = 3; // 4-match gives 3 seconds
+                } else if (match.length >= 5) {
+                    matchTimeBonus = 5; // 5+ match gives 5 seconds
+                }
+                
+                // Add combo multiplier to time bonus
+                matchTimeBonus *= (1 + (combo - 1) * 0.5); // Each combo level adds 50% more time
+                
+                // Add streak bonus
+                if (streak > 1) {
+                    matchTimeBonus *= (1 + (streak - 1) * 0.25); // Each streak adds 25% more time
+                }
+                
+                totalTimeBonus += matchTimeBonus;
                 
                 // Determine power-up type based on match
                 if (match.length >= 5 || (match.length >= 5 && checkIfTShape(match))) {
@@ -1206,6 +1227,12 @@
                 }
             });
             
+            // Apply time bonus
+            if (totalTimeBonus > 0 && gameState === 'playing') {
+                timeLeft = Math.min(120, timeLeft + totalTimeBonus);
+                createTimeBonus(Math.round(totalTimeBonus));
+            }
+            
             score += totalScore;
             updateUI();
             
@@ -1253,7 +1280,7 @@
             
             switch(type) {
                 case 'bomb':
-                    bonusTime = 2; // Reduced from 3
+                    bonusTime = 5; // Increased from 2
                     // Explode 3x3 area
                     for (let r = row - 1; r <= row + 1; r++) {
                         for (let c = col - 1; c <= col + 1; c++) {
@@ -1274,7 +1301,7 @@
                     break;
                     
                 case 'rocket':
-                    bonusTime = 3; // Reduced from 5
+                    bonusTime = 7; // Increased from 3
                     // Clear entire row and column
                     for (let r = 0; r < GRID_SIZE; r++) {
                         if (board[r][col] && !board[r][col].marked) {
@@ -1303,7 +1330,7 @@
                     break;
                     
                 case 'rainbow':
-                    bonusTime = 5; // Reduced from 7
+                    bonusTime = 10; // Increased from 5
                     // Rainbow power-up: clear a random candy type
                     let targetType;
                     if (board[row][col] && !board[row][col].powerUp) {
@@ -1596,9 +1623,9 @@
                 // Check inactivity
                 const inactiveTime = Date.now() - lastMoveTime;
                 
-                // Increase decay rate after 8 seconds of inactivity (was 10)
-                if (inactiveTime > 8000) {
-                    timeDecayRate = Math.min(2, 1 + (inactiveTime - 8000) / 4000); // Max 2x, gradual increase
+                // Increase decay rate after 6 seconds of inactivity
+                if (inactiveTime > 6000) {
+                    timeDecayRate = Math.min(1.5, 1 + (inactiveTime - 6000) / 6000); // Max 1.5x, very gradual increase
                     document.getElementById('timeItem').classList.add('decay');
                     document.getElementById('inactivityWarning').style.display = 'block';
                     // Add screen shake effect when time is speeding up
@@ -1631,14 +1658,6 @@
                     timeItem.classList.remove('warning', 'critical');
                 }
                 
-                // Add time bonus for big combos
-                if (combo >= 4 && gameState === 'playing') {
-                    const bonusTime = combo >= 6 ? 3 : 2; // Reduced bonus time
-                    timeLeft = Math.min(120, timeLeft + bonusTime); // Max 120 instead of 180
-                    createTimeBonus(bonusTime);
-                    combo = 0;
-                }
-                
                 if (timeLeft <= 0) {
                     clearInterval(gameTimer);
                     gameOver();
@@ -1668,7 +1687,7 @@
         function startGame() {
             gameState = 'playing';
             score = 0;
-            timeLeft = 120; // Reduced from 180 to 120 seconds (2 minutes)
+            timeLeft = 90; // Reduced from 120 to 90 seconds
             level = 1;
             combo = 0;
             streak = 0;

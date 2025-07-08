@@ -1373,6 +1373,11 @@
                 particles = [];
                 powerups = [];
                 createPipe();
+                
+                // Auto-jump dopo un breve delay per dare tempo al giocatore di prepararsi
+                setTimeout(() => {
+                    jump();
+                }, 250);
             }, 100);
         }
         

@@ -387,7 +387,7 @@
         <div id="gameHeader">
             <div id="gameInfo">
                 <div class="status-item">SCORE <span id="score">0</span></div>
-                <div class="status-item" id="timeItem">TIME <span id="time">60</span></div>
+                <div class="status-item" id="timeItem">TIME <span id="time">120</span></div>
                 <div class="status-item">LEVEL <span id="level">1</span></div>
             </div>
         </div>
@@ -468,7 +468,7 @@
         // Game state
         let gameState = 'menu';
         let score = 0;
-        let timeLeft = 60;
+        let timeLeft = 120; // Increased from 60 to 120 seconds
         let level = 1;
         let combo = 0;
         let streak = 0;
@@ -704,7 +704,7 @@
             }
             
             // Set new timer
-            hintTimer = setTimeout(showHint, 5000);
+            hintTimer = setTimeout(showHint, 8000); // Increased from 5000ms to 8000ms
         }
         
         // Check matches at position
@@ -1244,7 +1244,7 @@
             
             switch(type) {
                 case 'bomb':
-                    bonusTime = 1;
+                    bonusTime = 2; // Increased from 1
                     // Explode 3x3 area
                     for (let r = row - 1; r <= row + 1; r++) {
                         for (let c = col - 1; c <= col + 1; c++) {
@@ -1265,7 +1265,7 @@
                     break;
                     
                 case 'rocket':
-                    bonusTime = 2;
+                    bonusTime = 3; // Increased from 2
                     // Clear entire row and column
                     for (let r = 0; r < GRID_SIZE; r++) {
                         if (board[r][col] && !board[r][col].marked) {
@@ -1294,7 +1294,7 @@
                     break;
                     
                 case 'rainbow':
-                    bonusTime = 3;
+                    bonusTime = 5; // Increased from 3
                     // Rainbow power-up: clear a random candy type
                     let targetType;
                     if (board[row][col] && !board[row][col].powerUp) {
@@ -1323,7 +1323,7 @@
             
             // Add time bonus for power-up
             if (bonusTime > 0 && gameState === 'playing') {
-                timeLeft = Math.min(60, timeLeft + bonusTime);
+                timeLeft = Math.min(120, timeLeft + bonusTime); // Max 120 instead of 60
                 createTimeBonus(bonusTime);
             }
             
@@ -1587,13 +1587,13 @@
                 // Check inactivity
                 const inactiveTime = Date.now() - lastMoveTime;
                 
-                // Increase decay rate after 3 seconds of inactivity
-                if (inactiveTime > 3000) {
-                    timeDecayRate = Math.min(3, 1 + (inactiveTime - 3000) / 1000);
+                // Increase decay rate after 5 seconds of inactivity (was 3)
+                if (inactiveTime > 5000) {
+                    timeDecayRate = Math.min(2, 1 + (inactiveTime - 5000) / 2000); // Max 2x instead of 3x
                     document.getElementById('timeItem').classList.add('decay');
                     document.getElementById('inactivityWarning').style.display = 'block';
                     // Add screen shake effect when time is speeding up
-                    if (timeDecayRate > 2) {
+                    if (timeDecayRate > 1.5) {
                         canvas.style.transform = `translate(-50%, -50%) rotate(${Math.sin(Date.now() * 0.01) * 2}deg)`;
                     }
                 } else {
@@ -1612,10 +1612,10 @@
                 
                 // Visual warnings
                 const timeItem = document.getElementById('timeItem');
-                if (timeLeft <= 10) {
+                if (timeLeft <= 15) {
                     timeItem.classList.add('critical');
                     timeItem.classList.remove('warning');
-                } else if (timeLeft <= 20) {
+                } else if (timeLeft <= 30) {
                     timeItem.classList.add('warning');
                     timeItem.classList.remove('critical');
                 } else {
@@ -1624,8 +1624,8 @@
                 
                 // Add time bonus for big combos
                 if (combo >= 4 && gameState === 'playing') {
-                    const bonusTime = combo >= 6 ? 2 : 1;
-                    timeLeft = Math.min(60, timeLeft + bonusTime);
+                    const bonusTime = combo >= 6 ? 3 : 2; // Increased bonus time
+                    timeLeft = Math.min(120, timeLeft + bonusTime); // Max 120 instead of 60
                     createTimeBonus(bonusTime);
                     combo = 0;
                 }
@@ -1659,7 +1659,7 @@
         function startGame() {
             gameState = 'playing';
             score = 0;
-            timeLeft = 60;
+            timeLeft = 120; // Increased from 60 to 120 seconds
             level = 1;
             combo = 0;
             streak = 0;

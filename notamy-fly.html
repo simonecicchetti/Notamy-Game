@@ -146,6 +146,34 @@
             box-shadow: 0 0 10px currentColor;
         }
 
+        /* Invincibility countdown */
+        .invincibility-countdown {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--white);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 15;
+        }
+
+        .invincibility-countdown.active {
+            opacity: 1;
+        }
+
+        .invincibility-countdown.ending {
+            animation: countdownPulse 0.5s ease infinite;
+        }
+
+        @keyframes countdownPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); color: var(--white); }
+            50% { transform: translateX(-50%) scale(1.3); color: var(--pink-neon); }
+        }
+
         /* Start Screen */
         #startScreen {
             position: absolute;
@@ -355,35 +383,6 @@
             50% { transform: scale(1.2); opacity: 1; }
         }
 
-        /* Sound toggle */
-        .sound-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: var(--white);
-            transition: all 0.3s ease;
-            z-index: 30;
-        }
-
-        .sound-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .sound-toggle.muted {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
         /* Ready message */
         .ready-message {
             position: absolute;
@@ -404,36 +403,6 @@
 
         .ready-message.active {
             opacity: 1;
-        }
-
-        /* Debug mode toggle */
-        .debug-toggle {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: var(--white);
-            transition: all 0.3s ease;
-            z-index: 30;
-        }
-
-        .debug-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-        }
-
-        .debug-toggle.active {
-            background: rgba(255, 0, 0, 0.3);
-            border-color: rgba(255, 0, 0, 0.5);
         }
 
         /* Mobile optimizations */
@@ -467,6 +436,10 @@
             .ready-message {
                 font-size: 36px;
             }
+
+            .invincibility-countdown {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
@@ -481,11 +454,9 @@
                 <div class="powerup-fill" id="powerupFill"></div>
             </div>
         </div>
+        <div class="invincibility-countdown" id="invincibilityCountdown"></div>
         <div class="ready-message" id="readyMessage">GET READY!</div>
     </div>
-    
-    <div class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊</div>
-    <div class="debug-toggle" id="debugToggle" onclick="toggleDebug()">🐛</div>
     
     <div id="startScreen">
         <h1 class="game-title">Notamy Fly</h1>
@@ -534,28 +505,24 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Game dimensions - FISSIAMO LE DIMENSIONI PER EVITARE PROBLEMI DI ZOOM
+        // Game dimensions
         let WIDTH = Math.min(window.innerWidth, 800);
         let HEIGHT = Math.min(window.innerHeight, 600);
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
         
-        // Debug mode
-        let debugMode = false;
+        // Frame rate control
+        let lastTime = 0;
+        const targetFPS = 60;
+        const frameTime = 1000 / targetFPS;
         
-        function toggleDebug() {
-            debugMode = !debugMode;
-            const toggle = document.getElementById('debugToggle');
-            toggle.classList.toggle('active', debugMode);
-        }
-        
-        // Difficulty settings - RESO ANCORA PIÙ FACILE
+        // Difficulty settings
         const difficulties = {
             easy: { 
                 pipeSpeed: 1.2, 
-                pipeGap: 320,  // Spazio ancora più grande tra i tubi
-                gravity: 0.12,  // Gravità più leggera
-                jumpForce: -5,  // Salto più controllato
+                pipeGap: 320,
+                gravity: 0.12,
+                jumpForce: -5,
                 scoreMultiplier: 1 
             },
             normal: { 
@@ -585,13 +552,13 @@
         let settings = difficulties[currentDifficulty];
         
         // Game constants
-        const PIPE_WIDTH = 60;  // Tubi più sottili
-        const PIPE_SPACING = 450; // Molto più spazio tra i tubi
+        const PIPE_WIDTH = 60;
+        const PIPE_SPACING = 450;
         
         // Colors
         const COLORS = {
-            bird: '#ffff00',  // GIALLO BRILLANTE per massima visibilità
-            birdGlow: '#ffffff',  // BIANCO per il glow
+            bird: '#ffff00',
+            birdGlow: '#ffffff',
             pipe: '#00b4a6',
             pipeGlow: '#00e676',
             particle: '#b366ff',
@@ -600,54 +567,39 @@
             magnet: '#ffff00'
         };
         
-        // Sound system
-        let soundEnabled = true;
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Cached gradients for performance
+        const gradientCache = new Map();
         
-        function playSound(frequency, duration, type = 'sine') {
-            if (!soundEnabled) return;
-            
-            try {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.type = type;
-                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + duration);
-            } catch (e) {
-                // Ignora errori audio
+        function getCachedGradient(key, createGradient) {
+            if (!gradientCache.has(key)) {
+                gradientCache.set(key, createGradient());
             }
-        }
-        
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const toggle = document.getElementById('soundToggle');
-            toggle.textContent = soundEnabled ? '🔊' : '🔇';
-            toggle.classList.toggle('muted', !soundEnabled);
+            return gradientCache.get(key);
         }
         
         // Game state
         let gameState = 'start';
         let score = 0;
-        let bestScore = parseInt(localStorage.getItem('notamyFlyBest') || '0');
+        let bestScore = 0;
+        
+        // Safe localStorage handling
+        try {
+            bestScore = parseInt(localStorage.getItem('notamyFlyBest') || '0');
+        } catch (e) {
+            bestScore = 0;
+        }
+        
         let frameCount = 0;
         let combo = 0;
         let maxCombo = 0;
         let powerupsCollected = 0;
         
-        // Bird object - DIMENSIONE OTTIMIZZATA
+        // Bird object
         const bird = {
-            x: WIDTH * 0.25,  // Più a sinistra per dare più tempo di reazione
+            x: WIDTH * 0.25,
             y: HEIGHT / 2,
             velocity: 0,
-            radius: 16,  // DIMENSIONE MEDIA - non troppo piccolo per visibilità
+            radius: 16,
             trail: [],
             angle: 0,
             shielded: false,
@@ -726,7 +678,6 @@
         function jump() {
             bird.velocity = settings.jumpForce;
             bird.wingAnimation = 20;
-            playSound(400, 0.1, 'square');
             
             // Create jump particles
             for (let i = 0; i < 5; i++) {
@@ -770,33 +721,30 @@
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
-            frameCount = 0;  // Reset frame counter
+            frameCount = 0;
             
-            // RESET COMPLETO DELL'UCCELLO
-            bird.x = WIDTH * 0.25;  // Reset posizione
+            // Reset bird
+            bird.x = WIDTH * 0.25;
             bird.y = HEIGHT / 2;
-            bird.velocity = 0;  // Nessuna spinta iniziale
+            bird.velocity = 0;
             bird.trail = [];
-            bird.angle = 0;  // Reset angolo
+            bird.angle = 0;
             bird.shielded = false;
             bird.shieldTime = 0;
             bird.magnetized = false;
             bird.magnetTime = 0;
             bird.invincible = true;
-            bird.invincibleTime = 300; // 5 secondi di invincibilità iniziale
+            bird.invincibleTime = 300;
             bird.wingAnimation = 0;
-            
-            // VERIFICA POSIZIONE
-            console.log('Game started! Bird position:', bird.x, bird.y);
             
             pipes = [];
             particles = [];
             powerups = [];
             
-            // Create first pipe molto più tardi
+            // Create first pipe later
             setTimeout(() => {
                 createPipe();
-            }, 3000);  // 3 secondi di delay per il primo tubo
+            }, 3000);
         }
         
         function createPipe() {
@@ -821,7 +769,7 @@
                 x: x,
                 y: y,
                 type: type,
-                radius: 20,  // Power-up più grandi
+                radius: 20,
                 collected: false,
                 rotation: 0
             });
@@ -832,7 +780,7 @@
             bird.velocity += settings.gravity;
             bird.y += bird.velocity;
             
-            // Limita la velocità massima di caduta
+            // Limit max fall speed
             if (bird.velocity > 8) {
                 bird.velocity = 8;
             }
@@ -871,11 +819,12 @@
                 }
             }
             
+            // Update invincibility with countdown
             if (bird.invincibleTime > 0) {
                 bird.invincibleTime--;
+                updateInvincibilityCountdown();
                 if (bird.invincibleTime === 0) {
                     bird.invincible = false;
-                    console.log('Invincibility ended at frame:', frameCount);
                 }
             }
             
@@ -893,28 +842,44 @@
                 });
             }
             
-            // Check boundaries - ASSICURIAMOCI CHE L'UCCELLO NON ESCA MAI DALLO SCHERMO
-            const margin = bird.radius + 5;  // Usa il raggio dell'uccello come margine
+            // Check boundaries
+            const margin = bird.radius + 5;
             
-            // Limita la posizione dell'uccello ai bordi dello schermo
             if (bird.y - bird.radius < margin) {
                 bird.y = margin + bird.radius;
-                bird.velocity = Math.max(bird.velocity, 0); // Ferma la velocità verso l'alto
+                bird.velocity = Math.max(bird.velocity, 0);
             } else if (bird.y + bird.radius > HEIGHT - margin) {
                 bird.y = HEIGHT - margin - bird.radius;
-                bird.velocity = Math.min(bird.velocity, 0); // Ferma la velocità verso il basso
+                bird.velocity = Math.min(bird.velocity, 0);
             }
             
-            // Controlla collisione con i bordi solo se non invincibile
+            // Check collision with borders
             if (!bird.invincible && (bird.y - bird.radius <= 0 || bird.y + bird.radius >= HEIGHT)) {
                 if (bird.shielded) {
                     bird.shielded = false;
                     bird.invincible = true;
                     bird.invincibleTime = 60;
-                    playSound(200, 0.2, 'triangle');
                 } else {
                     gameOver();
                 }
+            }
+        }
+        
+        function updateInvincibilityCountdown() {
+            const countdown = document.getElementById('invincibilityCountdown');
+            
+            if (bird.invincibleTime > 0 && bird.invincibleTime <= 180) { // Show last 3 seconds
+                const seconds = Math.ceil(bird.invincibleTime / 60);
+                countdown.textContent = seconds;
+                countdown.classList.add('active');
+                
+                if (bird.invincibleTime <= 60) { // Last second
+                    countdown.classList.add('ending');
+                } else {
+                    countdown.classList.remove('ending');
+                }
+            } else {
+                countdown.classList.remove('active', 'ending');
             }
         }
         
@@ -933,7 +898,7 @@
                     document.getElementById('score').textContent = score;
                     
                     // Combo effects
-                    if (combo >= 3) {  // Combo più facile da ottenere
+                    if (combo >= 3) {
                         document.getElementById('score').classList.add('combo');
                         setTimeout(() => {
                             document.getElementById('score').classList.remove('combo');
@@ -941,8 +906,6 @@
                         
                         document.getElementById('comboIndicator').textContent = `${combo}x COMBO!`;
                         document.getElementById('comboIndicator').classList.add('active');
-                        
-                        playSound(600 + combo * 50, 0.1);
                     }
                     
                     // Score particles
@@ -959,8 +922,8 @@
                         });
                     }
                     
-                    // Spawn power-up più spesso
-                    if (Math.random() < 0.5) {  // 50% di probabilità
+                    // Spawn power-up
+                    if (Math.random() < 0.5) {
                         const pipeCenter = (pipe.topHeight + pipe.bottomY) / 2;
                         createPowerup(pipe.x + PIPE_WIDTH + 200, pipeCenter);
                     }
@@ -1010,25 +973,25 @@
                 powerup.x -= settings.pipeSpeed;
                 powerup.rotation += 0.05;
                 
-                // Magnet effect più forte
+                // Magnet effect
                 if (bird.magnetized && !powerup.collected) {
                     const dx = bird.x - powerup.x;
                     const dy = bird.y - powerup.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < 200) {  // Raggio magnetico più grande
+                    if (dist < 200) {
                         powerup.x += dx * 0.08;
                         powerup.y += dy * 0.08;
                     }
                 }
                 
-                // Check collection con hitbox più generosa
+                // Check collection
                 if (!powerup.collected) {
                     const dx = bird.x - powerup.x;
                     const dy = bird.y - powerup.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (dist < bird.radius + powerup.radius + 10) {  // +10 pixel di margine
+                    if (dist < bird.radius + powerup.radius + 10) {
                         powerup.collected = true;
                         powerupsCollected++;
                         
@@ -1036,18 +999,15 @@
                         switch (powerup.type) {
                             case 'shield':
                                 bird.shielded = true;
-                                bird.shieldTime = 400;  // Durata più lunga
-                                playSound(300, 0.2);
+                                bird.shieldTime = 400;
                                 break;
                             case 'magnet':
                                 bird.magnetized = true;
-                                bird.magnetTime = 500;  // Durata più lunga
-                                playSound(350, 0.2);
+                                bird.magnetTime = 500;
                                 break;
                             case 'points':
                                 score += Math.floor(10 * settings.scoreMultiplier);
                                 document.getElementById('score').textContent = score;
-                                playSound(800, 0.1);
                                 break;
                         }
                         
@@ -1096,24 +1056,16 @@
             if (bird.invincible) return;
             
             pipes.forEach(pipe => {
-                // COLLISION DETECTION PRECISA
-                // L'uccello tocca il tubo solo se il suo cerchio interseca davvero il rettangolo del tubo
-                
-                // Calcola i bordi del cerchio dell'uccello
                 const birdLeft = bird.x - bird.radius;
                 const birdRight = bird.x + bird.radius;
                 const birdTop = bird.y - bird.radius;
                 const birdBottom = bird.y + bird.radius;
                 
-                // Bordi del tubo
                 const pipeLeft = pipe.x;
                 const pipeRight = pipe.x + PIPE_WIDTH;
                 
-                // Check se l'uccello è nella zona X del tubo
                 if (birdRight > pipeLeft && birdLeft < pipeRight) {
-                    // Check collisione con tubo superiore
                     if (birdTop < pipe.topHeight) {
-                        // Verifica precisa: il cerchio tocca davvero il rettangolo?
                         if (isCircleRectCollision(bird.x, bird.y, bird.radius, 
                                                   pipeLeft, 0, PIPE_WIDTH, pipe.topHeight)) {
                             handleCollision();
@@ -1121,9 +1073,7 @@
                         }
                     }
                     
-                    // Check collisione con tubo inferiore
                     if (birdBottom > pipe.bottomY) {
-                        // Verifica precisa: il cerchio tocca davvero il rettangolo?
                         if (isCircleRectCollision(bird.x, bird.y, bird.radius,
                                                   pipeLeft, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY)) {
                             handleCollision();
@@ -1134,29 +1084,24 @@
             });
         }
         
-        // Funzione helper per collision detection cerchio-rettangolo precisa
         function isCircleRectCollision(circleX, circleY, circleRadius, rectX, rectY, rectWidth, rectHeight) {
-            // Trova il punto più vicino del rettangolo al centro del cerchio
             const closestX = Math.max(rectX, Math.min(circleX, rectX + rectWidth));
             const closestY = Math.max(rectY, Math.min(circleY, rectY + rectHeight));
             
-            // Calcola la distanza tra il centro del cerchio e questo punto più vicino
             const distanceX = circleX - closestX;
             const distanceY = circleY - closestY;
             
-            // Se la distanza è minore del raggio, c'è collisione
             const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-            return distanceSquared < (circleRadius * circleRadius);
+            return distanceSquared < (circleRadius * circleRadius * 1.1); // 10% margin
         }
         
         function handleCollision() {
             if (bird.shielded) {
                 bird.shielded = false;
                 bird.invincible = true;
-                bird.invincibleTime = 90;  // Più tempo di invincibilità
+                bird.invincibleTime = 90;
                 combo = 0;
                 document.getElementById('comboIndicator').classList.remove('active');
-                playSound(200, 0.2, 'triangle');
                 
                 // Shield break particles
                 for (let i = 0; i < 20; i++) {
@@ -1177,8 +1122,10 @@
         }
         
         function updateParticles() {
-            // Update game particles
+            // Update game particles with safety check
             particles = particles.filter(p => {
+                if (isNaN(p.life)) return false;
+                
                 p.x += p.vx;
                 p.y += p.vy;
                 
@@ -1219,9 +1166,6 @@
             
             if (combo > maxCombo) maxCombo = combo;
             
-            // Death sound
-            playSound(150, 0.3, 'sawtooth');
-            
             // Create explosion
             for (let i = 0; i < 30; i++) {
                 particles.push({
@@ -1244,7 +1188,11 @@
             // Update best score
             if (score > bestScore) {
                 bestScore = score;
-                localStorage.setItem('notamyFlyBest', bestScore);
+                try {
+                    localStorage.setItem('notamyFlyBest', bestScore);
+                } catch (e) {
+                    // Ignore localStorage errors
+                }
             }
             
             // Show game over screen
@@ -1258,6 +1206,7 @@
         function restartGame() {
             document.getElementById('gameOverScreen').style.display = 'none';
             document.getElementById('comboIndicator').classList.remove('active');
+            document.getElementById('invincibilityCountdown').classList.remove('active', 'ending');
             startGame();
         }
         
@@ -1303,16 +1252,14 @@
         }
         
         function drawBird() {
-            // VERIFICA POSIZIONE PRIMA DI DISEGNARE
             if (isNaN(bird.x) || isNaN(bird.y)) {
-                console.error('Bird position invalid:', bird.x, bird.y);
                 bird.x = WIDTH * 0.25;
                 bird.y = HEIGHT / 2;
             }
             
             ctx.save();
             
-            // CONTORNO NERO PER MASSIMA VISIBILITÀ
+            // Black outline for visibility
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.beginPath();
             ctx.arc(bird.x, bird.y, bird.radius + 4, 0, Math.PI * 2);
@@ -1354,12 +1301,10 @@
                 }
             }
             
-            // Invincibility effect molto più visibile
+            // Invincibility effect
             if (bird.invincible) {
-                // Effetto pulsante
                 const pulseScale = 1 + Math.sin(frameCount * 0.1) * 0.1;
                 
-                // Cerchio di protezione animato
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
                 ctx.lineWidth = 3;
                 ctx.setLineDash([5, 5]);
@@ -1369,7 +1314,6 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
-                // Glowing effect
                 if (frameCount % 20 < 10) {
                     const invincibleGradient = ctx.createRadialGradient(0, 0, bird.radius, 0, 0, bird.radius * 3);
                     invincibleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
@@ -1381,7 +1325,7 @@
                 }
             }
             
-            // Bird glow - MOLTO PIÙ FORTE
+            // Bird glow
             const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 3);
             glowGradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
             glowGradient.addColorStop(0.5, 'rgba(0, 255, 255, 0.4)');
@@ -1389,16 +1333,16 @@
             ctx.fillStyle = glowGradient;
             ctx.fillRect(-bird.radius * 3, -bird.radius * 3, bird.radius * 6, bird.radius * 6);
             
-            // CONTORNO BIANCO PRIMA DEL CORPO
+            // White outline
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.arc(0, 0, bird.radius + 2, 0, Math.PI * 2);
             ctx.fill();
             
-            // Draw bird corpo
+            // Draw bird body
             ctx.fillStyle = COLORS.bird;
             ctx.strokeStyle = COLORS.birdGlow;
-            ctx.lineWidth = 3;  // Bordo più spesso
+            ctx.lineWidth = 3;
             
             // Body
             ctx.beginPath();
@@ -1436,7 +1380,7 @@
             
             ctx.restore();
             
-            // CONTORNO FINALE SEMPRE VISIBILE
+            // Final outline
             ctx.save();
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
@@ -1445,17 +1389,6 @@
             ctx.arc(bird.x, bird.y, bird.radius + 1, 0, Math.PI * 2);
             ctx.stroke();
             ctx.restore();
-            
-            // DEBUG MODE: mostra hitbox
-            if (debugMode) {
-                ctx.save();
-                ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.restore();
-            }
         }
         
         function drawPipes() {
@@ -1483,7 +1416,7 @@
                 ctx.fillStyle = pipeGradient;
                 ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
                 
-                // Top pipe edge with rounded corners
+                // Top pipe edge
                 ctx.fillStyle = COLORS.pipeGlow;
                 ctx.fillRect(pipe.x - 5, pipe.topHeight - 10, PIPE_WIDTH + 10, 10);
                 
@@ -1491,7 +1424,7 @@
                 ctx.fillStyle = pipeGradient;
                 ctx.fillRect(pipe.x, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY);
                 
-                // Bottom pipe edge with rounded corners
+                // Bottom pipe edge
                 ctx.fillStyle = COLORS.pipeGlow;
                 ctx.fillRect(pipe.x - 5, pipe.bottomY, PIPE_WIDTH + 10, 10);
                 
@@ -1501,16 +1434,6 @@
                     ctx.fillStyle = `rgba(0, 230, 118, ${opacity * 0.5})`;
                     ctx.fillRect(p.x, p.y - 2, 20, 4);
                 });
-                
-                // DEBUG MODE: mostra hitbox dei tubi
-                if (debugMode) {
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
-                    ctx.strokeRect(pipe.x, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY);
-                    ctx.restore();
-                }
             });
         }
         
@@ -1520,7 +1443,7 @@
                 ctx.translate(powerup.x, powerup.y);
                 ctx.rotate(powerup.rotation);
                 
-                // Power-up glow più visibile
+                // Power-up glow
                 const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, powerup.radius * 3);
                 let color1, color2;
                 
@@ -1562,7 +1485,7 @@
                 ctx.arc(0, 0, powerup.radius + 3, 0, Math.PI * 2);
                 ctx.stroke();
                 
-                // Icon più grande
+                // Icon
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.font = 'bold 20px Arial';
                 ctx.textAlign = 'center';
@@ -1607,12 +1530,17 @@
             });
         }
         
-        function gameLoop() {
+        function gameLoop(currentTime) {
+            // Frame rate limiting
+            if (currentTime - lastTime < frameTime) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            lastTime = currentTime;
             frameCount++;
             
-            // VERIFICA CHE IL CANVAS SIA VALIDO
             if (!ctx || canvas.width === 0 || canvas.height === 0) {
-                console.error('Canvas invalid!');
                 return;
             }
             
@@ -1628,27 +1556,36 @@
             
             updateParticles();
             
-            // ORDINE DI RENDERING CORRETTO per assicurarsi che l'uccello sia sempre visibile
-            drawPipes();      // Prima i tubi (sfondo)
-            drawPowerups();   // Poi i power-up (mezzo)
-            drawParticles();  // Poi le particelle (effetti)
+            drawPipes();
+            drawPowerups();
+            drawParticles();
             
-            // SEMPRE DISEGNA L'UCCELLO PER ULTIMO
-            if (gameState === 'playing' || gameState === 'gameOver') {  // Disegna l'uccello anche durante game over per vedere l'esplosione
-                drawBird();       // Infine l'uccello (primo piano) - SEMPRE SOPRA TUTTO
+            if (gameState === 'playing' || gameState === 'gameOver') {
+                drawBird();
             }
             
             requestAnimationFrame(gameLoop);
         }
         
-        // Handle resize con limiti
+        // Handle resize
         window.addEventListener('resize', () => {
-            WIDTH = Math.min(window.innerWidth, 800);
-            HEIGHT = Math.min(window.innerHeight, 600);
+            const newWidth = Math.min(window.innerWidth, 800);
+            const newHeight = Math.min(window.innerHeight, 600);
+            
+            // Scale positions
+            const widthRatio = newWidth / WIDTH;
+            const heightRatio = newHeight / HEIGHT;
+            
+            WIDTH = newWidth;
+            HEIGHT = newHeight;
             canvas.width = WIDTH;
             canvas.height = HEIGHT;
             
-            // Adjust bird position - ASSICURIAMOCI CHE RIMANGA NEI LIMITI
+            // Adjust bird position
+            bird.x *= widthRatio;
+            bird.y *= heightRatio;
+            
+            // Keep bird in bounds
             if (bird.x > WIDTH * 0.25) {
                 bird.x = WIDTH * 0.25;
             }
@@ -1658,36 +1595,43 @@
             if (bird.y > HEIGHT - bird.radius) {
                 bird.y = HEIGHT - bird.radius;
             }
+            
+            // Adjust pipes
+            pipes.forEach(pipe => {
+                pipe.x *= widthRatio;
+                pipe.topHeight *= heightRatio;
+                pipe.bottomY *= heightRatio;
+            });
+            
+            // Adjust powerups
+            powerups.forEach(powerup => {
+                powerup.x *= widthRatio;
+                powerup.y *= heightRatio;
+            });
+            
+            // Reinitialize background elements
+            initBackgroundElements();
         });
         
         // Initialize
         initBackgroundElements();
         document.getElementById('bestScore').textContent = bestScore;
         
-        // DEBUG: Log initial state
-        console.log('Canvas dimensions:', WIDTH, 'x', HEIGHT);
-        console.log('Bird initial position:', bird.x, bird.y);
-        console.log('Bird radius:', bird.radius);
-        
         // Check for autostart parameter
         const urlParams = new URLSearchParams(window.location.search);
         const autostart = urlParams.get('autostart') === 'true';
         
         if (autostart) {
-            // Hide start screen immediately
             document.getElementById('startScreen').style.display = 'none';
-            // Set default difficulty to easy
             currentDifficulty = 'easy';
             settings = difficulties[currentDifficulty];
-            // Start game after a short delay
             setTimeout(() => {
                 startGame();
-                // No auto-jump to let player start when ready
             }, 500);
         }
         
         // Start game loop
-        gameLoop();
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>

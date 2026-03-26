@@ -639,7 +639,7 @@
                 jumpForce: -7.5,
                 scoreMultiplier: 1,
                 powerupChance: 0.5,
-                winScore: 150
+                winScore: 400
             },
             normal: {
                 pipeSpeed: 3.0,
@@ -648,16 +648,16 @@
                 jumpForce: -8.5,
                 scoreMultiplier: 1.5,
                 powerupChance: 0.4,
-                winScore: 120
+                winScore: 300
             },
             hard: {
                 pipeSpeed: 3.8,
                 pipeGap: 230,
                 gravity: 0.45,
-                jumpForce: -9.5,  // Stronger from -7
+                jumpForce: -9.5,
                 scoreMultiplier: 2,
                 powerupChance: 0.35,
-                winScore: 90
+                winScore: 200
             },
             insane: {
                 pipeSpeed: 4.5,
@@ -666,7 +666,7 @@
                 jumpForce: -10.5,
                 scoreMultiplier: 3,
                 powerupChance: 0.3,
-                winScore: 70
+                winScore: 150
             },
             nightmare: {
                 pipeSpeed: 5.5,
@@ -675,7 +675,7 @@
                 jumpForce: -11.5,
                 scoreMultiplier: 5,
                 powerupChance: 0.25,
-                winScore: 50
+                winScore: 100
             }
         };
 
@@ -925,7 +925,8 @@
             const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
 
             // Some pipes oscillate vertically (more likely at higher scores)
-            const movingChance = Math.min(0.5, score * 0.003);
+            // Moving pipes: appear early, scale to 60%
+            const movingChance = Math.min(0.6, score * 0.005);
             const isMoving = Math.random() < movingChance;
             const moveAmplitude = isMoving ? 20 + Math.random() * 25 : 0;
             const moveSpeed = isMoving ? 0.02 + Math.random() * 0.015 : 0;
@@ -1224,9 +1225,9 @@
                 bird.velocity = Math.min(bird.velocity, 0);
             }
 
-            // Progressive difficulty — steeper curve for longer game
-            const difficultyStep = Math.floor(score / 15);
-            let targetSpeed = 1 + difficultyStep * 0.06;
+            // Progressive difficulty — aggressive curve for long game
+            const difficultyStep = Math.floor(score / 10);
+            let targetSpeed = 1 + difficultyStep * 0.04;
 
             // Final zone: extra speed ramp (up to +0.4x on top of base)
             const finalIntensity = getFinalZoneIntensity();
@@ -1284,10 +1285,14 @@
                         return; // exits updatePipes entirely
                     }
 
-                    // Spawn missiles periodically (more frequent at higher scores)
-                    const missileInterval = Math.max(3, 10 - Math.floor(score / 20));
-                    if (score > 10 && score % missileInterval === 0) {
+                    // Spawn missiles — start at score 5, frequency ramps to every 2 pipes
+                    const missileInterval = Math.max(2, 8 - Math.floor(score / 30));
+                    if (score > 5 && score % missileInterval === 0) {
                         spawnMissileWarning();
+                        // Double missile in late game
+                        if (score > settings.winScore * 0.6 && Math.random() < 0.3) {
+                            setTimeout(() => { if (gameState === 'playing') spawnMissileWarning(); }, 300);
+                        }
                     }
 
                     // Final zone announcement (once, at 80% of win score)

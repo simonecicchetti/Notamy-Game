@@ -288,6 +288,7 @@
         <div id="ui">
             <div class="score">SCORE: <span id="scoreValue">0</span></div>
             <div class="combo" id="combo"></div>
+            <div class="score" style="color:#ffeb3b;text-shadow:0 0 20px rgba(255,235,59,0.5)">WAVE <span id="waveValue">1</span>/3</div>
             <div class="lives" id="livesContainer"></div>
         </div>
         
@@ -539,7 +540,9 @@
             
             input.isAiming = false;
             input.touchId = null;
-            
+            lastShotTime = 0;
+            lastSpawnCheck = 0;
+
             player.shield = false;
             
             updateUI();
@@ -547,31 +550,68 @@
         }
         
         function gameOver(reason = '') {
+            if (!game.running) return; // guard against multiple calls
             game.running = false;
-            
+
             if (game.animationId) {
                 cancelAnimationFrame(game.animationId);
                 game.animationId = null;
             }
-            
+
             if (game.score > game.highScore) {
                 game.highScore = game.score;
                 try {
                     localStorage.setItem('notamyBopHighScore', game.highScore.toString());
-                } catch (e) {
-                    console.error('Failed to save high score:', e);
-                }
+                } catch (e) {}
             }
-            
+
+            document.getElementById('gameOver').querySelector('h2').textContent = 'GAME OVER!';
+            document.getElementById('gameOver').querySelector('h2').style.color = '#ff5252';
             document.getElementById('gameOver').style.display = 'block';
             document.getElementById('finalScore').textContent = game.score;
             document.getElementById('highScoreValue').textContent = game.highScore;
             document.getElementById('gameOverReason').textContent = reason;
+
+            const indicator = document.getElementById('powerupIndicator');
+            if (indicator) indicator.classList.remove('active');
+        }
+
+        function victory() {
+            if (!game.running) return;
+            game.running = false;
+
+            if (game.animationId) {
+                cancelAnimationFrame(game.animationId);
+                game.animationId = null;
+            }
+
+            if (game.score > game.highScore) {
+                game.highScore = game.score;
+                try {
+                    localStorage.setItem('notamyBopHighScore', game.highScore.toString());
+                } catch (e) {}
+            }
+
+            document.getElementById('gameOver').querySelector('h2').textContent = 'YOU WIN!';
+            document.getElementById('gameOver').querySelector('h2').style.color = '#ffd700';
+            document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('finalScore').textContent = game.score;
+            document.getElementById('highScoreValue').textContent = game.highScore;
+            document.getElementById('gameOverReason').textContent = 'Survived all 3 waves!';
+
+            const indicator = document.getElementById('powerupIndicator');
+            if (indicator) indicator.classList.remove('active');
         }
         
-        // Shooting
+        // Shooting with fire rate
+        let lastShotTime = 0;
+
         function shoot() {
             if (bullets.length >= MAX_BULLETS) return;
+            const now = Date.now();
+            const cooldown = game.powerupActive === 'rapidfire' ? 100 : 250;
+            if (now - lastShotTime < cooldown) return;
+            lastShotTime = now;
             
             const dx = input.mouseX - player.x;
             const dy = input.mouseY - player.y;
@@ -711,12 +751,19 @@
                     }
                 }
                 
-                // Check if bubble escaped
+                // Check if bubble escaped — lose a life (not instant death)
                 if (bubble.y - bubble.size > canvas.height) {
-                    createFloatingText(canvas.width / 2, canvas.height / 2, 'BUBBLE ESCAPED!', colors.accent);
+                    game.lives--;
+                    game.combo = 0;
+                    bubbles.splice(i, 1);
+                    createFloatingText(canvas.width / 2, canvas.height / 2, 'ESCAPED! -1❤️', colors.accent);
                     createParticles(bubble.x, canvas.height - 20, colors.accent, 30);
-                    gameOver('Una bolla è scappata!');
-                    return;
+                    updateUI();
+                    if (game.lives <= 0) {
+                        gameOver('Hai perso tutte le vite!');
+                        return;
+                    }
+                    continue;
                 }
                 
                 // Wall collisions
@@ -742,6 +789,9 @@
                     if (player.shield) {
                         player.shield = false;
                         game.powerupActive = null;
+                        game.powerupTimer = 0;
+                        const ind = document.getElementById('powerupIndicator');
+                        if (ind) ind.classList.remove('active');
                         createParticles(player.x, player.y, colors.white, 20);
                     } else {
                         game.lives--;
@@ -800,12 +850,13 @@
             if (type === 'bomb') {
                 // Destroy all bubbles
                 for (const bubble of bubbles) {
-                    game.score += Math.floor(100 - bubble.size);
+                    game.score += Math.floor(bubble.size);
                     createParticles(bubble.x, bubble.y, bubble.color, 15);
                 }
                 bubbles = [];
                 createFloatingText(canvas.width / 2, canvas.height / 2, 'BOMB!', colors.purple);
-                setTimeout(() => createInitialBubbles(), 1000);
+                // Guard: only respawn if game is still running
+                setTimeout(() => { if (game.running) createInitialBubbles(); }, 1000);
             } else if (type === 'shield') {
                 player.shield = true;
                 game.powerupActive = 'shield';
@@ -817,11 +868,19 @@
             
             const indicator = document.getElementById('powerupIndicator');
             if (indicator) {
-                indicator.textContent = powerup.icon + ' ' + type.toUpperCase();
-                indicator.style.color = powerup.color;
-                indicator.classList.add('active');
+                if (type === 'bomb') {
+                    // Bomb is instant — flash briefly then clear
+                    indicator.textContent = powerup.icon + ' BOMB!';
+                    indicator.style.color = powerup.color;
+                    indicator.classList.add('active');
+                    setTimeout(() => indicator.classList.remove('active'), 1000);
+                } else {
+                    indicator.textContent = powerup.icon + ' ' + type.toUpperCase();
+                    indicator.style.color = powerup.color;
+                    indicator.classList.add('active');
+                }
             }
-            
+
             updateUI();
         }
         
@@ -847,7 +906,8 @@
                         }
                         game.lastHitTime = currentTime;
                         
-                        const points = Math.floor((100 - bubble.size) * game.combo);
+                        // Bigger bubbles = more points (was inverted)
+                        const points = Math.floor(bubble.size * game.combo);
                         game.score += points;
                         updateUI();
                         
@@ -875,21 +935,25 @@
                                 setTimeout(createBubble, 500);
                             }
                         } else {
-                            // Split bubble
+                            // Split bubble — cap velocity to prevent exponential blowup
+                            const maxSpeed = 4 + game.difficulty * 0.5;
+                            const clampV = (v) => Math.max(-maxSpeed, Math.min(maxSpeed, v));
+                            const pushUp = bubble.y > canvas.height * 0.6;
+
                             if (bubbles.length < MAX_BUBBLES) {
                                 const newBubble = {
                                     x: bubble.x + 20,
                                     y: bubble.y,
-                                    vx: -bubble.vx * 1.2,
-                                    vy: bubble.y > canvas.height * 0.6 ? -Math.abs(bubble.vy * 1.2) : bubble.vy * 1.2,
+                                    vx: clampV(-bubble.vx * 1.1),
+                                    vy: pushUp ? clampV(-Math.abs(bubble.vy)) : clampV(bubble.vy * 1.1),
                                     size: bubble.size,
                                     color: bubble.color,
                                     glow: 0
                                 };
                                 bubbles.push(newBubble);
                             }
-                            bubble.vx *= -1.2;
-                            bubble.vy = bubble.y > canvas.height * 0.6 ? -Math.abs(bubble.vy * 1.2) : bubble.vy * 1.2;
+                            bubble.vx = clampV(-bubble.vx * 1.1);
+                            bubble.vy = pushUp ? clampV(-Math.abs(bubble.vy)) : clampV(bubble.vy * 1.1);
                         }
                         
                         bullets.splice(i, 1);
@@ -926,12 +990,28 @@
             }
         }
         
+        let lastSpawnCheck = 0;
+        const WAVE_DURATION = 30000; // 30s per wave
+        const TOTAL_WAVES = 3;      // 3 waves = 90s to win
+
         function updateDifficulty() {
-            game.difficulty = 1 + Math.floor(game.gameTime / 30000);
-            
-            // Add bubbles as difficulty increases
-            if (game.gameTime % 15000 < 16 && bubbles.length < Math.min(5 + game.difficulty, MAX_BUBBLES)) {
-                createBubble();
+            game.difficulty = 1 + Math.floor(game.gameTime / WAVE_DURATION);
+
+            // Win condition: survived all waves
+            if (game.gameTime >= WAVE_DURATION * TOTAL_WAVES) {
+                victory();
+                return;
+            }
+
+            // Spawn bubbles every 10-15s based on difficulty (threshold, not modulo)
+            const spawnInterval = Math.max(6000, 15000 - game.difficulty * 2000);
+            if (game.gameTime - lastSpawnCheck >= spawnInterval) {
+                lastSpawnCheck = game.gameTime;
+                const maxBubblesForDifficulty = Math.min(4 + game.difficulty * 2, MAX_BUBBLES);
+                if (bubbles.length < maxBubblesForDifficulty) {
+                    createBubble();
+                    if (game.difficulty >= 2) createBubble(); // extra bubble in later waves
+                }
             }
         }
         
@@ -951,6 +1031,8 @@
         
         function updateUI() {
             document.getElementById('scoreValue').textContent = game.score;
+            const wave = Math.min(TOTAL_WAVES, 1 + Math.floor(game.gameTime / WAVE_DURATION));
+            document.getElementById('waveValue').textContent = wave;
             
             const livesContainer = document.getElementById('livesContainer');
             if (livesContainer) {
@@ -1113,6 +1195,21 @@
             
             // Draw everything
             drawBackground();
+
+            // Draw progress bar (time survived)
+            const totalTime = WAVE_DURATION * TOTAL_WAVES;
+            const progress = Math.min(1, game.gameTime / totalTime);
+            const barWidth = canvas.width - 40;
+            const barY = canvas.height - 10;
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(20, barY, barWidth, 6);
+            const barGradient = ctx.createLinearGradient(20, 0, 20 + barWidth, 0);
+            barGradient.addColorStop(0, '#00fff0');
+            barGradient.addColorStop(0.5, '#ff00ff');
+            barGradient.addColorStop(1, '#ffd700');
+            ctx.fillStyle = barGradient;
+            ctx.fillRect(20, barY, barWidth * progress, 6);
+
             drawPowerups();
             drawBubbles();
             drawBullets();

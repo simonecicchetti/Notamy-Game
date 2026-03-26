@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Game for Kids</title>
+<title>Acchiappa le Stelle!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:'Trebuchet MS','Comic Sans MS',sans-serif;-webkit-user-select:none;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#06000e;font-family:'Orbitron',sans-serif;-webkit-user-select:none;user-select:none}
 
-#game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#0f0326 0%,#1a0a3e 50%,#2d1b69 100%)}
+#game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#06000e 0%,#0f0020 50%,#1a0033 100%)}
 
 /* BASKET */
 #basket{position:absolute;bottom:15px;width:70px;height:50px;transform:translateX(-50%);z-index:10;font-size:50px;line-height:50px;text-align:center;transition:left 0.05s linear}
@@ -17,20 +20,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:
 .item{position:absolute;font-size:36px;z-index:5;line-height:1;text-align:center;pointer-events:none}
 
 /* HUD */
-#hud{position:fixed;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:50;font-size:14px;color:#fde68a;font-weight:bold;pointer-events:none}
-.hud-box{background:rgba(26,5,51,0.7);padding:4px 10px;border-radius:12px;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+#hud{position:fixed;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:50;font-size:14px;color:#00fff0;font-weight:bold;pointer-events:none}
+.hud-box{background:rgba(0,255,240,0.08);padding:4px 10px;border-radius:4px;border:1px solid rgba(0,255,240,0.3);text-shadow:0 0 8px rgba(0,255,240,0.7),0 0 20px rgba(0,255,240,0.3)}
 
 /* PROGRESS BAR */
-#progressWrap{position:fixed;bottom:4px;left:10px;right:10px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;z-index:50;pointer-events:none}
-#progressBar{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#a78bfa,#fbbf24,#34d399);transition:width 0.2s}
-#goalText{position:fixed;bottom:16px;left:0;right:0;text-align:center;font-size:11px;color:#c4b5fd;z-index:50;pointer-events:none;opacity:0.7;font-weight:600}
+#progressWrap{position:fixed;bottom:4px;left:10px;right:10px;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;z-index:50;pointer-events:none;border:1px solid rgba(0,255,240,0.2)}
+#progressBar{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#ff00ff,#00fff0,#39ff14);transition:width 0.2s;box-shadow:0 0 10px rgba(0,255,240,0.5)}
+#goalText{position:fixed;bottom:16px;left:0;right:0;text-align:center;font-size:10px;color:#ff00ff;z-index:50;pointer-events:none;opacity:0.8;font-weight:600;text-shadow:0 0 8px rgba(255,0,255,0.5)}
 
 /* FLOATING SCORE */
-.float-score{position:absolute;z-index:30;font-weight:bold;pointer-events:none;animation:floatUp 1s ease-out forwards;text-shadow:0 2px 6px rgba(0,0,0,0.5)}
+.float-score{position:absolute;z-index:30;font-weight:bold;pointer-events:none;animation:floatUp 1s ease-out forwards;text-shadow:0 0 10px rgba(0,255,240,0.8),0 0 20px rgba(0,255,240,0.4)}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(0.5)}30%{transform:translateY(-20px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(1)}}
 
 /* COMBO POPUP */
-#combo{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;color:#fde68a;text-shadow:0 0 20px rgba(251,191,36,0.7);z-index:60;pointer-events:none;opacity:0;transition:none}
+#combo{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;color:#fff200;text-shadow:0 0 20px rgba(255,242,0,0.8),0 0 40px rgba(255,242,0,0.4),0 0 60px rgba(255,0,102,0.3);z-index:60;pointer-events:none;opacity:0;transition:none}
 #combo.show{animation:comboPop 0.9s ease-out forwards}
 @keyframes comboPop{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3) rotate(-5deg)}30%{transform:translate(-50%,-50%) scale(1.4) rotate(3deg)}60%{opacity:1;transform:translate(-50%,-55%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-65%) scale(1)}}
 
@@ -42,31 +45,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:
 .overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;text-align:center;padding:20px;transition:opacity 0.4s}
 .overlay.hidden{opacity:0;pointer-events:none}
 
-#startScreen{background:linear-gradient(160deg,#1a0533 0%,#2d1b69 40%,#6b21a8 70%,#f472b6 100%)}
+#startScreen{background:linear-gradient(160deg,#06000e 0%,#0f0020 40%,#1a0033 70%,#2a0050 100%)}
 #startScreen .star{font-size:80px;animation:spin 4s linear infinite;display:block;margin-bottom:15px}
 @keyframes spin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
-#startScreen h1{font-size:32px;color:#fde68a;text-shadow:0 4px 20px rgba(251,191,36,0.6);line-height:1.2;margin-bottom:8px}
-#startScreen p{font-size:16px;color:#e9d5ff;margin-bottom:30px}
-#startScreen .brand{font-size:13px;color:#f0abfc;letter-spacing:2px;text-transform:uppercase;margin-top:20px;opacity:0.8}
-#startScreen .tap{font-size:22px;color:#1a0533;background:linear-gradient(135deg,#fde68a,#f59e0b);padding:14px 40px;border-radius:50px;font-weight:bold;display:inline-block;animation:pulse 2s ease-in-out infinite;cursor:pointer}
-@keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(245,158,11,0.5)}50%{box-shadow:0 6px 40px rgba(245,158,11,0.8)}}
+#startScreen h1{font-size:28px;color:#00fff0;text-shadow:0 0 10px rgba(0,255,240,0.8),0 0 30px rgba(0,255,240,0.4),0 0 60px rgba(0,255,240,0.2);line-height:1.3;margin-bottom:8px;letter-spacing:2px}
+#startScreen p{font-size:14px;color:#ff00ff;margin-bottom:30px;text-shadow:0 0 10px rgba(255,0,255,0.5);letter-spacing:1px}
+#startScreen .tap{font-size:20px;color:#00fff0;background:transparent;border:2px solid #00fff0;padding:14px 40px;border-radius:4px;font-weight:bold;display:inline-block;animation:pulseNeon 2s ease-in-out infinite;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:2px;text-shadow:0 0 10px rgba(0,255,240,0.8)}
+@keyframes pulseNeon{0%,100%{box-shadow:0 0 10px rgba(0,255,240,0.4),inset 0 0 10px rgba(0,255,240,0.1)}50%{box-shadow:0 0 25px rgba(0,255,240,0.8),0 0 50px rgba(0,255,240,0.3),inset 0 0 20px rgba(0,255,240,0.2)}}
 
-#endScreen{background:rgba(26,5,51,0.96)}
-#endScreen h2{font-size:28px;color:#f472b6;text-shadow:0 0 20px rgba(244,114,182,0.5)}
-#endScreen h2.win{color:#fde68a;text-shadow:0 0 30px rgba(251,191,36,0.7)}
-#endScreen .big{font-size:56px;color:#fde68a;font-weight:bold;margin:10px 0;text-shadow:0 0 30px rgba(251,191,36,0.5)}
-#endScreen .info{font-size:14px;color:#c4b5fd;margin:4px 0}
-#endScreen .msg{font-size:18px;color:#e9d5ff;margin:15px 0 25px;padding:0 15px}
-#endScreen .tap{font-size:18px;color:white;background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:14px 36px;border-radius:50px;font-weight:bold;cursor:pointer}
+#endScreen{background:rgba(6,0,14,0.96)}
+#endScreen h2{font-size:24px;color:#ff0066;text-shadow:0 0 10px rgba(255,0,102,0.8),0 0 30px rgba(255,0,102,0.4);letter-spacing:2px}
+#endScreen h2.win{color:#fff200;text-shadow:0 0 10px rgba(255,242,0,0.8),0 0 30px rgba(255,242,0,0.4),0 0 60px rgba(255,242,0,0.2)}
+#endScreen .big{font-size:52px;color:#00fff0;font-weight:bold;margin:10px 0;text-shadow:0 0 15px rgba(0,255,240,0.8),0 0 40px rgba(0,255,240,0.3)}
+#endScreen .info{font-size:13px;color:#ff00ff;margin:4px 0;text-shadow:0 0 8px rgba(255,0,255,0.5)}
+#endScreen .msg{font-size:16px;color:#39ff14;margin:15px 0 25px;padding:0 15px;text-shadow:0 0 10px rgba(57,255,20,0.6)}
+#endScreen .tap{font-size:16px;color:#ff00ff;background:transparent;border:2px solid #ff00ff;padding:14px 36px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:2px;text-shadow:0 0 10px rgba(255,0,255,0.8);box-shadow:0 0 10px rgba(255,0,255,0.3),inset 0 0 10px rgba(255,0,255,0.1)}
 
-#levelScreen{background:rgba(26,5,51,0.95)}
-#levelScreen .check{font-size:24px;color:#34d399;font-weight:bold;text-shadow:0 0 20px rgba(52,211,153,0.5)}
-#levelScreen .lvl{font-size:60px;color:#fde68a;font-weight:bold;margin:10px 0;text-shadow:0 0 30px rgba(251,191,36,0.5)}
-#levelScreen .info{font-size:14px;color:#c4b5fd;margin:4px 0}
-#levelScreen .info em{color:#fbbf24;font-style:normal;font-weight:bold}
-#levelScreen .tap{font-size:18px;color:#1a0533;background:linear-gradient(135deg,#34d399,#10b981);padding:14px 36px;border-radius:50px;font-weight:bold;margin-top:20px;cursor:pointer}
+#levelScreen{background:rgba(6,0,14,0.95)}
+#levelScreen .check{font-size:22px;color:#39ff14;font-weight:bold;text-shadow:0 0 10px rgba(57,255,20,0.8),0 0 30px rgba(57,255,20,0.4);letter-spacing:2px}
+#levelScreen .lvl{font-size:56px;color:#00fff0;font-weight:bold;margin:10px 0;text-shadow:0 0 15px rgba(0,255,240,0.8),0 0 40px rgba(0,255,240,0.3)}
+#levelScreen .info{font-size:13px;color:#ff00ff;margin:4px 0;text-shadow:0 0 8px rgba(255,0,255,0.5)}
+#levelScreen .info em{color:#fff200;font-style:normal;font-weight:bold;text-shadow:0 0 8px rgba(255,242,0,0.6)}
+#levelScreen .tap{font-size:16px;color:#39ff14;background:transparent;border:2px solid #39ff14;padding:14px 36px;border-radius:4px;font-weight:bold;margin-top:20px;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:2px;text-shadow:0 0 10px rgba(57,255,20,0.8);box-shadow:0 0 10px rgba(57,255,20,0.3),inset 0 0 10px rgba(57,255,20,0.1)}
 
-.brand-footer{position:fixed;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#c4b5fd;opacity:0.25;letter-spacing:1.5px;text-transform:uppercase;z-index:55;pointer-events:none}
+.brand-footer{position:fixed;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#00fff0;opacity:0.2;letter-spacing:3px;text-transform:uppercase;z-index:55;pointer-events:none;text-shadow:0 0 5px rgba(0,255,240,0.5)}
 </style>
 </head>
 <body>
@@ -91,7 +93,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:
   <h1>Acchiappa<br>le Stelle!</h1>
   <p>10 livelli — riesci a vincere?</p>
   <div class="tap" id="btnPlay">🚀 GIOCA!</div>
-  <div class="brand">Game for Kids</div>
 </div>
 
 <!-- LEVEL UP -->
@@ -107,7 +108,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:
 <!-- END -->
 <div class="overlay hidden" id="endScreen">
   <h2 id="esTitle">💥 Game Over!</h2>
-  <div style="font-size:13px;color:#c4b5fd">Punteggio</div>
+  <div style="font-size:13px;color:#ff00ff;text-shadow:0 0 8px rgba(255,0,255,0.5)">Punteggio</div>
   <div class="big" id="esScore">0</div>
   <div class="info" id="esBest"></div>
   <div class="info" id="esLvl"></div>
@@ -115,7 +116,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:
   <div class="tap" id="btnRetry">🔄 Rigioca!</div>
 </div>
 
-<div class="brand-footer">Game for Kids</div>
+<div class="brand-footer">Acchiappa le Stelle!</div>
 
 <script>
 // ===== GAME STATE =====
@@ -132,6 +133,10 @@ var items = [];
 var spawnTimer = 0;
 var lastTime = 0;
 var timerId = null;
+
+// ===== CYBERPUNK COLORS =====
+var CLR_SCORE = '#00fff0';
+var CLR_BAD = '#ff0066';
 
 // ===== LEVELS =====
 var LEVELS = [
@@ -218,7 +223,7 @@ function floatScore(x,y,txt,color){
   el.className='float-score';
   el.textContent=txt;
   el.style.left=x+'px';el.style.top=y+'px';
-  el.style.color=color||'#fde68a';
+  el.style.color=color||CLR_SCORE;
   el.style.fontSize=(16+Math.min(combo,20))+'px';
   game.appendChild(el);
   setTimeout(function(){el.remove()},1000);
@@ -382,7 +387,7 @@ function tick(now){
         // BAD
         lives--;combo=0;
         spawnParticles(it.x,it.y,'💥',8);
-        floatScore(it.x,it.y-20,'💥','#ef4444');
+        floatScore(it.x,it.y-20,'💥',CLR_BAD);
         sndBad();
         showCombo('💥 Ouch!');
         if(navigator.vibrate)navigator.vibrate([40,20,40]);
@@ -399,7 +404,7 @@ function tick(now){
         var emojis=['✨','🌟','💫','🎉'];
         spawnParticles(it.x,it.y,emojis[Math.floor(Math.random()*emojis.length)],6+Math.min(combo,15));
         var ptxt=mult>1?'+'+earned+' (x'+mult+')':'+'+it.points;
-        floatScore(it.x,it.y-20,ptxt,'#fde68a');
+        floatScore(it.x,it.y-20,ptxt,CLR_SCORE);
         sndCatch();
         if(navigator.vibrate)navigator.vibrate(15);
 
@@ -420,7 +425,7 @@ function tick(now){
     // Fell off screen
     if(it.y>H+50){
       if(it.points>0){
-        if(combo>=3)floatScore(it.x,H-80,'Combo perso!','#f87171');
+        if(combo>=3)floatScore(it.x,H-80,'Combo perso!','#ff0066');
         combo=0;
       }
       it.el.remove();items.splice(i,1);

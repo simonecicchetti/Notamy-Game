@@ -681,6 +681,22 @@
 
         let currentDifficulty = 'easy';
         let settings = difficulties[currentDifficulty];
+        let progressiveMode = false;
+
+        // Progressive difficulty: smoothly ramps all settings based on score
+        function updateProgressiveDifficulty() {
+            if (!progressiveMode) return;
+            const progress = Math.min(1, score / settings.winScore); // 0 to 1
+
+            // Interpolate from easy to nightmare over the game
+            const lerp = (a, b) => a + (b - a) * progress;
+
+            settings.pipeGap = Math.round(lerp(300, 190));       // 300 → 190
+            settings.gravity = lerp(0.25, 0.55);                 // 0.25 → 0.55
+            settings.jumpForce = lerp(-7.5, -10.5);              // -7.5 → -10.5
+            settings.pipeSpeed = lerp(2.5, 4.5);                 // 2.5 → 4.5
+            settings.powerupChance = lerp(0.5, 0.2);             // 50% → 20%
+        }
 
         // Game constants
         const PIPE_WIDTH = 60;
@@ -790,6 +806,7 @@
                 e.target.classList.add('active');
                 currentDifficulty = e.target.dataset.difficulty;
                 settings = difficulties[currentDifficulty];
+                progressiveMode = false;
             });
         });
 
@@ -1279,10 +1296,13 @@
                     score += points;
                     combo++;
 
+                    // Update progressive difficulty
+                    updateProgressiveDifficulty();
+
                     // Check win condition
                     if (settings.winScore && score >= settings.winScore) {
                         victory();
-                        return; // exits updatePipes entirely
+                        return;
                     }
 
                     // Spawn missiles — start at score 5, frequency ramps to every 2 pipes
@@ -2265,7 +2285,16 @@
         if (autostart) {
             document.getElementById('startScreen').style.display = 'none';
             currentDifficulty = 'easy';
-            settings = difficulties[currentDifficulty];
+            settings = {
+                pipeSpeed: 2.5,
+                pipeGap: 300,
+                gravity: 0.25,
+                jumpForce: -7.5,
+                scoreMultiplier: 1,
+                powerupChance: 0.5,
+                winScore: 500
+            };
+            progressiveMode = true;
             setTimeout(() => {
                 startGame();
             }, 500);

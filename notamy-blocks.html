@@ -340,8 +340,10 @@
         // ===== CONSTANTS =====
         const BOARD_WIDTH = 10;
         const BOARD_HEIGHT = 20;
-        const INITIAL_TIME = 300;
-        const TIME_BONUS = { 1: 5, 2: 10, 3: 15, 4: 25 };
+        const INITIAL_TIME = 420; // 7 minutes — generous but not infinite
+        const TIME_BONUS = { 1: 6, 2: 12, 3: 20, 4: 30 };
+        const WIN_LEVEL = 10;    // clear 100 lines to win
+        const WIN_LINES = 100;
         const LOCK_DELAY = 500; // ms — grace period before piece locks
         const LOCK_MOVES_MAX = 15; // max moves/rotations during lock delay
 
@@ -740,6 +742,11 @@
             gameState.level = Math.floor(gameState.lines / 10) + 1;
             if (gameState.level > oldLevel) {
                 gameState.timeLeft += 10;
+                // Win condition: reached level 10
+                if (gameState.lines >= WIN_LINES) {
+                    victory();
+                    return;
+                }
                 showLevelUp();
             }
 
@@ -926,7 +933,7 @@
         function updateUI() {
             document.getElementById('scoreDisplay').textContent = gameState.score;
             document.getElementById('levelDisplay').textContent = gameState.level;
-            document.getElementById('linesDisplay').textContent = gameState.lines;
+            document.getElementById('linesDisplay').textContent = gameState.lines + '/' + WIN_LINES;
 
             const timeDisplay = document.getElementById('timeDisplay');
             const secs = Math.ceil(gameState.timeLeft);
@@ -1022,9 +1029,34 @@
                 moveRepeatTimer = null;
             }
 
+            const title = document.querySelector('#gameOverScreen .game-over-title');
+            title.textContent = gameState.timeLeft <= 0 ? 'TIME OUT' : 'FLATLINED';
+            title.style.color = '#ff0066';
+            title.style.textShadow = '0 0 30px rgba(255, 0, 102, 0.5), 0 0 60px rgba(255, 0, 102, 0.2)';
+
             document.getElementById('finalScore').textContent = gameState.score;
             document.getElementById('finalStats').textContent =
-                'LV.' + gameState.level + ' // ' + gameState.lines + ' LINES';
+                'LV.' + gameState.level + ' // ' + gameState.lines + '/' + WIN_LINES + ' LINES';
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+
+        function victory() {
+            if (!gameState.gameActive) return;
+            gameState.gameActive = false;
+
+            if (moveRepeatTimer) {
+                clearInterval(moveRepeatTimer);
+                moveRepeatTimer = null;
+            }
+
+            const title = document.querySelector('#gameOverScreen .game-over-title');
+            title.textContent = 'SYSTEM CLEAR';
+            title.style.color = '#ffd700';
+            title.style.textShadow = '0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4)';
+
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalStats').textContent =
+                'LV.' + gameState.level + ' // ' + gameState.lines + ' LINES // COMPLETE';
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 

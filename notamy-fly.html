@@ -1199,6 +1199,17 @@
                 return;
             }
 
+            // Halfway bonus: +1 life + shield
+            if (bossTimer === Math.floor(BOSS_DURATION / 2)) {
+                if (lives < 3) {
+                    lives++;
+                    updateLivesUI();
+                }
+                bird.shielded = true;
+                bird.shieldTime = 300;
+                showMilestone('HALFWAY! +1 LIFE');
+            }
+
             const phase = Math.min(1, bossTimer / BOSS_DURATION); // 0 → 1
 
             // Spawn enemies — aggressive from the start
@@ -1216,9 +1227,9 @@
                 }
             }
 
-            // Spawn power-ups periodically during boss
-            if (bossTimer > 0 && bossTimer % 300 === 0) { // every 5 seconds
-                const types = ['shield', 'magnet', 'points', 'speed'];
+            // Spawn power-ups periodically during boss — shield-heavy for survivability
+            if (bossTimer > 0 && bossTimer % 240 === 0) { // every 4 seconds
+                const types = ['shield', 'shield', 'shield', 'magnet', 'points', 'speed'];
                 const type = types[Math.floor(Math.random() * types.length)];
                 powerups.push({
                     x: WIDTH + 20,
@@ -1792,7 +1803,9 @@
 
         function updatePowerups() {
             powerups.forEach(powerup => {
-                powerup.x -= settings.pipeSpeed * speedMultiplier;
+                // Power-ups move slower during boss so player can collect them
+                const powerupSpeed = bossPhase ? 2.5 : settings.pipeSpeed * speedMultiplier;
+                powerup.x -= powerupSpeed;
                 powerup.rotation += 0.05;
                 powerup.wobble += 0.05;
 

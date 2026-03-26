@@ -1087,8 +1087,8 @@
                 const pipe = pipes[pi];
                 pipe.x -= settings.pipeSpeed * speedMultiplier;
 
-                // Check if bird passed pipe
-                if (!pipe.passed && pipe.x + PIPE_WIDTH < bird.x) {
+                // Check if bird passed pipe (guard: only score while playing)
+                if (!pipe.passed && pipe.x + PIPE_WIDTH < bird.x && gameState === 'playing') {
                     pipe.passed = true;
                     const points = Math.floor(1 * settings.scoreMultiplier * bird.scoreMultiplier);
                     score += points;
@@ -1356,9 +1356,8 @@
         }
         
         function checkCollision() {
-            if (bird.invincible) return;
+            if (bird.invincible || gameState !== 'playing') return;
 
-            // Use for-loop instead of forEach so we can break on first hit
             for (let i = 0; i < pipes.length; i++) {
                 const pipe = pipes[i];
                 const birdLeft = bird.x - bird.radius;

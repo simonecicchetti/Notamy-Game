@@ -341,8 +341,7 @@
             dropTimer: 0,
             combo: 0,
             bag: [],
-            nextPiece: null,
-            lockingLines: false // flag to prevent spawning during line clear
+            nextPiece: null
         };
 
         // Canvas Setup
@@ -617,6 +616,7 @@
                 dropped++;
             }
             gameState.score += dropped * 2;
+            gameState.dropTimer = 0; // reset so new piece doesn't auto-drop immediately
             lockPiece();
         }
 
@@ -943,8 +943,7 @@
                 dropTimer: 0,
                 combo: 0,
                 bag: [],
-                nextPiece: null,
-                lockingLines: false
+                nextPiece: null
             };
 
             spawnPiece();
@@ -956,6 +955,12 @@
             if (!gameState.gameActive) return;
 
             gameState.gameActive = false;
+
+            // Clean up any active touch repeat timer
+            if (moveRepeatTimer) {
+                clearInterval(moveRepeatTimer);
+                moveRepeatTimer = null;
+            }
             document.getElementById('finalScore').textContent = gameState.score;
             document.getElementById('finalStats').textContent =
                 'Level ' + gameState.level + ' \u2022 ' + gameState.lines + ' lines cleared';

@@ -850,9 +850,10 @@
         }
 
         function jump() {
-            // More responsive jump with speed boost
             const jumpMultiplier = bird.speedBoost ? 1.2 : 1;
-            bird.velocity = settings.jumpForce * jumpMultiplier;
+            // Lighter jump during boss phase (matches reduced gravity)
+            const bossJump = bossPhase ? 0.7 : 1;
+            bird.velocity = settings.jumpForce * jumpMultiplier * bossJump;
             bird.wingAnimation = 20;
 
             // Create more dramatic jump particles
@@ -1491,12 +1492,16 @@
             ctx.fillStyle = g;
             ctx.fillRect(20, barY, barW * progress, 6);
 
-            // "SURVIVE" text
+            // "SURVIVE" countdown — large and prominent
             const remaining = Math.ceil((BOSS_DURATION - bossTimer) / 60);
-            ctx.fillStyle = remaining < 30 ? '#39ff14' : '#ff0066';
-            ctx.font = 'bold 14px Orbitron, monospace';
+            ctx.fillStyle = remaining < 30 ? '#39ff14' : (remaining < 60 ? '#fff200' : '#ff0066');
+            ctx.font = 'bold 22px Orbitron, monospace';
             ctx.textAlign = 'center';
-            ctx.fillText('SURVIVE ' + remaining + 's', WIDTH / 2, barY + 22);
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = 10;
+            ctx.fillText('SURVIVE ' + remaining + 's', WIDTH / 2, barY + 24);
+            ctx.shadowBlur = 0;
         }
 
         function updateBird() {
@@ -1509,9 +1514,10 @@
                 bird.velocity = 0;
             }
 
-            // Apply gravity with speed modifier
+            // Apply gravity — lighter during boss phase for better control
             const gravityModifier = bird.speedBoost ? 0.85 : 1;
-            bird.velocity += settings.gravity * gravityModifier * speedMultiplier;
+            const bossGravityReduction = bossPhase ? 0.5 : 1; // halve gravity during boss
+            bird.velocity += settings.gravity * gravityModifier * speedMultiplier * bossGravityReduction;
             bird.y += bird.velocity;
 
             // Limit max fall speed

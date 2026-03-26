@@ -743,11 +743,12 @@
                 bubble.y += bubble.vy;
                 bubble.glow = (bubble.glow + 0.1) % (Math.PI * 2);
                 
-                // Check danger zone
+                // Check danger zone — slow down but don't stop (min vy 0.5)
                 if (bubble.y + bubble.size > canvas.height - 150) {
                     dangerZone = true;
-                    if (bubble.vy > 0) {
-                        bubble.vy *= 0.9;
+                    if (bubble.vy > 0.5) {
+                        bubble.vy *= 0.95;
+                        if (bubble.vy < 0.5) bubble.vy = 0.5;
                     }
                 }
                 

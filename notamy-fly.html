@@ -639,7 +639,7 @@
                 jumpForce: -7.5,
                 scoreMultiplier: 1,
                 powerupChance: 0.5,
-                winScore: 400
+                winScore: 600
             },
             normal: {
                 pipeSpeed: 3.0,
@@ -648,7 +648,7 @@
                 jumpForce: -8.5,
                 scoreMultiplier: 1.5,
                 powerupChance: 0.4,
-                winScore: 300
+                winScore: 450
             },
             hard: {
                 pipeSpeed: 3.8,
@@ -657,7 +657,7 @@
                 jumpForce: -9.5,
                 scoreMultiplier: 2,
                 powerupChance: 0.35,
-                winScore: 200
+                winScore: 300
             },
             insane: {
                 pipeSpeed: 4.5,
@@ -666,7 +666,7 @@
                 jumpForce: -10.5,
                 scoreMultiplier: 3,
                 powerupChance: 0.3,
-                winScore: 150
+                winScore: 200
             },
             nightmare: {
                 pipeSpeed: 5.5,
@@ -675,7 +675,7 @@
                 jumpForce: -11.5,
                 scoreMultiplier: 5,
                 powerupChance: 0.25,
-                winScore: 100
+                winScore: 150
             }
         };
 
@@ -761,23 +761,23 @@
         // Initialize background elements
         function initBackgroundElements() {
             backgroundParticles = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 60; i++) {
                 backgroundParticles.push({
                     x: Math.random() * WIDTH,
                     y: Math.random() * HEIGHT,
                     size: Math.random() * 3 + 1,
-                    speed: Math.random() * 0.5 + 0.2,
+                    speed: Math.random() * 0.8 + 0.3,
                     opacity: Math.random() * 0.3 + 0.1
                 });
             }
 
             stars = [];
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 80; i++) {
                 stars.push({
                     x: Math.random() * WIDTH,
                     y: Math.random() * HEIGHT,
-                    size: Math.random() * 2,
-                    speed: Math.random() * 0.3 + 0.1,
+                    size: Math.random() * 2.5 + 0.5,
+                    speed: Math.random() * 0.5 + 0.15,
                     twinkle: Math.random() * Math.PI * 2
                 });
             }
@@ -1644,7 +1644,7 @@
 
             // Update background particles
             backgroundParticles.forEach(p => {
-                p.x -= p.speed * speedMultiplier;
+                p.x -= p.speed * speedMultiplier * 1.5;
                 if (p.x < -10) {
                     p.x = WIDTH + 10;
                     p.y = Math.random() * HEIGHT;
@@ -1653,8 +1653,8 @@
 
             // Update stars
             stars.forEach(star => {
-                star.x -= star.speed * speedMultiplier;
-                star.twinkle += 0.05;
+                star.x -= star.speed * speedMultiplier * 1.5;
+                star.twinkle += 0.05 + speedMultiplier * 0.02;
                 if (star.x < -10) {
                     star.x = WIDTH + 10;
                     star.y = Math.random() * HEIGHT;
@@ -1775,19 +1775,31 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-            // Draw stars
+            // Speed factor for visual effects
+            const sf = Math.min(speedMultiplier, 2.5);
+            const streakLength = Math.max(0, (sf - 1.2) * 15); // streak grows after 1.2x
+
+            // Draw stars — stretch into speed lines at high speed
             stars.forEach(star => {
                 const opacity = (Math.sin(star.twinkle) + 1) / 2 * 0.8 + 0.2;
                 ctx.fillStyle = `rgba(0, 255, 240, ${opacity * 0.6})`;
-                ctx.fillRect(star.x, star.y, star.size, star.size);
+                if (streakLength > 2) {
+                    // Star becomes a speed line
+                    ctx.fillRect(star.x, star.y, star.size + streakLength, star.size * 0.6);
+                } else {
+                    ctx.fillRect(star.x, star.y, star.size, star.size);
+                }
             });
 
-            // Draw grid with speed effect — cyberpunk magenta/cyan
-            ctx.strokeStyle = `rgba(255, 0, 255, ${0.03 + speedMultiplier * 0.01})`;
+            // Draw grid — scrolls faster with speed, gets brighter
+            const gridOpacity = 0.03 + sf * 0.015;
+            ctx.strokeStyle = `rgba(255, 0, 255, ${gridOpacity})`;
             ctx.lineWidth = 1;
             const gridSize = 50;
 
-            for (let x = (frameCount * speedMultiplier) % gridSize; x < WIDTH; x += gridSize) {
+            // Vertical grid lines scroll with speed
+            const gridScroll = (frameCount * sf * 1.5) % gridSize;
+            for (let x = gridScroll; x < WIDTH; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, HEIGHT);
@@ -1801,12 +1813,33 @@
                 ctx.stroke();
             }
 
-            // Draw background particles
+            // Background particles — stretch into streaks at high speed
             backgroundParticles.forEach(p => {
-                const speedGlow = speedMultiplier > 1 ? (speedMultiplier - 1) * 0.3 : 0;
-                ctx.fillStyle = `rgba(0, 255, 240, ${p.opacity + speedGlow})`;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
+                const speedGlow = sf > 1 ? (sf - 1) * 0.4 : 0;
+                const alpha = Math.min(0.8, p.opacity + speedGlow);
+                ctx.fillStyle = `rgba(0, 255, 240, ${alpha})`;
+                if (streakLength > 2) {
+                    ctx.fillRect(p.x, p.y, p.size + streakLength * 0.7, p.size * 0.5);
+                } else {
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                }
             });
+
+            // Speed streaks — horizontal lines that appear at high speed
+            if (sf > 1.5) {
+                const streakCount = Math.floor((sf - 1.5) * 12);
+                ctx.strokeStyle = `rgba(0, 255, 240, ${(sf - 1.5) * 0.15})`;
+                ctx.lineWidth = 1;
+                for (let i = 0; i < streakCount; i++) {
+                    const y = ((frameCount * 3 + i * 137) % HEIGHT);
+                    const len = 30 + sf * 25;
+                    const x = ((frameCount * sf * 4 + i * 211) % (WIDTH + len)) - len;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + len, y);
+                    ctx.stroke();
+                }
+            }
         }
 
         function drawBird() {

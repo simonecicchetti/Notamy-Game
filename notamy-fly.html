@@ -603,45 +603,50 @@
         
         // Difficulty settings - MADE MORE RESPONSIVE AND ENGAGING
         const difficulties = {
-            easy: { 
-                pipeSpeed: 2.5,  // Increased from 1.2
-                pipeGap: 300,    // Slightly reduced from 320
-                gravity: 0.25,   // Increased from 0.12 for better responsiveness
-                jumpForce: -7.5, // Stronger jump from -5
+            easy: {
+                pipeSpeed: 2.5,
+                pipeGap: 300,
+                gravity: 0.25,
+                jumpForce: -7.5,
                 scoreMultiplier: 1,
-                powerupChance: 0.5
+                powerupChance: 0.5,
+                winScore: 100
             },
-            normal: { 
-                pipeSpeed: 3.0,   // Increased from 1.8
-                pipeGap: 260,     // Reduced from 280
-                gravity: 0.35,    // Increased from 0.20
-                jumpForce: -8.5,  // Stronger from -6
+            normal: {
+                pipeSpeed: 3.0,
+                pipeGap: 260,
+                gravity: 0.35,
+                jumpForce: -8.5,
                 scoreMultiplier: 1.5,
-                powerupChance: 0.4
+                powerupChance: 0.4,
+                winScore: 75
             },
-            hard: { 
-                pipeSpeed: 3.8,   // Increased from 2.2
-                pipeGap: 230,     // Reduced from 240
-                gravity: 0.45,    // Increased from 0.30
+            hard: {
+                pipeSpeed: 3.8,
+                pipeGap: 230,
+                gravity: 0.45,
                 jumpForce: -9.5,  // Stronger from -7
                 scoreMultiplier: 2,
-                powerupChance: 0.35
+                powerupChance: 0.35,
+                winScore: 60
             },
-            insane: { 
-                pipeSpeed: 4.5,   // Increased from 2.8
-                pipeGap: 200,     // Reduced from 210
-                gravity: 0.55,    // Increased from 0.40
-                jumpForce: -10.5, // Stronger from -8
+            insane: {
+                pipeSpeed: 4.5,
+                pipeGap: 200,
+                gravity: 0.55,
+                jumpForce: -10.5,
                 scoreMultiplier: 3,
-                powerupChance: 0.3
+                powerupChance: 0.3,
+                winScore: 50
             },
-            nightmare: { 
+            nightmare: {
                 pipeSpeed: 5.5,
                 pipeGap: 180,
                 gravity: 0.65,
                 jumpForce: -11.5,
                 scoreMultiplier: 5,
-                powerupChance: 0.25
+                powerupChance: 0.25,
+                winScore: 35
             }
         };
         
@@ -691,6 +696,7 @@
         let powerupsCollected = 0;
         let achievements = [];
         let milestones = [10, 25, 50, 100, 150, 200, 300, 500, 1000];
+        let enteredFinalZone = false;
         let nextMilestone = 0;
         
         // Bird object - FIXED INITIALIZATION
@@ -831,7 +837,8 @@
             speedMultiplier = 1;
             maxSpeedReached = 1;
             nextMilestone = 0;
-            
+            enteredFinalZone = false;
+
             // Clear any existing timeouts
             if (comboTimeout) clearTimeout(comboTimeout);
             if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
@@ -866,16 +873,30 @@
             }, 2000);
         }
         
+        // Final zone: last 20% before win, difficulty ramps
+        function getFinalZoneIntensity() {
+            if (!settings.winScore) return 0;
+            const threshold = settings.winScore * 0.8;
+            if (score < threshold) return 0;
+            return Math.min(1, (score - threshold) / (settings.winScore - threshold));
+        }
+
         function createPipe() {
+            // Final zone: gap shrinks up to 20%
+            const finalIntensity = getFinalZoneIntensity();
+            const gapReduction = finalIntensity * settings.pipeGap * 0.2;
+            const effectiveGap = settings.pipeGap - gapReduction;
+
             const minHeight = 80;
-            const maxHeight = Math.max(minHeight + 10, HEIGHT - settings.pipeGap - minHeight);
+            const maxHeight = Math.max(minHeight + 10, HEIGHT - effectiveGap - minHeight);
             const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
             
             pipes.push({
                 x: WIDTH + PIPE_WIDTH,
                 topHeight: topHeight,
-                bottomY: topHeight + settings.pipeGap,
+                bottomY: topHeight + effectiveGap,
                 passed: false,
+                finalZone: finalIntensity > 0,
                 particles: []
             });
         }
@@ -1029,9 +1050,16 @@
 
             // Progressive difficulty — only trigger once per score threshold
             const difficultyStep = Math.floor(score / 20);
-            const targetSpeed = 1 + difficultyStep * 0.05;
-            if (targetSpeed > speedMultiplier && speedMultiplier < 2) {
-                speedMultiplier = Math.min(2, targetSpeed);
+            let targetSpeed = 1 + difficultyStep * 0.05;
+
+            // Final zone: extra speed ramp (up to +0.3x on top of base)
+            const finalIntensity = getFinalZoneIntensity();
+            if (finalIntensity > 0) {
+                targetSpeed += finalIntensity * 0.3;
+            }
+
+            if (targetSpeed > speedMultiplier && speedMultiplier < 2.3) {
+                speedMultiplier = Math.min(2.3, targetSpeed);
                 maxSpeedReached = Math.max(maxSpeedReached, speedMultiplier);
             }
         }
@@ -1065,6 +1093,18 @@
                     score += points;
                     combo++;
                     
+                    // Check win condition
+                    if (settings.winScore && score >= settings.winScore) {
+                        victory();
+                        return;
+                    }
+
+                    // Final zone announcement (once, at 80% of win score)
+                    if (settings.winScore && !enteredFinalZone && score >= settings.winScore * 0.8) {
+                        enteredFinalZone = true;
+                        showMilestone('FINAL ZONE!');
+                    }
+
                     // Check milestones
                     checkMilestone();
                     
@@ -1477,7 +1517,56 @@
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
         
+        function victory() {
+            gameState = 'gameOver';
+
+            if (comboTimeout) clearTimeout(comboTimeout);
+            if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
+
+            // Victory particles — gold explosion
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: bird.x,
+                    y: bird.y,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 0.5) * 20,
+                    size: Math.random() * 12 + 5,
+                    color: ['#ffff00', '#ffd700', '#ff8800', '#00ffff', '#ff00ff'][Math.floor(Math.random() * 5)],
+                    life: 100,
+                    type: 'explosion'
+                });
+            }
+
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                try { localStorage.setItem('notamyFlyBest', bestScore); } catch(e) {}
+            }
+
+            if (combo > maxCombo) maxCombo = combo;
+
+            // Reuse game over screen with victory styling
+            const title = document.querySelector('#gameOverScreen .game-over-title');
+            title.textContent = 'YOU WIN!';
+            title.style.color = '#ffd700';
+            title.style.textShadow = '0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4)';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('bestScore').textContent = bestScore;
+            document.getElementById('maxCombo').textContent = maxCombo;
+            document.getElementById('powerupsCollected').textContent = powerupsCollected;
+            document.getElementById('maxSpeed').textContent = maxSpeedReached.toFixed(1) + 'x';
+            document.getElementById('gameOverScreen').style.display = 'flex';
+        }
+
         function restartGame() {
+            // Reset game over screen title styling
+            const title = document.querySelector('#gameOverScreen .game-over-title');
+            title.textContent = 'GAME OVER';
+            title.style.color = '';
+            title.style.textShadow = '';
             document.getElementById('gameOverScreen').style.display = 'none';
             document.getElementById('comboIndicator').classList.remove('active');
             document.getElementById('invincibilityCountdown').classList.remove('active', 'ending');
@@ -1704,11 +1793,18 @@
                 // Bottom pipe glow
                 ctx.fillRect(pipe.x - 20, pipe.bottomY, PIPE_WIDTH + 40, HEIGHT - pipe.bottomY);
                 
-                // Pipe gradient
+                // Pipe gradient — red tint in final zone
                 const pipeGradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_WIDTH, 0);
-                pipeGradient.addColorStop(0, '#007a70');
-                pipeGradient.addColorStop(0.5, COLORS.pipe);
-                pipeGradient.addColorStop(1, '#007a70');
+                if (pipe.finalZone) {
+                    const pulse = 0.5 + Math.sin(frameCount * 0.1) * 0.2;
+                    pipeGradient.addColorStop(0, `rgba(180, 30, 30, ${pulse})`);
+                    pipeGradient.addColorStop(0.5, `rgba(255, 60, 60, ${pulse})`);
+                    pipeGradient.addColorStop(1, `rgba(180, 30, 30, ${pulse})`);
+                } else {
+                    pipeGradient.addColorStop(0, '#007a70');
+                    pipeGradient.addColorStop(0.5, COLORS.pipe);
+                    pipeGradient.addColorStop(1, '#007a70');
+                }
                 
                 // Draw top pipe
                 ctx.fillStyle = pipeGradient;

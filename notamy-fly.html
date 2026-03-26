@@ -676,6 +676,7 @@
         // Timers for UI elements
         let comboTimeout = null;
         let speedBoostTimeout = null;
+        let firstPipeTimer = null;
         
         // Safe localStorage handling
         try {
@@ -756,8 +757,13 @@
         });
         
         // Input handling
-        canvas.addEventListener('click', handleInput);
+        // Use touchstart only — suppress synthetic click from touch to prevent double-jump
         canvas.addEventListener('touchstart', handleInput, { passive: false });
+        canvas.addEventListener('click', (e) => {
+            // Only handle click from mouse, not synthetic click from touch
+            if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+            handleInput(e);
+        });
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
@@ -829,6 +835,7 @@
             // Clear any existing timeouts
             if (comboTimeout) clearTimeout(comboTimeout);
             if (speedBoostTimeout) clearTimeout(speedBoostTimeout);
+            if (firstPipeTimer) clearTimeout(firstPipeTimer);
             
             // Reset bird with validation
             bird.x = WIDTH * 0.25;
@@ -852,15 +859,16 @@
             particles = [];
             powerups = [];
             
-            // Create first pipe sooner
-            setTimeout(() => {
+            // Create first pipe sooner — store timer ID to cancel on restart
+            firstPipeTimer = setTimeout(() => {
                 createPipe();
+                firstPipeTimer = null;
             }, 2000);
         }
         
         function createPipe() {
             const minHeight = 80;
-            const maxHeight = HEIGHT - settings.pipeGap - minHeight;
+            const maxHeight = Math.max(minHeight + 10, HEIGHT - settings.pipeGap - minHeight);
             const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
             
             pipes.push({
@@ -995,32 +1003,35 @@
                 }
             }
             
-            // Check boundaries with margin
-            const margin = bird.radius + 5;
-            
-            if (bird.y - bird.radius < margin) {
-                bird.y = margin + bird.radius;
-                bird.velocity = Math.max(bird.velocity, 0);
-            } else if (bird.y + bird.radius > HEIGHT - margin) {
-                bird.y = HEIGHT - margin - bird.radius;
-                bird.velocity = Math.min(bird.velocity, 0);
-            }
-            
-            // Check collision with borders
+            // Check boundaries — collision BEFORE clamping so border death is reachable
             if (!bird.invincible && (bird.y - bird.radius <= 0 || bird.y + bird.radius >= HEIGHT)) {
                 if (bird.shielded) {
                     bird.shielded = false;
+                    bird.shieldTime = 0;
                     bird.invincible = true;
                     bird.invincibleTime = 60;
+                    bird.velocity = bird.y < HEIGHT / 2 ? 3 : -3; // bounce away from edge
                     showAchievement("Shield Save!");
                 } else {
                     gameOver();
+                    return;
                 }
             }
-            
-            // Progressive difficulty
-            if (score > 0 && score % 20 === 0 && speedMultiplier < 2) {
-                speedMultiplier += 0.1;
+
+            // Clamp position after collision check
+            if (bird.y - bird.radius < 0) {
+                bird.y = bird.radius;
+                bird.velocity = Math.max(bird.velocity, 0);
+            } else if (bird.y + bird.radius > HEIGHT) {
+                bird.y = HEIGHT - bird.radius;
+                bird.velocity = Math.min(bird.velocity, 0);
+            }
+
+            // Progressive difficulty — only trigger once per score threshold
+            const difficultyStep = Math.floor(score / 20);
+            const targetSpeed = 1 + difficultyStep * 0.05;
+            if (targetSpeed > speedMultiplier && speedMultiplier < 2) {
+                speedMultiplier = Math.min(2, targetSpeed);
                 maxSpeedReached = Math.max(maxSpeedReached, speedMultiplier);
             }
         }
@@ -1307,29 +1318,31 @@
         
         function checkCollision() {
             if (bird.invincible) return;
-            
-            pipes.forEach(pipe => {
+
+            // Use for-loop instead of forEach so we can break on first hit
+            for (let i = 0; i < pipes.length; i++) {
+                const pipe = pipes[i];
                 const birdLeft = bird.x - bird.radius;
                 const birdRight = bird.x + bird.radius;
                 const birdTop = bird.y - bird.radius;
                 const birdBottom = bird.y + bird.radius;
-                
+
                 const pipeLeft = pipe.x;
                 const pipeRight = pipe.x + PIPE_WIDTH;
-                
+
                 if (birdRight > pipeLeft && birdLeft < pipeRight) {
                     if (birdTop < pipe.topHeight || birdBottom > pipe.bottomY) {
-                        const hit = (birdTop < pipe.topHeight) ? 
+                        const hit = (birdTop < pipe.topHeight) ?
                             isCircleRectCollision(bird.x, bird.y, bird.radius, pipeLeft, 0, PIPE_WIDTH, pipe.topHeight) :
                             isCircleRectCollision(bird.x, bird.y, bird.radius, pipeLeft, pipe.bottomY, PIPE_WIDTH, HEIGHT - pipe.bottomY);
-                        
+
                         if (hit) {
                             handleCollision();
-                            return;
+                            return; // actually exits the function now
                         }
                     }
                 }
-            });
+            }
         }
         
         function isCircleRectCollision(circleX, circleY, circleRadius, rectX, rectY, rectWidth, rectHeight) {
@@ -1346,8 +1359,10 @@
         function handleCollision() {
             if (bird.shielded) {
                 bird.shielded = false;
+                bird.shieldTime = 0;
                 bird.invincible = true;
                 bird.invincibleTime = 120;
+                maxCombo = Math.max(maxCombo, combo); // track before reset
                 combo = 0;
                 document.getElementById('comboIndicator').classList.remove('active');
                 
@@ -1609,7 +1624,7 @@
             
             // Bird glow
             const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, bird.radius * 3);
-            const glowColor = bird.speedBoost ? '0, 255, 255' : '0, 255, 255';
+            const glowColor = bird.speedBoost ? '255, 150, 0' : '0, 255, 255';
             glowGradient.addColorStop(0, `rgba(${glowColor}, 0.8)`);
             glowGradient.addColorStop(0.5, `rgba(${glowColor}, 0.4)`);
             glowGradient.addColorStop(1, 'transparent');

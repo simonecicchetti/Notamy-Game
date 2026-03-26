@@ -744,6 +744,15 @@
         let enteredFinalZone = false;
         let nextMilestone = 0;
 
+        // === BOSS PHASE ===
+        let bossPhase = false;
+        let bossTimer = 0;
+        const BOSS_DURATION = 150 * 60; // 150 seconds at 60fps
+        let enemies = [];
+        let enemyBullets = [];
+        let bossSpawnTimer = 0;
+        let bossWave = 0;
+
         // Bird object - FIXED INITIALIZATION
         const bird = {
             x: WIDTH * 0.25,
@@ -915,6 +924,12 @@
             powerups = [];
             missiles = [];
             missileWarnings = [];
+            enemies = [];
+            enemyBullets = [];
+            bossPhase = false;
+            bossTimer = 0;
+            bossWave = 0;
+            bossSpawnTimer = 0;
 
             // Create first pipe sooner — store timer ID to cancel on restart
             firstPipeTimer = setTimeout(() => {
@@ -1122,6 +1137,268 @@
             });
         }
 
+        // === BOSS PHASE FUNCTIONS ===
+        function enterBossPhase() {
+            bossPhase = true;
+            bossTimer = 0;
+            bossWave = 0;
+            bossSpawnTimer = 0;
+            enemies = [];
+            enemyBullets = [];
+            pipes = []; // clear remaining pipes
+            missiles = [];
+            missileWarnings = [];
+            showMilestone('INCOMING!');
+            // Give player a shield to start
+            bird.shielded = true;
+            bird.shieldTime = 300; // 5 seconds
+        }
+
+        function spawnEnemy() {
+            const phase = Math.min(1, bossTimer / BOSS_DURATION);
+            // Enemy types get harder over time
+            const isFast = Math.random() < phase * 0.4;
+            const y = 40 + Math.random() * (HEIGHT - 80);
+            enemies.push({
+                x: WIDTH + 30,
+                y: y,
+                baseY: y,
+                vx: isFast ? -(3 + phase * 3) : -(1.5 + phase * 2),
+                size: isFast ? 14 : 20,
+                health: isFast ? 1 : 2,
+                shootTimer: Math.floor(Math.random() * 60) + 30,
+                shootInterval: isFast ? 90 : 60,
+                wobble: Math.random() * Math.PI * 2,
+                wobbleSpeed: 0.02 + Math.random() * 0.02,
+                wobbleAmp: 20 + Math.random() * 30,
+                color: isFast ? '#ff0066' : '#ff00ff',
+                fast: isFast
+            });
+        }
+
+        function updateBossPhase() {
+            if (!bossPhase) return;
+            bossTimer++;
+
+            // Victory!
+            if (bossTimer >= BOSS_DURATION) {
+                victory();
+                return;
+            }
+
+            const phase = Math.min(1, bossTimer / BOSS_DURATION); // 0 → 1
+
+            // Spawn enemies in waves
+            bossSpawnTimer++;
+            const spawnRate = Math.max(30, 120 - phase * 80); // 120 → 40 frames between spawns
+            if (bossSpawnTimer >= spawnRate) {
+                bossSpawnTimer = 0;
+                spawnEnemy();
+                // Double spawn in later phases
+                if (phase > 0.4 && Math.random() < phase * 0.5) {
+                    spawnEnemy();
+                }
+            }
+
+            // Spawn power-ups periodically during boss
+            if (bossTimer % 300 === 0) { // every 5 seconds
+                const types = ['shield', 'magnet', 'points', 'speed'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                powerups.push({
+                    x: WIDTH + 20,
+                    y: 60 + Math.random() * (HEIGHT - 120),
+                    type: type,
+                    radius: 25,
+                    collected: false,
+                    rotation: 0,
+                    wobble: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Update enemies
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                e.x += e.vx;
+                e.wobble += e.wobbleSpeed;
+                e.y = e.baseY + Math.sin(e.wobble) * e.wobbleAmp;
+                e.y = Math.max(e.size, Math.min(HEIGHT - e.size, e.y));
+
+                // Remove off-screen
+                if (e.x < -50) {
+                    enemies.splice(i, 1);
+                    continue;
+                }
+
+                // Enemy shoots
+                e.shootTimer--;
+                if (e.shootTimer <= 0) {
+                    e.shootTimer = e.shootInterval;
+                    // Shoot toward bird
+                    const dx = bird.x - e.x;
+                    const dy = bird.y - e.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 0) {
+                        const bulletSpeed = e.fast ? 5 : 3.5;
+                        enemyBullets.push({
+                            x: e.x - e.size,
+                            y: e.y,
+                            vx: (dx / dist) * bulletSpeed,
+                            vy: (dy / dist) * bulletSpeed,
+                            size: 5,
+                            life: 300
+                        });
+                    }
+                }
+
+                // Collision with bird
+                if (gameState === 'playing' && !bird.invincible) {
+                    const dx = e.x - bird.x;
+                    const dy = e.y - bird.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < bird.radius + e.size) {
+                        if (bird.shielded) {
+                            bird.shielded = false;
+                            bird.shieldTime = 0;
+                            bird.invincible = true;
+                            bird.invincibleTime = 90;
+                            enemies.splice(i, 1);
+                            for (let p = 0; p < 20; p++) {
+                                particles.push({
+                                    x: e.x, y: e.y,
+                                    vx: (Math.random() - 0.5) * 12,
+                                    vy: (Math.random() - 0.5) * 12,
+                                    size: Math.random() * 8 + 3,
+                                    color: e.color, life: 35, type: 'explosion'
+                                });
+                            }
+                            showAchievement('Shield blocked ship!');
+                            continue;
+                        } else {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Update enemy bullets
+            for (let i = enemyBullets.length - 1; i >= 0; i--) {
+                const b = enemyBullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                b.life--;
+
+                if (b.x < -20 || b.x > WIDTH + 20 || b.y < -20 || b.y > HEIGHT + 20 || b.life <= 0) {
+                    enemyBullets.splice(i, 1);
+                    continue;
+                }
+
+                // Hit bird
+                if (gameState === 'playing' && !bird.invincible) {
+                    const dx = b.x - bird.x;
+                    const dy = b.y - bird.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < bird.radius + b.size) {
+                        enemyBullets.splice(i, 1);
+                        if (bird.shielded) {
+                            bird.shielded = false;
+                            bird.shieldTime = 0;
+                            bird.invincible = true;
+                            bird.invincibleTime = 60;
+                            for (let p = 0; p < 15; p++) {
+                                particles.push({
+                                    x: bird.x, y: bird.y,
+                                    vx: (Math.random() - 0.5) * 10,
+                                    vy: (Math.random() - 0.5) * 10,
+                                    size: Math.random() * 6 + 2,
+                                    color: '#ff0066', life: 25, type: 'shield'
+                                });
+                            }
+                            showAchievement('Shield!');
+                        } else {
+                            gameOver();
+                            return;
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+
+        function drawBossPhase() {
+            if (!bossPhase) return;
+
+            // Draw enemies
+            enemies.forEach(e => {
+                ctx.save();
+                ctx.translate(e.x, e.y);
+
+                // Glow
+                ctx.shadowColor = e.color;
+                ctx.shadowBlur = 15;
+
+                // Ship body (triangle pointing left)
+                ctx.fillStyle = e.color;
+                ctx.beginPath();
+                ctx.moveTo(-e.size, 0);
+                ctx.lineTo(e.size, -e.size * 0.7);
+                ctx.lineTo(e.size, e.size * 0.7);
+                ctx.closePath();
+                ctx.fill();
+
+                // Cockpit
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(e.size * 0.3, 0, e.size * 0.25, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Engine glow
+                ctx.fillStyle = e.fast ? '#00fff0' : '#fff200';
+                ctx.beginPath();
+                ctx.arc(e.size + 3, 0, 4 + Math.sin(frameCount * 0.3) * 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            });
+
+            // Draw enemy bullets
+            enemyBullets.forEach(b => {
+                ctx.fillStyle = '#ff0066';
+                ctx.shadowColor = '#ff0066';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+                ctx.fill();
+                // Trail
+                ctx.fillStyle = 'rgba(255, 0, 102, 0.3)';
+                ctx.beginPath();
+                ctx.arc(b.x - b.vx * 2, b.y - b.vy * 2, b.size * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Boss timer progress bar
+            const progress = bossTimer / BOSS_DURATION;
+            const barW = WIDTH - 40;
+            const barY = 40;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(20, barY, barW, 6);
+            const g = ctx.createLinearGradient(20, 0, 20 + barW, 0);
+            g.addColorStop(0, '#ff0066');
+            g.addColorStop(0.5, '#ff00ff');
+            g.addColorStop(1, '#39ff14');
+            ctx.fillStyle = g;
+            ctx.fillRect(20, barY, barW * progress, 6);
+
+            // "SURVIVE" text
+            const remaining = Math.ceil((BOSS_DURATION - bossTimer) / 60);
+            ctx.fillStyle = remaining < 30 ? '#39ff14' : '#ff0066';
+            ctx.font = 'bold 14px Orbitron, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('SURVIVE ' + remaining + 's', WIDTH / 2, barY + 22);
+        }
+
         function updateBird() {
             // Validate bird position
             if (!bird || typeof bird.x !== 'number' || typeof bird.y !== 'number' ||
@@ -1299,9 +1576,9 @@
                     // Update progressive difficulty
                     updateProgressiveDifficulty();
 
-                    // Check win condition
-                    if (settings.winScore && score >= settings.winScore) {
-                        victory();
+                    // Check win condition → enter boss phase
+                    if (settings.winScore && score >= settings.winScore && !bossPhase) {
+                        enterBossPhase();
                         return;
                     }
 
@@ -1796,7 +2073,8 @@
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
             // Speed factor for visual effects
-            const sf = Math.min(speedMultiplier, 2.5);
+            // Boss phase: force high speed visual (even though pipes stopped)
+            const sf = bossPhase ? Math.min(2.5, 1.8 + bossTimer / BOSS_DURATION * 0.7) : Math.min(speedMultiplier, 2.5);
             const streakLength = Math.max(0, (sf - 1.2) * 15); // streak grows after 1.2x
 
             // Draw stars — stretch into speed lines at high speed
@@ -2206,17 +2484,26 @@
 
             if (gameState === 'playing') {
                 updateBird();
-                updatePipes();
-                updatePowerups();
-                updateMissiles();
-                checkCollision();
+                if (bossPhase) {
+                    updateBossPhase();
+                    updatePowerups();
+                } else {
+                    updatePipes();
+                    updatePowerups();
+                    updateMissiles();
+                    checkCollision();
+                }
                 updatePowerupUI();
             }
 
             updateParticles();
 
-            drawPipes();
-            drawMissiles();
+            if (bossPhase) {
+                drawBossPhase();
+            } else {
+                drawPipes();
+                drawMissiles();
+            }
             drawPowerups();
             drawParticles();
 

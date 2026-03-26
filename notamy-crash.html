@@ -1032,8 +1032,23 @@
                 
                 removeInitialMatches();
                 if (!checkPossibleMoves()) {
-                    shuffleBoard();
-                    return;
+                    // Retry shuffle inline instead of recursing (avoids stack overflow)
+                    for (let retry = 0; retry < 50; retry++) {
+                        for (let i = types.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [types[i], types[j]] = [types[j], types[i]];
+                        }
+                        let idx = 0;
+                        for (let r = 0; r < GRID_SIZE; r++) {
+                            for (let c = 0; c < GRID_SIZE; c++) {
+                                if (board[r][c] && !board[r][c].powerUp) {
+                                    board[r][c].type = types[idx++];
+                                }
+                            }
+                        }
+                        removeInitialMatches();
+                        if (checkPossibleMoves()) break;
+                    }
                 }
                 
                 // Animate candies growing back
@@ -1539,8 +1554,8 @@
                 } else {
                     const matches = findAllMatches();
                     if (matches.length > 0) {
-                        processMatches(matches);
                         streak++;
+                        processMatches(matches);
                         updateStreak();
                     } else {
                         // No matches, swap back
@@ -1622,28 +1637,28 @@
                 if (match.length === 3) {
                     matchTimeBonus = 1.5;
                 } else if (match.length === 4) {
-                    matchTimeBonus = 3;
+                    matchTimeBonus = 2.5;
                 } else if (match.length === 5) {
-                    matchTimeBonus = 5;
+                    matchTimeBonus = 4;
                 } else if (match.length >= 6) {
-                    matchTimeBonus = 8;
+                    matchTimeBonus = 5;
                 }
-                
+
+                // Additive bonuses instead of multiplicative (prevents infinite play)
                 if (combo > 1) {
-                    matchTimeBonus *= combo;
+                    matchTimeBonus += Math.min(combo - 1, 3) * 0.5;
                 }
-                
+
                 if (streak > 1) {
-                    matchTimeBonus *= (1 + (streak - 1) * 0.5);
+                    matchTimeBonus += Math.min(streak - 1, 4) * 0.3;
                 }
-                
+
                 if (isInChain && chainMultiplier > 1) {
-                    matchTimeBonus *= Math.pow(1.5, chainMultiplier - 1);
+                    matchTimeBonus += Math.min(chainMultiplier - 1, 5) * 0.5;
                 }
-                
-                if (matches.length > 1) {
-                    matchTimeBonus *= (1 + (matches.length - 1) * 0.3);
-                }
+
+                // Cap per-match time bonus at 8 seconds
+                matchTimeBonus = Math.min(matchTimeBonus, 8);
                 
                 totalTimeBonus += matchTimeBonus;
                 
@@ -1653,7 +1668,14 @@
                     board[powerUpPos.row][powerUpPos.col].powerUp = 'rainbow';
                 } else if (match.length === 4) {
                     powerUpPos = match[Math.floor(match.length / 2)];
-                    board[powerUpPos.row][powerUpPos.col].powerUp = 'bomb';
+                    // Rocket for line-of-4, bomb for other shapes
+                    const rows = new Set(match.map(m => m.row));
+                    const cols = new Set(match.map(m => m.col));
+                    if (rows.size === 1 || cols.size === 1) {
+                        board[powerUpPos.row][powerUpPos.col].powerUp = 'rocket';
+                    } else {
+                        board[powerUpPos.row][powerUpPos.col].powerUp = 'bomb';
+                    }
                 }
                 
                 // Process each candy in the match
@@ -1688,7 +1710,9 @@
                 if (validCandyCount > 0) {
                     centerX /= validCandyCount;
                     centerY /= validCandyCount;
-                    createScorePopup(centerX, centerY, totalScore);
+                    // Show per-match-group score, not cumulative total
+                    const groupScore = match.length * 10 * combo * Math.max(1, streak);
+                    createScorePopup(centerX, centerY, groupScore);
                 }
             });
             
@@ -1746,11 +1770,12 @@
             }, 300);
         }
         
-        // Check if matches form a T or L shape
+        // Check if matches form a T or L shape (spans multiple rows AND columns)
         function checkIfTShape(matches) {
             const rows = new Set(matches.map(m => m.row));
             const cols = new Set(matches.map(m => m.col));
-            return rows.size >= 3 && cols.size >= 3;
+            // T/L shape: must span at least 2 rows AND 2 columns (not a straight line)
+            return rows.size >= 2 && cols.size >= 2 && matches.length >= 5;
         }
         
         // Activate power-up with enhanced time bonuses
@@ -1768,7 +1793,7 @@
                 case 'bomb':
                     bonusTime = 5;
                     if (isInChain && chainMultiplier > 1) {
-                        bonusTime *= (1 + (chainMultiplier - 1) * 0.5);
+                        bonusTime += Math.min(chainMultiplier - 1, 5) * 0.5;
                     }
                     
                     // Explode 3x3 area
@@ -1783,7 +1808,7 @@
                                         board[r][c].y + CANDY_SIZE/2,
                                         '#ff5252'
                                     );
-                                    score += 20 * combo * streak;
+                                    score += 20 * Math.max(1, combo) * Math.max(1, streak);
                                 }
                             }
                         }
@@ -1793,7 +1818,7 @@
                 case 'rocket':
                     bonusTime = 7;
                     if (isInChain && chainMultiplier > 1) {
-                        bonusTime *= (1 + (chainMultiplier - 1) * 0.5);
+                        bonusTime += Math.min(chainMultiplier - 1, 5) * 0.5;
                     }
                     
                     // Clear entire row and column
@@ -1806,7 +1831,7 @@
                                 board[r][col].y + CANDY_SIZE/2,
                                 'vertical'
                             );
-                            score += 15 * combo * streak;
+                            score += 15 * Math.max(1, combo) * Math.max(1, streak);
                         }
                     }
                     for (let c = 0; c < GRID_SIZE; c++) {
@@ -1818,7 +1843,7 @@
                                 board[row][c].y + CANDY_SIZE/2,
                                 'horizontal'
                             );
-                            score += 15 * combo * streak;
+                            score += 15 * Math.max(1, combo) * Math.max(1, streak);
                         }
                     }
                     break;
@@ -1826,13 +1851,23 @@
                 case 'rainbow':
                     bonusTime = 10;
                     if (isInChain && chainMultiplier > 1) {
-                        bonusTime *= (1 + (chainMultiplier - 1) * 0.5);
+                        bonusTime += Math.min(chainMultiplier - 1, 5) * 1;
                     }
-                    
-                    let targetType;
-                    if (board[row][col] && !board[row][col].powerUp) {
-                        targetType = board[row][col].type;
-                    } else {
+
+                    // Find the type of the candy that was swapped WITH the rainbow
+                    // by checking adjacent cells for the most recently swapped candy
+                    let targetType = -1;
+                    const neighbors = [
+                        [row-1, col], [row+1, col], [row, col-1], [row, col+1]
+                    ];
+                    for (const [nr, nc] of neighbors) {
+                        if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE &&
+                            board[nr][nc] && !board[nr][nc].powerUp && !board[nr][nc].marked) {
+                            targetType = board[nr][nc].type;
+                            break;
+                        }
+                    }
+                    if (targetType === -1) {
                         targetType = Math.floor(Math.random() * candyTypes.length);
                     }
                     
@@ -1845,7 +1880,7 @@
                                     board[r][c].x + CANDY_SIZE/2,
                                     board[r][c].y + CANDY_SIZE/2
                                 );
-                                score += 30 * combo * streak;
+                                score += 30 * Math.max(1, combo) * Math.max(1, streak);
                             }
                         }
                     }
@@ -1969,7 +2004,10 @@
         }
         
         // Enhanced particle systems
+        const MAX_PARTICLES = 300;
+
         function createBurstParticles(x, y, color) {
+            if (particles.length >= MAX_PARTICLES) return;
             const particleCount = 12;
             for (let i = 0; i < particleCount; i++) {
                 const angle = (Math.PI * 2 / particleCount) * i;
@@ -2129,6 +2167,12 @@
         function checkGameState() {
             if (timeLeft <= 0 && gameState === 'playing' && !isGameOverProcessed) {
                 gameOver();
+            }
+            // Level progression: level up every 500 points
+            const newLevel = Math.floor(score / 500) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                document.getElementById('level').textContent = level;
             }
         }
         

@@ -553,6 +553,7 @@
     <canvas id="gameCanvas"></canvas>
 
     <div class="ui-overlay">
+        <div id="livesDisplay" style="position:absolute;top:16px;left:16px;font-size:24px;pointer-events:none;filter:drop-shadow(0 0 6px rgba(255,0,102,0.6));">❤️❤️❤️</div>
         <div id="score">0</div>
         <div class="combo-indicator" id="comboIndicator"></div>
         <div class="speed-indicator" id="speedIndicator">SPEED BOOST!</div>
@@ -736,6 +737,7 @@
         }
 
         let frameCount = 0;
+        let lives = 3;
         let combo = 0;
         let maxCombo = 0;
         let powerupsCollected = 0;
@@ -890,6 +892,8 @@
 
             gameState = 'playing';
             score = 0;
+            lives = 3;
+            updateLivesUI();
             combo = 0;
             maxCombo = 0;
             powerupsCollected = 0;
@@ -1078,7 +1082,7 @@
                             }
                             showAchievement("Shield blocked missile!");
                         } else {
-                            gameOver();
+                            loseLife();
                         }
                         continue;
                     }
@@ -1341,8 +1345,8 @@
                             showAchievement('Shield blocked ship!');
                             continue;
                         } else {
-                            gameOver();
-                            return;
+                            loseLife();
+                            if (lives <= 0) return;
                         }
                     }
                 }
@@ -1383,8 +1387,8 @@
                             }
                             showAchievement('Shield!');
                         } else {
-                            gameOver();
-                            return;
+                            loseLife();
+                            if (lives <= 0) return;
                         }
                         continue;
                     }
@@ -1586,8 +1590,10 @@
                     bird.velocity = bird.y < HEIGHT / 2 ? 3 : -3; // bounce away from edge
                     showAchievement("Shield Save!");
                 } else {
-                    gameOver();
-                    return;
+                    loseLife();
+                    if (lives <= 0) return;
+                    // Bounce away from edge after losing life
+                    bird.velocity = bird.y < HEIGHT / 2 ? 3 : -3;
                 }
             }
 
@@ -1967,6 +1973,48 @@
             return distanceSquared < (circleRadius * circleRadius);
         }
 
+        function updateLivesUI() {
+            const el = document.getElementById('livesDisplay');
+            let hearts = '';
+            for (let i = 0; i < 3; i++) hearts += i < lives ? '❤️' : '🖤';
+            el.textContent = hearts;
+        }
+
+        function loseLife() {
+            lives--;
+            updateLivesUI();
+            maxCombo = Math.max(maxCombo, combo);
+            combo = 0;
+            document.getElementById('comboIndicator').classList.remove('active');
+
+            if (lives <= 0) {
+                gameOver();
+                return;
+            }
+
+            // Survive: invincibility + visual feedback
+            bird.invincible = true;
+            bird.invincibleTime = 180; // 3 seconds
+            bird.velocity = 0; // stabilize
+
+            // Hit particles
+            for (let i = 0; i < 25; i++) {
+                particles.push({
+                    x: bird.x, y: bird.y,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14,
+                    size: Math.random() * 8 + 3,
+                    color: '#ff0066', life: 40, type: 'explosion'
+                });
+            }
+
+            showAchievement(lives + ' lives left!');
+
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate([80, 30, 80]);
+            }
+        }
+
         function handleCollision() {
             if (bird.shielded) {
                 bird.shielded = false;
@@ -1993,7 +2041,7 @@
 
                 showAchievement("Shield Saved You!");
             } else {
-                gameOver();
+                loseLife();
             }
         }
 

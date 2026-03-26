@@ -610,7 +610,7 @@
                 jumpForce: -7.5,
                 scoreMultiplier: 1,
                 powerupChance: 0.5,
-                winScore: 100
+                winScore: 150
             },
             normal: {
                 pipeSpeed: 3.0,
@@ -619,7 +619,7 @@
                 jumpForce: -8.5,
                 scoreMultiplier: 1.5,
                 powerupChance: 0.4,
-                winScore: 75
+                winScore: 120
             },
             hard: {
                 pipeSpeed: 3.8,
@@ -628,7 +628,7 @@
                 jumpForce: -9.5,  // Stronger from -7
                 scoreMultiplier: 2,
                 powerupChance: 0.35,
-                winScore: 60
+                winScore: 90
             },
             insane: {
                 pipeSpeed: 4.5,
@@ -637,7 +637,7 @@
                 jumpForce: -10.5,
                 scoreMultiplier: 3,
                 powerupChance: 0.3,
-                winScore: 50
+                winScore: 70
             },
             nightmare: {
                 pipeSpeed: 5.5,
@@ -646,7 +646,7 @@
                 jumpForce: -11.5,
                 scoreMultiplier: 5,
                 powerupChance: 0.25,
-                winScore: 35
+                winScore: 50
             }
         };
         
@@ -726,6 +726,8 @@
         let backgroundParticles = [];
         let powerups = [];
         let stars = [];
+        let missiles = [];
+        let missileWarnings = [];
         
         // Initialize background elements
         function initBackgroundElements() {
@@ -865,6 +867,8 @@
             pipes = [];
             particles = [];
             powerups = [];
+            missiles = [];
+            missileWarnings = [];
             
             // Create first pipe sooner — store timer ID to cancel on restart
             firstPipeTimer = setTimeout(() => {
@@ -891,12 +895,24 @@
             const maxHeight = Math.max(minHeight + 10, HEIGHT - effectiveGap - minHeight);
             const topHeight = Math.random() * (maxHeight - minHeight) + minHeight;
             
+            // Some pipes oscillate vertically (more likely at higher scores)
+            const movingChance = Math.min(0.5, score * 0.003);
+            const isMoving = Math.random() < movingChance;
+            const moveAmplitude = isMoving ? 20 + Math.random() * 25 : 0;
+            const moveSpeed = isMoving ? 0.02 + Math.random() * 0.015 : 0;
+
             pipes.push({
                 x: WIDTH + PIPE_WIDTH,
                 topHeight: topHeight,
                 bottomY: topHeight + effectiveGap,
+                baseTopHeight: topHeight,
+                gap: effectiveGap,
                 passed: false,
                 finalZone: finalIntensity > 0,
+                moving: isMoving,
+                movePhase: Math.random() * Math.PI * 2,
+                moveAmplitude: moveAmplitude,
+                moveSpeed: moveSpeed,
                 particles: []
             });
         }
@@ -928,6 +944,137 @@
             return items[0];
         }
         
+        // Missile system
+        function spawnMissileWarning() {
+            // Warning appears on right edge for 1 second, then missile launches
+            const y = 60 + Math.random() * (HEIGHT - 120);
+            missileWarnings.push({
+                y: y,
+                timer: 60, // 1 second at 60fps
+                speed: 6 + speedMultiplier * 2
+            });
+        }
+
+        function updateMissiles() {
+            // Update warnings → spawn missiles when timer expires
+            for (let i = missileWarnings.length - 1; i >= 0; i--) {
+                const w = missileWarnings[i];
+                w.timer--;
+                if (w.timer <= 0) {
+                    missiles.push({
+                        x: WIDTH + 20,
+                        y: w.y,
+                        speed: w.speed,
+                        size: 8,
+                        trail: []
+                    });
+                    missileWarnings.splice(i, 1);
+                }
+            }
+
+            // Update missiles
+            for (let i = missiles.length - 1; i >= 0; i--) {
+                const m = missiles[i];
+                m.x -= m.speed;
+                m.trail.push({ x: m.x + 15, y: m.y, life: 15 });
+                if (m.trail.length > 10) m.trail.shift();
+                m.trail.forEach(t => t.life--);
+
+                // Off screen
+                if (m.x < -30) {
+                    missiles.splice(i, 1);
+                    continue;
+                }
+
+                // Collision with bird
+                if (gameState === 'playing' && !bird.invincible) {
+                    const dx = m.x - bird.x;
+                    const dy = m.y - bird.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < bird.radius + m.size) {
+                        missiles.splice(i, 1);
+                        if (bird.shielded) {
+                            bird.shielded = false;
+                            bird.shieldTime = 0;
+                            bird.invincible = true;
+                            bird.invincibleTime = 90;
+                            maxCombo = Math.max(maxCombo, combo);
+                            combo = 0;
+                            for (let p = 0; p < 20; p++) {
+                                particles.push({
+                                    x: bird.x, y: bird.y,
+                                    vx: (Math.random() - 0.5) * 10,
+                                    vy: (Math.random() - 0.5) * 10,
+                                    size: Math.random() * 8 + 3,
+                                    color: '#ff3333', life: 30, type: 'explosion'
+                                });
+                            }
+                            showAchievement("Shield blocked missile!");
+                        } else {
+                            gameOver();
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+
+        function drawMissiles() {
+            // Draw warnings (flashing red markers on right edge)
+            missileWarnings.forEach(w => {
+                const flash = Math.sin(w.timer * 0.5) > 0 ? 1 : 0.3;
+                ctx.save();
+                ctx.globalAlpha = flash;
+                // Arrow on right edge
+                ctx.fillStyle = '#ff0033';
+                ctx.beginPath();
+                ctx.moveTo(WIDTH - 5, w.y - 8);
+                ctx.lineTo(WIDTH - 15, w.y);
+                ctx.lineTo(WIDTH - 5, w.y + 8);
+                ctx.closePath();
+                ctx.fill();
+                // Horizontal line
+                ctx.strokeStyle = 'rgba(255, 0, 51, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 8]);
+                ctx.beginPath();
+                ctx.moveTo(0, w.y);
+                ctx.lineTo(WIDTH, w.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.restore();
+            });
+
+            // Draw missiles
+            missiles.forEach(m => {
+                // Trail
+                m.trail.forEach(t => {
+                    if (t.life > 0) {
+                        ctx.fillStyle = `rgba(255, 100, 0, ${t.life / 15 * 0.6})`;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, 3 + (15 - t.life) * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                // Missile body
+                ctx.fillStyle = '#ff0033';
+                ctx.shadowColor = '#ff0033';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.size, 0, Math.PI * 2);
+                ctx.fill();
+                // Nose
+                ctx.fillStyle = '#ff6666';
+                ctx.beginPath();
+                ctx.moveTo(m.x - m.size - 4, m.y - 4);
+                ctx.lineTo(m.x - m.size - 12, m.y);
+                ctx.lineTo(m.x - m.size - 4, m.y + 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        }
+
         function updateBird() {
             // Validate bird position
             if (!bird || typeof bird.x !== 'number' || typeof bird.y !== 'number' || 
@@ -1048,18 +1195,18 @@
                 bird.velocity = Math.min(bird.velocity, 0);
             }
 
-            // Progressive difficulty — only trigger once per score threshold
-            const difficultyStep = Math.floor(score / 20);
-            let targetSpeed = 1 + difficultyStep * 0.05;
+            // Progressive difficulty — steeper curve for longer game
+            const difficultyStep = Math.floor(score / 15);
+            let targetSpeed = 1 + difficultyStep * 0.06;
 
-            // Final zone: extra speed ramp (up to +0.3x on top of base)
+            // Final zone: extra speed ramp (up to +0.4x on top of base)
             const finalIntensity = getFinalZoneIntensity();
             if (finalIntensity > 0) {
-                targetSpeed += finalIntensity * 0.3;
+                targetSpeed += finalIntensity * 0.4;
             }
 
-            if (targetSpeed > speedMultiplier && speedMultiplier < 2.3) {
-                speedMultiplier = Math.min(2.3, targetSpeed);
+            if (targetSpeed > speedMultiplier && speedMultiplier < 2.5) {
+                speedMultiplier = Math.min(2.5, targetSpeed);
                 maxSpeedReached = Math.max(maxSpeedReached, speedMultiplier);
             }
         }
@@ -1087,6 +1234,14 @@
                 const pipe = pipes[pi];
                 pipe.x -= settings.pipeSpeed * speedMultiplier;
 
+                // Oscillating pipes
+                if (pipe.moving) {
+                    pipe.movePhase += pipe.moveSpeed;
+                    const offset = Math.sin(pipe.movePhase) * pipe.moveAmplitude;
+                    pipe.topHeight = Math.max(30, Math.min(HEIGHT - pipe.gap - 30, pipe.baseTopHeight + offset));
+                    pipe.bottomY = pipe.topHeight + pipe.gap;
+                }
+
                 // Check if bird passed pipe (guard: only score while playing)
                 if (!pipe.passed && pipe.x + PIPE_WIDTH < bird.x && gameState === 'playing') {
                     pipe.passed = true;
@@ -1098,6 +1253,12 @@
                     if (settings.winScore && score >= settings.winScore) {
                         victory();
                         return; // exits updatePipes entirely
+                    }
+
+                    // Spawn missiles periodically (more frequent at higher scores)
+                    const missileInterval = Math.max(3, 10 - Math.floor(score / 20));
+                    if (score > 10 && score % missileInterval === 0) {
+                        spawnMissileWarning();
                     }
 
                     // Final zone announcement (once, at 80% of win score)
@@ -1243,7 +1404,7 @@
                             case 'speed':
                                 bird.speedBoost = true;
                                 bird.speedBoostTime = 360;
-                                speedMultiplier = Math.min(2.3, speedMultiplier * 1.2);
+                                speedMultiplier = Math.min(2.5, speedMultiplier * 1.2);
                                 
                                 // Show speed boost indicator temporarily
                                 document.getElementById('speedIndicator').classList.add('active');
@@ -1791,13 +1952,18 @@
                 // Bottom pipe glow
                 ctx.fillRect(pipe.x - 20, pipe.bottomY, PIPE_WIDTH + 40, HEIGHT - pipe.bottomY);
                 
-                // Pipe gradient — red tint in final zone
+                // Pipe gradient — themed by type
                 const pipeGradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_WIDTH, 0);
                 if (pipe.finalZone) {
                     const pulse = 0.5 + Math.sin(frameCount * 0.1) * 0.2;
                     pipeGradient.addColorStop(0, `rgba(180, 30, 30, ${pulse})`);
                     pipeGradient.addColorStop(0.5, `rgba(255, 60, 60, ${pulse})`);
                     pipeGradient.addColorStop(1, `rgba(180, 30, 30, ${pulse})`);
+                } else if (pipe.moving) {
+                    const pulse = 0.6 + Math.sin(frameCount * 0.08) * 0.2;
+                    pipeGradient.addColorStop(0, `rgba(180, 80, 0, ${pulse})`);
+                    pipeGradient.addColorStop(0.5, `rgba(255, 150, 0, ${pulse})`);
+                    pipeGradient.addColorStop(1, `rgba(180, 80, 0, ${pulse})`);
                 } else {
                     pipeGradient.addColorStop(0, '#007a70');
                     pipeGradient.addColorStop(0.5, COLORS.pipe);
@@ -1955,6 +2121,7 @@
                 updateBird();
                 updatePipes();
                 updatePowerups();
+                updateMissiles();
                 checkCollision();
                 updatePowerupUI();
             }
@@ -1962,6 +2129,7 @@
             updateParticles();
             
             drawPipes();
+            drawMissiles();
             drawPowerups();
             drawParticles();
             

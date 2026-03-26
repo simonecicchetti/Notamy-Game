@@ -1083,20 +1083,21 @@
         }
         
         function updatePipes() {
-            pipes.forEach(pipe => {
+            for (let pi = 0; pi < pipes.length; pi++) {
+                const pipe = pipes[pi];
                 pipe.x -= settings.pipeSpeed * speedMultiplier;
-                
+
                 // Check if bird passed pipe
                 if (!pipe.passed && pipe.x + PIPE_WIDTH < bird.x) {
                     pipe.passed = true;
                     const points = Math.floor(1 * settings.scoreMultiplier * bird.scoreMultiplier);
                     score += points;
                     combo++;
-                    
+
                     // Check win condition
                     if (settings.winScore && score >= settings.winScore) {
                         victory();
-                        return;
+                        return; // exits updatePipes entirely
                     }
 
                     // Final zone announcement (once, at 80% of win score)
@@ -1107,31 +1108,30 @@
 
                     // Check milestones
                     checkMilestone();
-                    
+
                     // Update UI
                     document.getElementById('score').textContent = score;
-                    
+
                     // Enhanced combo effects
                     if (combo >= 3) {
                         document.getElementById('score').classList.add('combo');
                         setTimeout(() => {
                             document.getElementById('score').classList.remove('combo');
                         }, 500);
-                        
+
                         const comboBonus = Math.floor(combo / 3);
                         score += comboBonus;
                         document.getElementById('score').textContent = score;
-                        
+
                         document.getElementById('comboIndicator').textContent = `${combo}x COMBO! +${comboBonus}`;
                         document.getElementById('comboIndicator').classList.add('active');
-                        
-                        // Clear previous timeout and set new one
+
                         if (comboTimeout) clearTimeout(comboTimeout);
                         comboTimeout = setTimeout(() => {
                             document.getElementById('comboIndicator').classList.remove('active');
                         }, 2000);
                     }
-                    
+
                     // Score particles
                     for (let i = 0; i < 15; i++) {
                         particles.push({
@@ -1145,20 +1145,20 @@
                             type: 'score'
                         });
                     }
-                    
+
                     // Spawn power-up
                     if (Math.random() < settings.powerupChance) {
                         const pipeCenter = (pipe.topHeight + pipe.bottomY) / 2;
                         const offsetY = (Math.random() - 0.5) * settings.pipeGap * 0.6;
                         createPowerup(pipe.x + PIPE_WIDTH + 150, pipeCenter + offsetY);
                     }
-                    
+
                     // Vibrate on score
                     if (window.navigator.vibrate) {
                         window.navigator.vibrate(20);
                     }
                 }
-                
+
                 // Create pipe edge particles
                 if (frameCount % 10 === 0) {
                     pipe.particles.push({
@@ -1166,21 +1166,20 @@
                         y: pipe.topHeight,
                         life: 30
                     });
-                    
                     pipe.particles.push({
                         x: pipe.x + PIPE_WIDTH,
                         y: pipe.bottomY,
                         life: 30
                     });
                 }
-                
+
                 // Update pipe particles
                 pipe.particles = pipe.particles.filter(p => {
                     p.x -= settings.pipeSpeed * speedMultiplier;
                     p.life--;
                     return p.life > 0;
                 });
-            });
+            }
             
             // Remove off-screen pipes
             pipes = pipes.filter(pipe => pipe.x > -PIPE_WIDTH);
@@ -1244,7 +1243,7 @@
                             case 'speed':
                                 bird.speedBoost = true;
                                 bird.speedBoostTime = 360;
-                                speedMultiplier = Math.min(2, speedMultiplier * 1.2);
+                                speedMultiplier = Math.min(2.3, speedMultiplier * 1.2);
                                 
                                 // Show speed boost indicator temporarily
                                 document.getElementById('speedIndicator').classList.add('active');

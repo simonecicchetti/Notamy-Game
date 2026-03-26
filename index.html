@@ -6,805 +6,367 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#06000e">
     <title>Notamy Mini Games</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-        :root {
-            --primary-teal: #00b4a6;
-            --primary-light: #00d9ff;
-            --cyan-neon: #00ffff;
-            --purple-accent: #b366ff;
-            --pink-neon: #ff6b6b;
-            --orange-neon: #ffab00;
-            --green-neon: #00e676;
-            --black-deep: #000000;
-            --white: #ffffff;
-            --gradient-main: linear-gradient(135deg, #00b4a6, #00d9ff);
-            --gradient-nature: linear-gradient(135deg, #00e676, #00b4a6);
-            --gradient-ice: linear-gradient(135deg, #00d9ff, #00ffff);
-            --gradient-fly: linear-gradient(135deg, #b366ff, #00d9ff);
-            --gradient-bop: linear-gradient(135deg, #ff6b6b, #00d9ff);
-        }
-        
+        * { margin:0; padding:0; box-sizing:border-box;
+            -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;
+            -webkit-tap-highlight-color:transparent; }
+
         body {
-            background: var(--black-deep);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
-            color: var(--white);
-            margin: 0;
+            background: #06000e;
+            font-family: 'Orbitron', -apple-system, system-ui, sans-serif;
+            min-height: 100vh; color: #fff; margin: 0;
         }
 
-        /* Simple static grid */
-        .background-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -10;
-            overflow: hidden;
+        /* === BG === */
+        .bg { position:fixed; inset:0; z-index:-10; overflow:hidden; }
+
+        .bg-grid {
+            position:absolute; inset:0;
+            background-image:
+                linear-gradient(rgba(0,255,240,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,240,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
-        
-        .neon-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 180, 166, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 180, 166, 0.04) 1px, transparent 1px);
-            background-size: 50px 50px;
+
+        .bg-glow {
+            position:absolute; border-radius:50%; filter:blur(120px); opacity:0.15;
+            animation: drift 20s ease-in-out infinite;
         }
-        
+        .bg-glow.g1 { width:400px; height:400px; background:#00fff0; top:-200px; left:-100px; }
+        .bg-glow.g2 { width:350px; height:350px; background:#ff00ff; bottom:-150px; right:-100px; animation-delay:7s; }
+        .bg-glow.g3 { width:300px; height:300px; background:#39ff14; top:40%; left:60%; animation-delay:14s; }
+
+        @keyframes drift {
+            0%,100% { transform:translate(0,0) scale(1); }
+            33% { transform:translate(80px,-60px) scale(1.1); }
+            66% { transform:translate(-60px,80px) scale(0.9); }
+        }
+
+        /* Scanlines */
+        .bg::after {
+            content:''; position:absolute; inset:0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 6px);
+            pointer-events:none;
+        }
+
+        /* === CONTAINER === */
         .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Static header */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        /* Simple static logo */
-        .logo-text {
-            font-size: 120px;
-            font-weight: 300;
-            background: linear-gradient(45deg, var(--primary-teal), var(--primary-light), var(--purple-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-        }
-        
-        .logo-subtitle {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-light);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            opacity: 1;
-            text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+            position:relative; z-index:1; width:100%; max-width:900px;
+            margin:0 auto; padding:40px 20px; min-height:100vh;
+            display:flex; flex-direction:column;
         }
 
-        /* Simple grid */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
+        /* === HEADER === */
+        .header { text-align:center; margin-bottom:50px; }
+
+        .logo {
+            font-size: 80px; font-weight:900; letter-spacing:6px;
+            background: linear-gradient(135deg, #00fff0, #ff00ff);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+            margin-bottom:8px; line-height:1;
         }
-        
-        /* Ultra simple game cards */
-        .game-card {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid var(--card-border, rgba(0, 180, 166, 0.3));
-            border-radius: 20px;
-            padding: 25px;
+
+        .subtitle {
+            font-size:11px; font-weight:400; color:#ff00ff;
+            letter-spacing:8px; text-transform:uppercase; opacity:0.6;
+        }
+
+        /* === GRID === */
+        .grid {
+            display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap:20px; max-width:800px; margin:0 auto; width:100%;
+        }
+
+        /* === CARDS === */
+        .card {
+            background: rgba(6,0,14,0.7);
+            border: 1px solid var(--c, rgba(0,255,240,0.15));
+            border-radius: 12px;
+            padding: 28px 24px;
             text-align: center;
-            position: relative;
-            cursor: pointer;
             text-decoration: none;
             display: block;
-            transition: border-color 0.2s ease, transform 0.2s ease;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Desktop hover effect */
-        @media (hover: hover) {
-            .game-card:hover {
-                transform: translateY(-8px);
-                border-color: var(--card-border-hover, var(--primary-teal));
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            }
-        }
-
-        .game-card:active {
-            transform: translateY(-3px);
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Simple game icons */
-        .game-icon {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 22px;
-            border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--icon-gradient, var(--gradient-main));
-            padding: 3px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .icon-inner {
-            width: 100%;
-            height: 100%;
-            border-radius: 19px;
-            background: var(--black-deep);
-            border: 1px solid var(--icon-border, rgba(0, 180, 166, 0.3));
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
             overflow: hidden;
-        }
-        
-        /* Static Crush icon */
-        .candy-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 3px;
-            width: 45px;
-            height: 45px;
-        }
-        
-        .logo-candy {
-            width: 100%;
-            height: 100%;
-            border-radius: 4px;
-        }
-        
-        /* Static Tetris icon */
-        .tetris-icon-container {
-            position: relative;
-            width: 55px;
-            height: 55px;
-        }
-        
-        .tetris-piece {
-            position: absolute;
-            display: grid;
-            gap: 1px;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
         }
 
-        .tetris-block {
-            width: 9px;
-            height: 9px;
-            border-radius: 2px;
+        .card::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse at 50% 0%, var(--cg, rgba(0,255,240,0.04)), transparent 70%);
+            transition: opacity 0.3s; opacity:0;
         }
 
-        /* I piece */
-        .piece-i {
-            grid-template-columns: repeat(4, 1fr);
-            top: 7px;
-            left: 7px;
+        @media (hover:hover) {
+            .card:hover {
+                transform: translateY(-6px);
+                border-color: var(--ch, #00fff0);
+                box-shadow: 0 8px 30px var(--cs, rgba(0,255,240,0.15));
+            }
+            .card:hover::before { opacity:1; }
         }
 
-        /* T piece */
-        .piece-t {
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            bottom: 7px;
-            right: 7px;
+        .card:active {
+            transform: translateY(-2px);
+            border-color: var(--ch, #00fff0);
         }
 
-        /* O piece */
-        .piece-o {
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            top: 7px;
-            right: 11px;
-        }
-        
-        /* Fly bird icon */
-        .fly-icon-container {
-            position: relative;
-            width: 50px;
-            height: 50px;
-        }
-        
-        .bird-body {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: var(--cyan-neon);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
-        }
-        
-        .bird-wing {
-            position: absolute;
-            width: 20px;
-            height: 15px;
-            background: var(--purple-accent);
-            border-radius: 50% 0 50% 0;
-            top: 50%;
-            left: 5px;
-            transform: translateY(-50%) rotate(-20deg);
-            box-shadow: 0 0 10px rgba(179, 102, 255, 0.6);
-        }
-        
-        .bird-eye {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: var(--white);
-            border-radius: 50%;
-            top: 10px;
-            right: 8px;
-        }
-        
-        /* Bop bubble icon */
-        .bop-icon-container {
-            position: relative;
-            width: 50px;
-            height: 50px;
-        }
-        
-        .bubble {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: var(--pink-neon);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
-        }
-        
-        .bubble-glow {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: var(--white);
-            border-radius: 50%;
-            top: 10px;
-            left: 10px;
-            opacity: 0.3;
-        }
-        
-        /* Simple titles */
-        .game-title {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--white);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .game-description {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.4;
-        }
-        
-        /* Card specific colors */
-        .crush-card {
-            --card-border: rgba(0, 230, 118, 0.3);
-            --card-border-hover: var(--green-neon);
-            --icon-gradient: var(--gradient-nature);
-            --icon-border: rgba(0, 230, 118, 0.3);
-        }
-        
-        .tetris-card {
-            --card-border: rgba(0, 180, 166, 0.3);
-            --card-border-hover: var(--primary-teal);
-            --icon-gradient: var(--gradient-ice);
-            --icon-border: rgba(0, 217, 255, 0.3);
-        }
-        
-        .fly-card {
-            --card-border: rgba(179, 102, 255, 0.3);
-            --card-border-hover: var(--purple-accent);
-            --icon-gradient: var(--gradient-fly);
-            --icon-border: rgba(179, 102, 255, 0.3);
-        }
-        
-        .bop-card {
-            --card-border: rgba(255, 107, 107, 0.3);
-            --card-border-hover: var(--pink-neon);
-            --icon-gradient: var(--gradient-bop);
-            --icon-border: rgba(255, 107, 107, 0.3);
+        /* Icon */
+        .icon {
+            width:72px; height:72px; margin:0 auto 20px;
+            border-radius:16px; display:flex; align-items:center; justify-content:center;
+            background: var(--ig, linear-gradient(135deg, #00fff0, #00b8b0));
+            padding:2px;
+            box-shadow: 0 0 20px var(--cs, rgba(0,255,240,0.2));
         }
 
-        .stars-card {
-            --card-border: rgba(251, 191, 36, 0.3);
-            --card-border-hover: #fbbf24;
-            --icon-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
-            --icon-border: rgba(251, 191, 36, 0.3);
+        .icon-inner {
+            width:100%; height:100%; border-radius:14px;
+            background: #06000e; display:flex; align-items:center; justify-content:center;
         }
 
-        /* Ultra simple loader */
+        .title {
+            font-size:18px; font-weight:700; color:#fff;
+            margin-bottom:8px; letter-spacing:1px; text-transform:uppercase;
+        }
+
+        .desc {
+            font-size:11px; font-weight:400; color:rgba(255,255,255,0.45);
+            letter-spacing:1px; line-height:1.4;
+        }
+
+        /* Card themes */
+        .card-crush  { --c:rgba(57,255,20,0.15); --ch:#39ff14; --cs:rgba(57,255,20,0.15);
+                       --cg:rgba(57,255,20,0.04); --ig:linear-gradient(135deg,#39ff14,#28b80e); }
+        .card-blocks { --c:rgba(0,255,240,0.15); --ch:#00fff0; --cs:rgba(0,255,240,0.15);
+                       --cg:rgba(0,255,240,0.04); --ig:linear-gradient(135deg,#00fff0,#00b8b0); }
+        .card-fly    { --c:rgba(255,0,255,0.15); --ch:#ff00ff; --cs:rgba(255,0,255,0.15);
+                       --cg:rgba(255,0,255,0.04); --ig:linear-gradient(135deg,#ff00ff,#b800b8); }
+        .card-bop    { --c:rgba(255,0,102,0.15); --ch:#ff0066; --cs:rgba(255,0,102,0.15);
+                       --cg:rgba(255,0,102,0.04); --ig:linear-gradient(135deg,#ff0066,#b80048); }
+        .card-stars  { --c:rgba(255,242,0,0.15); --ch:#fff200; --cs:rgba(255,242,0,0.15);
+                       --cg:rgba(255,242,0,0.04); --ig:linear-gradient(135deg,#fff200,#b8a800); }
+
+        /* Mini icons inside cards */
+        .candy-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; width:36px; height:36px; }
+        .candy-cell { border-radius:3px; }
+
+        .tetris-wrap { position:relative; width:40px; height:40px; }
+        .t-piece { position:absolute; display:grid; gap:1px; }
+        .t-block { width:7px; height:7px; border-radius:1px; }
+        .t-i { grid-template-columns:repeat(4,1fr); top:5px; left:3px; }
+        .t-t { grid-template-columns:repeat(3,1fr); bottom:5px; right:3px; }
+        .t-o { grid-template-columns:repeat(2,1fr); top:5px; right:7px; }
+
+        .fly-wrap { position:relative; width:36px; height:36px; }
+        .f-body { position:absolute; width:22px; height:22px; background:#ff00ff; border-radius:50%;
+                  top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 0 12px rgba(255,0,255,0.5); }
+        .f-wing { position:absolute; width:14px; height:10px; background:#00fff0; border-radius:50% 0 50% 0;
+                  top:50%; left:2px; transform:translateY(-50%) rotate(-20deg); box-shadow:0 0 8px rgba(0,255,240,0.5); }
+        .f-eye { position:absolute; width:4px; height:4px; background:#fff; border-radius:50%; top:7px; right:5px; }
+
+        .bop-wrap { position:relative; width:36px; height:36px; }
+        .b-bubble { position:absolute; width:22px; height:22px; background:#ff0066; border-radius:50%;
+                    top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 0 12px rgba(255,0,102,0.5); }
+        .b-glow { position:absolute; width:12px; height:12px; background:#fff; border-radius:50%;
+                  top:8px; left:8px; opacity:0.25; }
+
+        /* Footer */
+        .footer {
+            margin-top:auto; padding-top:40px; text-align:center;
+            font-size:8px; color:rgba(255,255,255,0.15); letter-spacing:3px; text-transform:uppercase;
+        }
+
+        /* === LOADER === */
         .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--black-deep);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.25s ease;
+            position:fixed; inset:0; background:#06000e;
+            display:flex; align-items:center; justify-content:center;
+            z-index:9999; transition:opacity 0.3s;
         }
-
-        .loader.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
-
+        .loader.hide { opacity:0; pointer-events:none; }
         .loader-ring {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 180, 166, 0.2);
-            border-top-color: var(--primary-teal);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width:40px; height:40px;
+            border:2px solid rgba(0,255,240,0.1); border-top-color:#00fff0;
+            border-radius:50%; animation:spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* === MOBILE === */
+        @media (max-width:768px) {
+            .container { padding:20px 0; padding-top:max(20px,env(safe-area-inset-top));
+                         padding-bottom:max(30px,calc(20px + env(safe-area-inset-bottom))); }
+            .header { margin-bottom:30px; padding:0 16px; }
+            .logo { font-size:48px; letter-spacing:3px; }
+            .subtitle { font-size:9px; letter-spacing:5px; }
+
+            .grid { display:flex; flex-direction:column; gap:0; padding:0; }
+
+            .card {
+                background:transparent; border:none; border-radius:0;
+                padding:16px 20px; box-shadow:none; backdrop-filter:none;
+                display:flex; align-items:center; gap:18px;
+                border-bottom:1px solid rgba(255,255,255,0.05);
+            }
+            .card::before { display:none; }
+            .card:last-child { border-bottom:none; }
+            .card:active { background:rgba(255,255,255,0.03); transform:none; box-shadow:none; }
+
+            .icon { width:56px; height:56px; margin:0; border-radius:14px; flex-shrink:0; }
+            .icon-inner { border-radius:12px; }
+            .game-info { flex:1; text-align:left; }
+            .title { font-size:15px; margin-bottom:3px; letter-spacing:0.5px; }
+            .desc { font-size:10px; }
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @media (max-width:375px) {
+            .logo { font-size:40px; }
+            .subtitle { font-size:8px; letter-spacing:4px; }
+            .card { padding:13px 16px; gap:14px; }
+            .icon { width:50px; height:50px; border-radius:12px; }
+            .icon-inner { border-radius:10px; }
+            .title { font-size:14px; }
         }
 
-        /* Disable loader animation on mobile for performance */
-        @media (max-width: 768px) {
-            .loader-ring {
-                animation: none;
-            }
-        }
-        
-        /* Mobile optimizations - MINIMALIST DESIGN */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px 0;
-                padding-top: max(15px, env(safe-area-inset-top));
-                padding-bottom: max(30px, calc(20px + env(safe-area-inset-bottom)));
-                min-height: 100vh;
-                min-height: 100dvh;
-            }
-
-            .header {
-                margin-bottom: 30px;
-                padding: 0 15px;
-            }
-            
-            .logo-text {
-                font-size: 65px;
-                letter-spacing: 2px;
-                margin-bottom: 5px;
-            }
-            
-            .logo-subtitle {
-                font-size: 12px;
-                letter-spacing: 2px;
-                font-weight: 500;
-            }
-            
-            /* MINIMALIST MOBILE LAYOUT */
-            .games-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-                padding: 0;
-            }
-            
-            /* NO CARDS - JUST ROWS */
-            .game-card {
-                background: transparent;
-                border: none;
-                border-radius: 0;
-                padding: 15px 20px;
-                box-shadow: none;
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                transition: background-color 0.2s ease;
-            }
-
-            .game-card:last-child {
-                border-bottom: none;
-            }
-
-            .game-card:active {
-                background: rgba(255, 255, 255, 0.05);
-                transform: none;
-                box-shadow: none;
-            }
-            
-            /* BIGGER ICONS, NO BORDERS */
-            .game-icon {
-                width: 65px;
-                height: 65px;
-                margin: 0;
-                border-radius: 18px;
-                padding: 0;
-                background: var(--icon-gradient);
-                box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
-                flex-shrink: 0;
-            }
-            
-            .icon-inner {
-                border: none;
-                background: rgba(0, 0, 0, 0.5);
-                border-radius: 18px;
-            }
-            
-            /* TEXT ON THE RIGHT */
-            .game-info {
-                flex: 1;
-                text-align: left;
-            }
-            
-            .game-title {
-                font-size: 18px;
-                margin-bottom: 4px;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-            }
-
-            .game-description {
-                font-size: 13px;
-                color: rgba(255, 255, 255, 0.6);
-                line-height: 1.3;
-            }
-            
-            /* Adjust icon sizes */
-            .candy-grid {
-                width: 36px;
-                height: 36px;
-                gap: 2px;
-            }
-            
-            .tetris-icon-container {
-                width: 42px;
-                height: 42px;
-            }
-            
-            .tetris-block {
-                width: 7px;
-                height: 7px;
-            }
-            
-            .piece-i {
-                top: 5px;
-                left: 5px;
-            }
-            
-            .piece-t {
-                bottom: 5px;
-                right: 5px;
-            }
-            
-            .piece-o {
-                top: 5px;
-                right: 8px;
-            }
-            
-            .fly-icon-container {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .bird-body {
-                width: 24px;
-                height: 24px;
-            }
-            
-            .bird-wing {
-                width: 16px;
-                height: 12px;
-                left: 3px;
-            }
-            
-            .bird-eye {
-                width: 4px;
-                height: 4px;
-                top: 8px;
-                right: 6px;
-            }
-            
-            .bop-icon-container {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .bubble {
-                width: 24px;
-                height: 24px;
-            }
-            
-            .bubble-glow {
-                width: 15px;
-                height: 15px;
-                top: 8px;
-                left: 8px;
-            }
-        }
-        
-        /* Even smaller screens */
-        @media (max-width: 375px) {
-            .container {
-                padding-top: max(10px, env(safe-area-inset-top));
-            }
-
-            .logo-text {
-                font-size: 55px;
-            }
-
-            .logo-subtitle {
-                font-size: 11px;
-                letter-spacing: 1.5px;
-            }
-            
-            .game-card {
-                padding: 12px 15px;
-                gap: 15px;
-            }
-
-            .game-icon {
-                width: 60px;
-                height: 60px;
-                border-radius: 16px;
-            }
-            
-            .icon-inner {
-                border-radius: 16px;
-            }
-
-            .game-title {
-                font-size: 17px;
-            }
-
-            .game-description {
-                font-size: 12px;
-            }
-        }
-
-        /* Extra small height screens */
-        @media (max-height: 700px) and (max-width: 768px) {
-            .header {
-                margin-bottom: 20px;
-            }
-
-            .logo-text {
-                font-size: 50px;
-            }
-
-            .logo-subtitle {
-                font-size: 10px;
-            }
-
-            .game-card {
-                padding: 10px 15px;
-            }
-
-            .game-icon {
-                width: 55px;
-                height: 55px;
-                border-radius: 14px;
-            }
-            
-            .icon-inner {
-                border-radius: 14px;
-            }
-
-            .game-title {
-                font-size: 16px;
-                margin-bottom: 2px;
-            }
-
-            .game-description {
-                font-size: 11px;
-            }
-        }
-
-        /* Ensure proper scrolling on iOS */
-        @supports (-webkit-touch-callout: none) {
-            body {
-                -webkit-overflow-scrolling: touch;
-            }
+        @supports (-webkit-touch-callout:none) {
+            body { -webkit-overflow-scrolling:touch; }
         }
     </style>
 </head>
 <body>
-    <!-- Background -->
-    <div class="background-container">
-        <div class="neon-grid"></div>
+    <div class="bg">
+        <div class="bg-grid"></div>
+        <div class="bg-glow g1"></div>
+        <div class="bg-glow g2"></div>
+        <div class="bg-glow g3"></div>
     </div>
 
-    <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="loader-ring"></div>
-    </div>
+    <div class="loader" id="loader"><div class="loader-ring"></div></div>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <h1 class="logo-text">NOTAMY</h1>
-            <div class="logo-subtitle">MINI GAMES COLLECTION</div>
+            <h1 class="logo">NOTAMY</h1>
+            <div class="subtitle">MINI GAMES</div>
         </div>
-        
-        <!-- Games Grid -->
-        <div class="games-grid">
-            <!-- Notamy Crush -->
-            <a href="notamy-crash.html?autostart=true" class="game-card crush-card">
-                <div class="game-icon">
+
+        <div class="grid">
+            <!-- Crush -->
+            <a href="notamy-crash.html?autostart=true" class="card card-crush">
+                <div class="icon">
                     <div class="icon-inner">
                         <div class="candy-grid">
-                            <div class="logo-candy" style="background: #00e676;"></div>
-                            <div class="logo-candy" style="background: #00d9ff;"></div>
-                            <div class="logo-candy" style="background: #ff6b6b;"></div>
-                            <div class="logo-candy" style="background: #ffab00;"></div>
-                            <div class="logo-candy" style="background: #00b4a6;"></div>
-                            <div class="logo-candy" style="background: #b366ff;"></div>
-                            <div class="logo-candy" style="background: #ff6b6b;"></div>
-                            <div class="logo-candy" style="background: #00d9ff;"></div>
-                            <div class="logo-candy" style="background: #00e676;"></div>
+                            <div class="candy-cell" style="background:#39ff14"></div>
+                            <div class="candy-cell" style="background:#00fff0"></div>
+                            <div class="candy-cell" style="background:#ff0066"></div>
+                            <div class="candy-cell" style="background:#fff200"></div>
+                            <div class="candy-cell" style="background:#00b8b0"></div>
+                            <div class="candy-cell" style="background:#ff00ff"></div>
+                            <div class="candy-cell" style="background:#ff0066"></div>
+                            <div class="candy-cell" style="background:#00fff0"></div>
+                            <div class="candy-cell" style="background:#39ff14"></div>
                         </div>
                     </div>
                 </div>
                 <div class="game-info">
-                    <h2 class="game-title">Notamy Crush</h2>
-                    <p class="game-description">
-                        Match colorful candies to win
-                    </p>
-                </div>
-            </a>
-            
-            <!-- Notamy Tetris -->
-            <a href="notamy-blocks.html?autostart=true" class="game-card tetris-card">
-                <div class="game-icon">
-                    <div class="icon-inner">
-                        <div class="tetris-icon-container">
-                            <!-- I piece -->
-                            <div class="tetris-piece piece-i">
-                                <div class="tetris-block" style="background: #00d9ff;"></div>
-                                <div class="tetris-block" style="background: #00d9ff;"></div>
-                                <div class="tetris-block" style="background: #00d9ff;"></div>
-                                <div class="tetris-block" style="background: #00d9ff;"></div>
-                            </div>
-                            <!-- T piece -->
-                            <div class="tetris-piece piece-t">
-                                <div style="grid-column: 2;" class="tetris-block" style="background: #b366ff;"></div>
-                                <div class="tetris-block" style="background: #b366ff;"></div>
-                                <div class="tetris-block" style="background: #b366ff;"></div>
-                                <div class="tetris-block" style="background: #b366ff;"></div>
-                            </div>
-                            <!-- O piece -->
-                            <div class="tetris-piece piece-o">
-                                <div class="tetris-block" style="background: #ffab00;"></div>
-                                <div class="tetris-block" style="background: #ffab00;"></div>
-                                <div class="tetris-block" style="background: #ffab00;"></div>
-                                <div class="tetris-block" style="background: #ffab00;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Notamy Tetris</h2>
-                    <p class="game-description">
-                        Classic block-stacking fun
-                    </p>
-                </div>
-            </a>
-            
-            <!-- Notamy Fly -->
-            <a href="notamy-fly.html?autostart=true" class="game-card fly-card">
-                <div class="game-icon">
-                    <div class="icon-inner">
-                        <div class="fly-icon-container">
-                            <div class="bird-body"></div>
-                            <div class="bird-wing"></div>
-                            <div class="bird-eye"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Notamy Fly</h2>
-                    <p class="game-description">
-                        Navigate through neon obstacles
-                    </p>
-                </div>
-            </a>
-            
-            <!-- Notamy Bop -->
-            <a href="notamy-bop.html?autostart=true" class="game-card bop-card">
-                <div class="game-icon">
-                    <div class="icon-inner">
-                        <div class="bop-icon-container">
-                            <div class="bubble"></div>
-                            <div class="bubble-glow"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Notamy Bop</h2>
-                    <p class="game-description">
-                        Pop colorful bubbles to score
-                    </p>
+                    <h2 class="title">Notamy Crush</h2>
+                    <p class="desc">Match neon candies before time runs out</p>
                 </div>
             </a>
 
-            <!-- Notamy Stars -->
-            <a href="notamy-stars.html" class="game-card stars-card">
-                <div class="game-icon">
+            <!-- Blocks -->
+            <a href="notamy-blocks.html?autostart=true" class="card card-blocks">
+                <div class="icon">
                     <div class="icon-inner">
-                        <div style="font-size:36px;line-height:1;">⭐</div>
+                        <div class="tetris-wrap">
+                            <div class="t-piece t-i">
+                                <div class="t-block" style="background:#00fff0"></div>
+                                <div class="t-block" style="background:#00fff0"></div>
+                                <div class="t-block" style="background:#00fff0"></div>
+                                <div class="t-block" style="background:#00fff0"></div>
+                            </div>
+                            <div class="t-piece t-t">
+                                <div class="t-block" style="background:#ff00ff"></div>
+                                <div class="t-block" style="background:#ff00ff"></div>
+                                <div class="t-block" style="background:#ff00ff"></div>
+                                <div class="t-block" style="background:#ff00ff"></div>
+                            </div>
+                            <div class="t-piece t-o">
+                                <div class="t-block" style="background:#fff200"></div>
+                                <div class="t-block" style="background:#fff200"></div>
+                                <div class="t-block" style="background:#fff200"></div>
+                                <div class="t-block" style="background:#fff200"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="game-info">
-                    <h2 class="game-title">Notamy Stars</h2>
-                    <p class="game-description">
-                        Catch falling stars & gems!
-                    </p>
+                    <h2 class="title">Notamy Blocks</h2>
+                    <p class="desc">Stack blocks in the neon grid</p>
+                </div>
+            </a>
+
+            <!-- Fly -->
+            <a href="notamy-fly.html?autostart=true" class="card card-fly">
+                <div class="icon">
+                    <div class="icon-inner">
+                        <div class="fly-wrap">
+                            <div class="f-body"></div>
+                            <div class="f-wing"></div>
+                            <div class="f-eye"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-info">
+                    <h2 class="title">Notamy Fly</h2>
+                    <p class="desc">Navigate through neon obstacles</p>
+                </div>
+            </a>
+
+            <!-- Bop -->
+            <a href="notamy-bop.html?autostart=true" class="card card-bop">
+                <div class="icon">
+                    <div class="icon-inner">
+                        <div class="bop-wrap">
+                            <div class="b-bubble"></div>
+                            <div class="b-glow"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-info">
+                    <h2 class="title">Notamy Bop</h2>
+                    <p class="desc">Pop neon bubbles to score</p>
+                </div>
+            </a>
+
+            <!-- Stars -->
+            <a href="notamy-stars.html" class="card card-stars">
+                <div class="icon">
+                    <div class="icon-inner">
+                        <div style="font-size:28px;line-height:1;">⭐</div>
+                    </div>
+                </div>
+                <div class="game-info">
+                    <h2 class="title">Notamy Stars</h2>
+                    <p class="desc">Catch falling stars & gems</p>
                 </div>
             </a>
         </div>
+
+        <div class="footer">NOTAMY MINI GAMES</div>
     </div>
 
     <script>
-        // Ultra minimal JavaScript - no animations
         window.addEventListener('load', () => {
-            // Remove loader immediately
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hide');
-            }, 150);
+            setTimeout(() => document.getElementById('loader').classList.add('hide'), 100);
         });
-
-        // Simple touch feedback
-        const cards = document.querySelectorAll('.game-card');
-        cards.forEach(card => {
-            card.addEventListener('touchstart', function() {
-                this.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-            });
-            
-            card.addEventListener('touchend', function() {
-                this.style.backgroundColor = '';
-            });
+        document.querySelectorAll('.card').forEach(c => {
+            c.addEventListener('touchstart', function() { this.style.background = 'rgba(255,255,255,0.03)'; });
+            c.addEventListener('touchend', function() { this.style.background = ''; });
         });
     </script>
 </body>

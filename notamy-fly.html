@@ -749,7 +749,7 @@
         // === BOSS PHASE ===
         let bossPhase = false;
         let bossTimer = 0;
-        const BOSS_DURATION = 150 * 60; // 150 seconds at 60fps
+        const BOSS_DURATION = 180 * 60; // 180 seconds (3 minutes) at 60fps
         let enemies = [];
         let enemyBullets = [];
         let bossSpawnTimer = 0;
@@ -1154,29 +1154,32 @@
             bossSpawnTimer = 0;
             enemies = [];
             enemyBullets = [];
-            pipes = []; // clear remaining pipes
+            birdBullets = [];
+            pipes = [];
             missiles = [];
             missileWarnings = [];
             showMilestone('INCOMING!');
-            // Give player a shield to start
             bird.shielded = true;
-            bird.shieldTime = 300; // 5 seconds
+            bird.shieldTime = 300;
+            // Immediate first wave — 3 enemies right away
+            for (let i = 0; i < 3; i++) {
+                spawnEnemy();
+            }
         }
 
         function spawnEnemy() {
             const phase = Math.min(1, bossTimer / BOSS_DURATION);
-            // Enemy types get harder over time
-            const isFast = Math.random() < phase * 0.4;
+            const isFast = Math.random() < 0.2 + phase * 0.3;
             const y = 40 + Math.random() * (HEIGHT - 80);
             enemies.push({
                 x: WIDTH + 30,
                 y: y,
                 baseY: y,
-                vx: isFast ? -(3 + phase * 3) : -(1.5 + phase * 2),
-                size: isFast ? 14 : 20,
+                vx: isFast ? -(4 + phase * 3) : -(2.5 + phase * 2),
+                size: isFast ? 16 : 24,
                 health: isFast ? 1 : 2,
-                shootTimer: Math.floor(Math.random() * 60) + 30,
-                shootInterval: isFast ? 90 : 60,
+                shootTimer: Math.floor(Math.random() * 40) + 20,
+                shootInterval: isFast ? 70 : 45,
                 wobble: Math.random() * Math.PI * 2,
                 wobbleSpeed: 0.02 + Math.random() * 0.02,
                 wobbleAmp: 20 + Math.random() * 30,
@@ -1197,14 +1200,17 @@
 
             const phase = Math.min(1, bossTimer / BOSS_DURATION); // 0 → 1
 
-            // Spawn enemies in waves
+            // Spawn enemies — aggressive from the start
             bossSpawnTimer++;
-            const spawnRate = Math.max(30, 120 - phase * 80); // 120 → 40 frames between spawns
+            const spawnRate = Math.max(20, 60 - phase * 35); // 60 → 25 frames (1s → 0.4s)
             if (bossSpawnTimer >= spawnRate) {
                 bossSpawnTimer = 0;
                 spawnEnemy();
-                // Double spawn in later phases
-                if (phase > 0.4 && Math.random() < phase * 0.5) {
+                // Double spawn from 30%, triple from 70%
+                if (phase > 0.3 && Math.random() < 0.4) {
+                    spawnEnemy();
+                }
+                if (phase > 0.7 && Math.random() < 0.3) {
                     spawnEnemy();
                 }
             }
@@ -1309,13 +1315,13 @@
                     const dy = bird.y - e.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist > 0) {
-                        const bulletSpeed = e.fast ? 5 : 3.5;
+                        const bulletSpeed = e.fast ? 6 : 4.5;
                         enemyBullets.push({
                             x: e.x - e.size,
                             y: e.y,
                             vx: (dx / dist) * bulletSpeed,
                             vy: (dy / dist) * bulletSpeed,
-                            size: 5,
+                            size: 6,
                             life: 300
                         });
                     }
@@ -1433,18 +1439,27 @@
                 ctx.restore();
             });
 
-            // Draw enemy bullets
+            // Draw enemy bullets — bright and visible
             enemyBullets.forEach(b => {
                 ctx.fillStyle = '#ff0066';
                 ctx.shadowColor = '#ff0066';
-                ctx.shadowBlur = 8;
+                ctx.shadowBlur = 12;
                 ctx.beginPath();
                 ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
                 ctx.fill();
-                // Trail
-                ctx.fillStyle = 'rgba(255, 0, 102, 0.3)';
+                // Inner bright core
+                ctx.fillStyle = '#ff99bb';
                 ctx.beginPath();
-                ctx.arc(b.x - b.vx * 2, b.y - b.vy * 2, b.size * 0.7, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, b.size * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                // Trail
+                ctx.fillStyle = 'rgba(255, 0, 102, 0.4)';
+                ctx.beginPath();
+                ctx.arc(b.x - b.vx * 2, b.y - b.vy * 2, b.size * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255, 0, 102, 0.2)';
+                ctx.beginPath();
+                ctx.arc(b.x - b.vx * 4, b.y - b.vy * 4, b.size * 0.5, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
             });

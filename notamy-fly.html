@@ -1206,7 +1206,7 @@
             }
 
             // Spawn power-ups periodically during boss
-            if (bossTimer % 300 === 0) { // every 5 seconds
+            if (bossTimer > 0 && bossTimer % 300 === 0) { // every 5 seconds
                 const types = ['shield', 'magnet', 'points', 'speed'];
                 const type = types[Math.floor(Math.random() * types.length)];
                 powerups.push({

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jelena's Game for Kids</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a0533;font-family:'Trebuchet MS','Comic Sans MS',sans-serif;-webkit-user-select:none;user-select:none}
+
+#game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#0f0326 0%,#1a0a3e 50%,#2d1b69 100%)}
+
+/* BASKET */
+#basket{position:absolute;bottom:15px;width:70px;height:50px;transform:translateX(-50%);z-index:10;font-size:50px;line-height:50px;text-align:center;transition:left 0.05s linear}
+
+/* FALLING ITEMS */
+.item{position:absolute;font-size:36px;z-index:5;line-height:1;text-align:center;pointer-events:none}
+
+/* HUD */
+#hud{position:fixed;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:50;font-size:14px;color:#fde68a;font-weight:bold;pointer-events:none}
+.hud-box{background:rgba(26,5,51,0.7);padding:4px 10px;border-radius:12px;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+
+/* PROGRESS BAR */
+#progressWrap{position:fixed;bottom:4px;left:10px;right:10px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;z-index:50;pointer-events:none}
+#progressBar{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#a78bfa,#fbbf24,#34d399);transition:width 0.2s}
+#goalText{position:fixed;bottom:16px;left:0;right:0;text-align:center;font-size:11px;color:#c4b5fd;z-index:50;pointer-events:none;opacity:0.7;font-weight:600}
+
+/* FLOATING SCORE */
+.float-score{position:absolute;z-index:30;font-weight:bold;pointer-events:none;animation:floatUp 1s ease-out forwards;text-shadow:0 2px 6px rgba(0,0,0,0.5)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(0.5)}30%{transform:translateY(-20px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(1)}}
+
+/* COMBO POPUP */
+#combo{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;color:#fde68a;text-shadow:0 0 20px rgba(251,191,36,0.7);z-index:60;pointer-events:none;opacity:0;transition:none}
+#combo.show{animation:comboPop 0.9s ease-out forwards}
+@keyframes comboPop{0%{opacity:1;transform:translate(-50%,-50%) scale(0.3) rotate(-5deg)}30%{transform:translate(-50%,-50%) scale(1.4) rotate(3deg)}60%{opacity:1;transform:translate(-50%,-55%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-65%) scale(1)}}
+
+/* PARTICLES */
+.particle{position:absolute;pointer-events:none;z-index:20;animation:particleFly 0.7s ease-out forwards}
+@keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0.3)}}
+
+/* SCREENS */
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;text-align:center;padding:20px;transition:opacity 0.4s}
+.overlay.hidden{opacity:0;pointer-events:none}
+
+#startScreen{background:linear-gradient(160deg,#1a0533 0%,#2d1b69 40%,#6b21a8 70%,#f472b6 100%)}
+#startScreen .star{font-size:80px;animation:spin 4s linear infinite;display:block;margin-bottom:15px}
+@keyframes spin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
+#startScreen h1{font-size:32px;color:#fde68a;text-shadow:0 4px 20px rgba(251,191,36,0.6);line-height:1.2;margin-bottom:8px}
+#startScreen p{font-size:16px;color:#e9d5ff;margin-bottom:30px}
+#startScreen .brand{font-size:13px;color:#f0abfc;letter-spacing:2px;text-transform:uppercase;margin-top:20px;opacity:0.8}
+#startScreen .tap{font-size:22px;color:#1a0533;background:linear-gradient(135deg,#fde68a,#f59e0b);padding:14px 40px;border-radius:50px;font-weight:bold;display:inline-block;animation:pulse 2s ease-in-out infinite;cursor:pointer}
+@keyframes pulse{0%,100%{box-shadow:0 6px 20px rgba(245,158,11,0.5)}50%{box-shadow:0 6px 40px rgba(245,158,11,0.8)}}
+
+#endScreen{background:rgba(26,5,51,0.96)}
+#endScreen h2{font-size:28px;color:#f472b6;text-shadow:0 0 20px rgba(244,114,182,0.5)}
+#endScreen h2.win{color:#fde68a;text-shadow:0 0 30px rgba(251,191,36,0.7)}
+#endScreen .big{font-size:56px;color:#fde68a;font-weight:bold;margin:10px 0;text-shadow:0 0 30px rgba(251,191,36,0.5)}
+#endScreen .info{font-size:14px;color:#c4b5fd;margin:4px 0}
+#endScreen .msg{font-size:18px;color:#e9d5ff;margin:15px 0 25px;padding:0 15px}
+#endScreen .tap{font-size:18px;color:white;background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:14px 36px;border-radius:50px;font-weight:bold;cursor:pointer}
+
+#levelScreen{background:rgba(26,5,51,0.95)}
+#levelScreen .check{font-size:24px;color:#34d399;font-weight:bold;text-shadow:0 0 20px rgba(52,211,153,0.5)}
+#levelScreen .lvl{font-size:60px;color:#fde68a;font-weight:bold;margin:10px 0;text-shadow:0 0 30px rgba(251,191,36,0.5)}
+#levelScreen .info{font-size:14px;color:#c4b5fd;margin:4px 0}
+#levelScreen .info em{color:#fbbf24;font-style:normal;font-weight:bold}
+#levelScreen .tap{font-size:18px;color:#1a0533;background:linear-gradient(135deg,#34d399,#10b981);padding:14px 36px;border-radius:50px;font-weight:bold;margin-top:20px;cursor:pointer}
+
+.brand-footer{position:fixed;bottom:1px;left:0;right:0;text-align:center;font-size:9px;color:#c4b5fd;opacity:0.25;letter-spacing:1.5px;text-transform:uppercase;z-index:55;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="basket">🧺</div>
+</div>
+
+<div id="hud" style="display:none">
+  <div class="hud-box" id="hLv">Lv.1</div>
+  <div class="hud-box" id="hScore">⭐ 0</div>
+  <div class="hud-box" id="hTime">⏱ 35</div>
+  <div class="hud-box" id="hLives">❤️❤️❤️</div>
+</div>
+<div id="progressWrap" style="display:none"><div id="progressBar"></div></div>
+<div id="goalText" style="display:none"></div>
+<div id="combo"></div>
+
+<!-- START -->
+<div class="overlay" id="startScreen">
+  <span class="star">⭐</span>
+  <h1>Acchiappa<br>le Stelle!</h1>
+  <p>10 livelli — riesci a vincere?</p>
+  <div class="tap" id="btnPlay">🚀 GIOCA!</div>
+  <div class="brand">Jelena's Game for Kids</div>
+</div>
+
+<!-- LEVEL UP -->
+<div class="overlay hidden" id="levelScreen">
+  <div class="check">✅ Livello Completato!</div>
+  <div class="lvl" id="lsLv">2</div>
+  <div class="info">Punteggio: <em id="lsScore">0</em></div>
+  <div class="info">Vite: <em id="lsLives">❤️❤️❤️</em></div>
+  <div class="info" id="lsWarn"></div>
+  <div class="tap" id="btnNext">▶️ Prossimo Livello!</div>
+</div>
+
+<!-- END -->
+<div class="overlay hidden" id="endScreen">
+  <h2 id="esTitle">💥 Game Over!</h2>
+  <div style="font-size:13px;color:#c4b5fd">Punteggio</div>
+  <div class="big" id="esScore">0</div>
+  <div class="info" id="esBest"></div>
+  <div class="info" id="esLvl"></div>
+  <div class="msg" id="esMsg"></div>
+  <div class="tap" id="btnRetry">🔄 Rigioca!</div>
+</div>
+
+<div class="brand-footer">Jelena's Game for Kids</div>
+
+<script>
+// ===== GAME STATE =====
+var game = document.getElementById('game');
+var basketEl = document.getElementById('basket');
+var comboEl = document.getElementById('combo');
+
+var W = window.innerWidth, H = window.innerHeight;
+var playing = false;
+var score=0, lives=3, level=1, combo=0, best=0;
+var levelScore=0, levelGoal=0, timeLeft=0;
+var basketX = W/2;
+var items = [];
+var spawnTimer = 0;
+var lastTime = 0;
+var timerId = null;
+
+// ===== LEVELS =====
+var LEVELS = [
+  {goal:200,time:35,speed:0.6,spawnMs:1000,bad:0.05,name:'Prateria'},
+  {goal:210,time:35,speed:0.7,spawnMs:950,bad:0.08,name:'Collina'},
+  {goal:220,time:35,speed:0.8,spawnMs:900,bad:0.10,name:'Foresta'},
+  {goal:240,time:35,speed:0.9,spawnMs:850,bad:0.12,name:'Montagna'},
+  {goal:260,time:35,speed:1.0,spawnMs:800,bad:0.14,name:'Cascata'},
+  {goal:280,time:35,speed:1.1,spawnMs:750,bad:0.16,name:'Vulcano'},
+  {goal:300,time:40,speed:1.2,spawnMs:700,bad:0.18,name:'Cielo'},
+  {goal:330,time:40,speed:1.35,spawnMs:650,bad:0.20,name:'Spazio'},
+  {goal:360,time:45,speed:1.5,spawnMs:600,bad:0.22,name:'Galassia'},
+  {goal:420,time:50,speed:1.7,spawnMs:500,bad:0.25,name:'Universo!'}
+];
+
+var GOOD = [
+  {e:'⭐',p:10},{e:'🌟',p:20},{e:'💎',p:30},{e:'🍭',p:15},
+  {e:'🎀',p:15},{e:'🦋',p:25},{e:'🌈',p:50},{e:'🍬',p:10},
+  {e:'🎈',p:20},{e:'🍩',p:15},{e:'🎁',p:40},{e:'🧁',p:15},{e:'🍉',p:20}
+];
+var BAD = [{e:'💣',p:-1},{e:'🌵',p:-1}];
+
+// ===== AUDIO =====
+var audioCtx = null;
+function initAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function beep(freq,dur,type,vol){
+  if(!audioCtx)return;
+  try{var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.value=vol||0.1;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur)}catch(e){}
+}
+function sndCatch(){var f=400+Math.min(combo,30)*20;beep(f,0.1);setTimeout(function(){beep(f*1.5,0.08,undefined,0.06)},40)}
+function sndBad(){beep(150,0.25,'sawtooth',0.08)}
+function sndCombo(){[0,80,160,240].forEach(function(d,i){setTimeout(function(){beep(600+i*180,0.12)},d)})}
+function sndWin(){[523,659,784,1047,1319].forEach(function(f,i){setTimeout(function(){beep(f,0.3,undefined,0.1)},i*140)})}
+
+// ===== RESIZE =====
+window.addEventListener('resize',function(){W=window.innerWidth;H=window.innerHeight});
+
+// ===== INPUT =====
+var touchX = W/2;
+
+document.addEventListener('touchmove',function(e){
+  if(!playing)return;
+  e.preventDefault();
+  touchX=e.touches[0].clientX;
+},{passive:false});
+
+document.addEventListener('touchstart',function(e){
+  if(!playing)return;
+  touchX=e.touches[0].clientX;
+},{passive:true});
+
+document.addEventListener('mousemove',function(e){
+  if(playing)touchX=e.clientX;
+});
+
+// ===== UI HELPERS =====
+function showHud(v){
+  document.getElementById('hud').style.display=v?'flex':'none';
+  document.getElementById('progressWrap').style.display=v?'block':'none';
+  document.getElementById('goalText').style.display=v?'block':'none';
+}
+
+function updateHud(){
+  document.getElementById('hLv').textContent='Lv.'+level;
+  document.getElementById('hScore').textContent='⭐ '+score;
+  document.getElementById('hTime').textContent='⏱ '+timeLeft;
+  var h='';for(var i=0;i<3;i++)h+=i<lives?'❤️':'🖤';
+  document.getElementById('hLives').textContent=h;
+  var pct=Math.min(levelScore/levelGoal*100,100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  var rem=Math.max(levelGoal-levelScore,0);
+  document.getElementById('goalText').textContent=rem>0?(level>=10?'Mancano '+rem+' punti per VINCERE!':'Mancano '+rem+' punti!'):'✅ Obiettivo raggiunto!';
+}
+
+function showCombo(txt){
+  comboEl.textContent=txt;
+  comboEl.classList.remove('show');
+  void comboEl.offsetWidth;
+  comboEl.classList.add('show');
+}
+
+function floatScore(x,y,txt,color){
+  var el=document.createElement('div');
+  el.className='float-score';
+  el.textContent=txt;
+  el.style.left=x+'px';el.style.top=y+'px';
+  el.style.color=color||'#fde68a';
+  el.style.fontSize=(16+Math.min(combo,20))+'px';
+  game.appendChild(el);
+  setTimeout(function(){el.remove()},1000);
+}
+
+function spawnParticles(x,y,emoji,count){
+  for(var i=0;i<count;i++){
+    var el=document.createElement('div');
+    el.className='particle';
+    el.textContent=emoji||'✨';
+    el.style.left=x+'px';el.style.top=y+'px';
+    el.style.fontSize=(12+Math.random()*14)+'px';
+    var angle=Math.random()*Math.PI*2;
+    var dist=40+Math.random()*60;
+    el.style.setProperty('--dx',Math.cos(angle)*dist+'px');
+    el.style.setProperty('--dy',Math.sin(angle)*dist+'px');
+    game.appendChild(el);
+    setTimeout(function(){el.remove()},700);
+  }
+}
+
+function hide(id){document.getElementById(id).classList.add('hidden')}
+function show(id){document.getElementById(id).classList.remove('hidden')}
+
+// ===== SPAWN ITEM =====
+function spawnItem(){
+  var cfg=LEVELS[Math.min(level-1,9)];
+  var isBad=Math.random()<cfg.bad;
+  var pool=isBad?BAD:GOOD;
+  var type=pool[Math.floor(Math.random()*pool.length)];
+
+  var el=document.createElement('div');
+  el.className='item';
+  el.textContent=type.e;
+  var x=30+Math.random()*(W-60);
+  el.style.left=x+'px';
+  el.style.top='-40px';
+  game.appendChild(el);
+
+  items.push({
+    el:el,
+    x:x,
+    y:-40,
+    vy:(1.5+Math.random()*1.5)*cfg.speed,
+    points:type.p,
+    emoji:type.e,
+    w:36
+  });
+}
+
+// ===== GAME FLOW =====
+function startGame(){
+  initAudio();
+  score=0;lives=3;level=1;combo=0;
+  startLevel();
+}
+
+function startLevel(){
+  var cfg=LEVELS[Math.min(level-1,9)];
+  levelScore=0;levelGoal=cfg.goal;timeLeft=cfg.time;
+  // Remove old items
+  items.forEach(function(it){it.el.remove()});
+  items=[];
+  combo=0;spawnTimer=0;
+  hide('startScreen');hide('endScreen');hide('levelScreen');
+  showHud(true);
+  playing=true;
+  touchX=W/2;basketX=W/2;
+  updateHud();
+  showCombo('🌍 Lv.'+level+': '+cfg.name);
+
+  if(timerId)clearInterval(timerId);
+  timerId=setInterval(function(){
+    if(!playing)return;
+    timeLeft--;
+    if(timeLeft<=0){timeLeft=0;endGame('time')}
+    updateHud();
+  },1000);
+
+  lastTime=performance.now();
+  requestAnimationFrame(tick);
+}
+
+function levelDone(){
+  playing=false;
+  if(timerId)clearInterval(timerId);
+  showHud(false);
+  sndCombo();
+
+  if(level>=10){winGame();return}
+
+  level++;
+  document.getElementById('lsLv').textContent=level;
+  document.getElementById('lsScore').textContent=score;
+  var h='';for(var i=0;i<3;i++)h+=i<lives?'❤️':'🖤';
+  document.getElementById('lsLives').textContent=h;
+  var nc=LEVELS[Math.min(level-1,9)];
+  document.getElementById('lsWarn').textContent='⚡ Più veloce! Obiettivo: '+nc.goal+' punti';
+  show('levelScreen');
+}
+
+function winGame(){
+  playing=false;if(timerId)clearInterval(timerId);showHud(false);
+  sndWin();
+  if(score>best)best=score;
+  document.getElementById('esTitle').textContent='🏆 HAI VINTO! 🏆';
+  document.getElementById('esTitle').className='win';
+  document.getElementById('esScore').textContent=score;
+  document.getElementById('esBest').textContent='Record: '+best;
+  document.getElementById('esLvl').textContent='Tutti i 10 livelli completati!';
+  document.getElementById('esMsg').textContent='Sei il campione assoluto! 👑🌈⭐';
+  show('endScreen');
+}
+
+function endGame(reason){
+  playing=false;if(timerId)clearInterval(timerId);showHud(false);
+  if(score>best)best=score;
+  document.getElementById('esTitle').textContent=reason==='lives'?'💥 Game Over!':'⏱ Tempo Scaduto!';
+  document.getElementById('esTitle').className='';
+  document.getElementById('esScore').textContent=score;
+  document.getElementById('esBest').textContent='Record: '+best;
+  document.getElementById('esLvl').textContent='Arrivato al livello '+level+' di 10';
+  var msgs=[[0,'Prossima volta! 💪'],[50,'Bel tentativo! 🎉'],[150,'Fantastico! 🌟'],[300,'Fortissimo! 🏆'],[500,'Quasi alla fine! 👑']];
+  var msg=msgs[0][1];msgs.forEach(function(m){if(score>=m[0])msg=m[1]});
+  document.getElementById('esMsg').textContent=msg;
+  show('endScreen');
+}
+
+// ===== MAIN TICK =====
+function tick(now){
+  if(!playing)return;
+  var dt=Math.min(now-lastTime,50);
+  lastTime=now;
+  var cfg=LEVELS[Math.min(level-1,9)];
+
+  // Move basket
+  basketX+=(touchX-basketX)*0.2;
+  basketX=Math.max(35,Math.min(W-35,basketX));
+  basketEl.style.left=basketX+'px';
+
+  // Spawn
+  spawnTimer+=dt;
+  if(spawnTimer>=cfg.spawnMs){
+    spawnTimer=0;
+    spawnItem();
+  }
+
+  // Update items
+  var basketTop=H-65;
+  var basketLeft=basketX-40;
+  var basketRight=basketX+40;
+
+  for(var i=items.length-1;i>=0;i--){
+    var it=items[i];
+    it.y+=it.vy*(dt/16);
+    it.el.style.top=it.y+'px';
+
+    // Catch?
+    if(it.y>basketTop-20 && it.y<basketTop+30 && it.x>basketLeft && it.x<basketRight){
+      if(it.points===-1){
+        // BAD
+        lives--;combo=0;
+        spawnParticles(it.x,it.y,'💥',8);
+        floatScore(it.x,it.y-20,'💥','#ef4444');
+        sndBad();
+        showCombo('💥 Ouch!');
+        if(navigator.vibrate)navigator.vibrate([40,20,40]);
+        it.el.remove();items.splice(i,1);
+        updateHud();
+        if(lives<=0){endGame('lives');return}
+      } else {
+        // GOOD
+        combo++;
+        var mult=combo>=20?4:combo>=10?3:combo>=5?2:1;
+        var earned=it.points*mult;
+        score+=earned;levelScore+=earned;
+
+        var emojis=['✨','🌟','💫','🎉'];
+        spawnParticles(it.x,it.y,emojis[Math.floor(Math.random()*emojis.length)],6+Math.min(combo,15));
+        var ptxt=mult>1?'+'+earned+' (x'+mult+')':'+'+it.points;
+        floatScore(it.x,it.y-20,ptxt,'#fde68a');
+        sndCatch();
+        if(navigator.vibrate)navigator.vibrate(15);
+
+        if(combo===5){showCombo('🔥 COMBO x2!');sndCombo()}
+        else if(combo===10){showCombo('⚡ SUPER x3!');sndCombo()}
+        else if(combo===20){showCombo('👑 MEGA x4!');sndCombo()}
+        else if(combo===30)showCombo('🌈 LEGGENDARIO!');
+        else if(combo===50)showCombo('💎 IMPOSSIBILE!!');
+
+        it.el.remove();items.splice(i,1);
+        updateHud();
+
+        if(levelScore>=levelGoal){levelDone();return}
+      }
+      continue;
+    }
+
+    // Fell off screen
+    if(it.y>H+50){
+      if(it.points>0){
+        if(combo>=3)floatScore(it.x,H-80,'Combo perso!','#f87171');
+        combo=0;
+      }
+      it.el.remove();items.splice(i,1);
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ===== BUTTON HANDLERS =====
+document.getElementById('btnPlay').onclick=function(){initAudio();startGame()};
+document.getElementById('btnRetry').onclick=function(){initAudio();startGame()};
+document.getElementById('btnNext').onclick=function(){initAudio();startLevel()};
+
+// Also handle touch for mobile
+document.getElementById('btnPlay').ontouchend=function(e){e.preventDefault();initAudio();startGame()};
+document.getElementById('btnRetry').ontouchend=function(e){e.preventDefault();initAudio();startGame()};
+document.getElementById('btnNext').ontouchend=function(e){e.preventDefault();initAudio();startLevel()};
+</script>
+</body>
+</html>
